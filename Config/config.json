@@ -1,0 +1,48 @@
+﻿{
+  "serverLocation": "D:\\Spt Stuff\\server",
+  "threads": 20,
+  "threadPoolingTimeoutMs": 1000,
+  "jsonSerializer": "DotNet",
+  "manualGarbageCollectionCalls": false,
+  "dataStorageConfig": {
+    "dataStorageType": "Memory",
+    "fileDataStorageTempLocation": "D:\\Spt Stuff\\Lootgenerator\\Dumps\\cache"
+  },
+  "loggerConfig": {
+    "logLevel": "Info",
+    "queueLoggerPoolingTimeoutMs": 500
+  },
+  "readerConfig": {
+    "preProcessorConfig": {
+      "preProcessors": [
+        "SevenZip"
+      ],
+      "preProcessorTempFolder": "D:\\Spt Stuff\\Lootgenerator\\TEMP",
+      "cleanupTempFolderAfterProcess": true
+    },
+    "intakeReaderConfig": {
+      "readerType": "Json",
+      "ignoredDumpLocations": [
+        "Hideout"
+      ]
+    },
+    "dumpFilesLocation": [
+      "D:\\Spt Stuff\\Lootgenerator\\dumps\\input"
+    ],
+    "thresholdDate": "2023-01-08",
+    "acceptedFileExtensions": [
+      "json",
+      "7z"
+    ],
+    "processSubFolders": true,
+    "fileFilters": [
+      "JsonDump"
+    ]
+  },
+  "processorConfig": {
+    "spawnPointToleranceForForced": 99.5
+  },
+  "writerConfig": {
+    "outputLocation": "D:\\Spt Stuff\\Lootgenerator\\dumps\\output"
+  }
+}

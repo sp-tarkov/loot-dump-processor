@@ -1,0 +1,16 @@
+---
+static_weapon_ids:
+  # ids for static weapons
+  - 5d52cc5ba4b9367408500062
+  - 5cdeb229d7f00c000e7ce174
+
+forced_items:
+  Customs:
+  # unknown key
+  - containerId: custom_multiScene_00058
+    itemTpl: 593962ca86f774068014d9af
+
+  Streets of Tarkov:
+  # Backup hideout key
+  - containerId: container_City_SE_02_Primorskiy_51_indoor_00001
+    itemTpl: 6398fd8ad3de3849057f5128

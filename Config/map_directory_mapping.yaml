@@ -1,0 +1,29 @@
+---
+Customs:
+  name:
+  - bigmap
+Factory:
+  name:
+  - factory4_day
+  - factory4_night
+Interchange:
+  name:
+  - interchange
+Laboratory:
+  name:
+  - laboratory
+Lighthouse:
+  name:
+  - lighthouse
+ReserveBase:
+  name:
+  - rezervbase
+Shoreline:
+  name:
+  - shoreline
+Woods:
+  name:
+  - woods
+Streets of Tarkov:
+  name:
+  - tarkovstreets

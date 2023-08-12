@@ -1,0 +1,67 @@
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace LootDumpProcessor.Storage;
+
+public class NetJsonKeyConverter : JsonConverter<IKey?>
+{
+    public override IKey? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        Dictionary<string, string> values = new Dictionary<string, string>();
+        while (reader.Read())
+        {
+            var property = reader.GetString() ?? "";
+            reader.Read();
+            var value = reader.GetString() ?? "";
+            values.Add(property, value);
+            if (values.Count == 2)
+                break;
+        }
+
+        reader.Read();
+
+        if (!values.TryGetValue("type", out var type))
+        {
+            throw new Exception("Key type was missing from json definition");
+        }
+
+        if (!values.TryGetValue("serializedKey", out var serializedKey))
+        {
+            throw new Exception("Key serializedKey was missing from json definition");
+        }
+
+        AbstractKey key;
+        switch (Enum.Parse<KeyType>(type))
+        {
+            case KeyType.Subdivisioned:
+                key = new SubdivisionedUniqueKey(serializedKey.Split("|"));
+                break;
+            case KeyType.Unique:
+                key = new FlatUniqueKey(serializedKey.Split("|"));
+                break;
+            default:
+                throw new Exception("Unknown key type used!");
+        }
+
+        return key;
+    }
+
+    public override void Write(Utf8JsonWriter writer, IKey? value, JsonSerializerOptions options)
+    {
+        if (value != null)
+        {
+            var actualValue = (AbstractKey)value;
+            writer.WriteStartObject();
+            // writer.WritePropertyName("type");
+            writer.WriteString("type", actualValue.GetKeyType().ToString());
+            // writer.WritePropertyName("serializedKey");
+            writer.WriteString("serializedKey", actualValue.SerializedKey);
+            writer.WriteEndObject();
+        }
+        else
+        {
+            writer.WriteStartObject();
+            writer.WriteEndObject();
+        }
+    }
+}
