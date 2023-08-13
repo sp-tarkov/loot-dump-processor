@@ -21,3 +21,16 @@ public class HandbookRoot
     public List<Category> Categories { get; set; }
     public List<HandbookItem> Items { get; set; }
 }
+
+public class StaticContainerRoot
+{
+    public decimal probability { get; set; }
+    public StaticContainerTemplate template { get; set; }
+}
+
+public class StaticContainerTemplate
+{
+    public string Id { get; set; }
+    public decimal SpawnChance { get; set; }
+    public bool IsAlwaysSpawn { get; set; }
+}

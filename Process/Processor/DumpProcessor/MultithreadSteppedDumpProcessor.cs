@@ -39,7 +39,7 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
         // dictionary of maps, that has a dictionary of template and hit count
         var mapStaticContainersAggregated = new Dictionary<string, Dictionary<Template, int>>();
         var mapStaticContainersAggregatedLock = new object();
-        
+
         Runners.Clear();
         // BSG changed the map data so static containers are now dynamic, so we need to scan all dumps for the static containers.
         foreach (var dumped in dumps)
@@ -102,7 +102,7 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                 td => new StaticDataPoint
                 {
                     Template = td.Key,
-                    Probability = Math.Round((double)((decimal)td.Value / (decimal)mapDumpCounter[kv.Key]), 2)
+                    Probability = GetStaticProbability(kv.Key, td, mapDumpCounter)
                 }
             ).ToList()
         ).ToList().ForEach(kv => staticContainers[kv.Key].StaticContainers = kv.Value);
@@ -134,6 +134,16 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
 
         output.Add(OutputFileType.LooseLoot, loot);
         return output;
+    }
+
+    private static double GetStaticProbability(string mapName, KeyValuePair<Template, int> td, Dictionary<string, int> mapDumpCounter)
+    {
+        if (mapName == "Streets of Tarkov")
+        {
+            return Math.Round((double)(LootDumpProcessorContext.GetTarkovItems().GetProbabilityByContainerId(td.Key.Id).probability), 2);
+        }
+        
+        return Math.Round((double)((decimal)td.Value / (decimal)mapDumpCounter[mapName]), 2);
     }
 
     private DumpProcessData GetDumpProcessData(List<PartialData> dumps)
