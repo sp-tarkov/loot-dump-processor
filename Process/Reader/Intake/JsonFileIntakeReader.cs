@@ -14,7 +14,7 @@ public class JsonFileIntakeReader : IIntakeReader
     private static readonly HashSet<string>? _ignoredLocations =
         LootDumpProcessorContext.GetConfig().ReaderConfig.IntakeReaderConfig?.IgnoredDumpLocations.ToHashSet();
 
-    private readonly ConcurrentDictionary<string, int> _totalMapDumpsCounter = new();
+    private static readonly ConcurrentDictionary<string, int> _totalMapDumpsCounter = new();
     
     public bool Read(string file, out BasicInfo basicInfo)
     {
