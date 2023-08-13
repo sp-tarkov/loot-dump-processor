@@ -140,7 +140,11 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
     {
         if (mapName == "Streets of Tarkov")
         {
-            return Math.Round((double)(LootDumpProcessorContext.GetTarkovItems().GetProbabilityByContainerId(td.Key.Id).probability), 2);
+            var result = LootDumpProcessorContext.GetTarkovItems().GetProbabilityByContainerId(td.Key.Id);
+            if (result != null)
+            {
+                return Math.Round((double)(result.probability), 2);
+            }
         }
         
         return Math.Round((double)((decimal)td.Value / (decimal)mapDumpCounter[mapName]), 2);

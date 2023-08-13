@@ -66,6 +66,7 @@ public class StaticLootProcessor
 
         foreach (var item in data)
         {
+            // remove all but first item from containers items
             item.Items = new List<Item> { item.Items[0] };
         }
 
