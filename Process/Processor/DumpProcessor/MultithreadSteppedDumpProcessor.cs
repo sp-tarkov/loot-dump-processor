@@ -50,14 +50,6 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                 {
                     LoggerFactory.GetInstance().Log($"Processing static data for file {dumped.BasicInfo.FileName}", LogLevel.Info);
                     var data = _jsonSerializer.Deserialize<RootData>(File.ReadAllText(dumped.BasicInfo.FileName));
-                    // the if statement below will keep track of how many dumps we have for each map
-                    lock (mapDumpCounterLock)
-                    {
-                        if (mapDumpCounter.ContainsKey(data.Data.Name))
-                            mapDumpCounter[data.Data.Name] += 1;
-                        else
-                            mapDumpCounter.Add(data.Data.Name, 1);
-                    }
                     // the if statement below takes care of processing "forced" or real static data for each map, we only need
                     // to do this once per map, so we dont care about doing it again
                     lock (staticContainersLock)
@@ -87,6 +79,15 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                         fileDate.Value > LootDumpProcessorContext.GetConfig().DumpProcessorConfig
                             .SpawnContainerChanceIncludeAfterDate)
                     {
+                        // the if statement below will keep track of how many dumps we have for each map
+                        lock (mapDumpCounterLock)
+                        {
+                            if (mapDumpCounter.ContainsKey(data.Data.Name))
+                                mapDumpCounter[data.Data.Name] += 1;
+                            else
+                                mapDumpCounter.Add(data.Data.Name, 1);
+                        }
+                        
                         foreach (var dynamicStaticContainer in StaticLootProcessor.CreateDynamicStaticContainers(data))
                         {
                             lock (mapStaticContainersAggregatedLock)
