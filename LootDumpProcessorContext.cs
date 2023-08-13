@@ -117,8 +117,7 @@ public class LootDumpProcessorContext
             {
                 _tarkovItems = new TarkovItems(
                     $"{GetConfig().ServerLocation}/project/assets/database/templates/items.json",
-                    $"{GetConfig().ServerLocation}/project/assets/database/templates/handbook.json",
-                    $"{GetConfig().ServerLocation}/project/assets/database/locations/tarkovstreets/statics.json"
+                    $"{GetConfig().ServerLocation}/project/assets/database/templates/handbook.json"
                 );
             }
         }

@@ -144,16 +144,7 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
     }
 
     private static double GetStaticProbability(string mapName, KeyValuePair<Template, int> td, Dictionary<string, int> mapDumpCounter)
-    {
-        if (mapName == "Streets of Tarkov")
-        {
-            var result = LootDumpProcessorContext.GetTarkovItems().GetProbabilityByContainerId(td.Key.Id);
-            if (result != null)
-            {
-                return Math.Round((double)(result.probability), 2);
-            }
-        }
-        
+    {        
         return Math.Round((double)((decimal)td.Value / (decimal)mapDumpCounter[mapName]), 2);
     }
 
