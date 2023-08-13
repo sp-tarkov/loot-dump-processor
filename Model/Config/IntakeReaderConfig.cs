@@ -10,6 +10,11 @@ public class IntakeReaderConfig
     [JsonPropertyName("readerType")]
     public IntakeReaderTypes IntakeReaderType { get; set; } = IntakeReaderTypes.Json;
     
+    [JsonProperty("maxDumpsPerMap")]
+    [JsonPropertyName("maxDumpsPerMap")]
+    public int MaxDumpsPerMap { get; set; } = 1500;
+    
+    
     [JsonProperty("ignoredDumpLocations")]
     [JsonPropertyName("ignoredDumpLocations")]
     public List<string> IgnoredDumpLocations { get; set; } = new List<string>();

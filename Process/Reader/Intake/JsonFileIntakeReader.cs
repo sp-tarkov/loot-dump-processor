@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Text.RegularExpressions;
+﻿using System.Collections.Concurrent;
 using LootDumpProcessor.Logger;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Processing;
@@ -15,27 +14,40 @@ public class JsonFileIntakeReader : IIntakeReader
     private static readonly HashSet<string>? _ignoredLocations =
         LootDumpProcessorContext.GetConfig().ReaderConfig.IntakeReaderConfig?.IgnoredDumpLocations.ToHashSet();
 
-    private static Regex FileNameDateRegex = new("([0-9]{4}(-[0-9]{2}){2}_((-){0,1}[0-9]{2}){3})");
-
+    private readonly ConcurrentDictionary<string, int> _totalMapDumpsCounter = new();
+    
     public bool Read(string file, out BasicInfo basicInfo)
     {
         var fileData = File.ReadAllText(file);
-        var unparsedDate = FileNameDateRegex.Match(file).Groups[1].Value;
-        var date = DateTime.ParseExact(unparsedDate, "yyyy-MM-dd_HH-mm-ss", CultureInfo.InvariantCulture);
+        // If the file format changes it may screw up this date parser
+        if (!FileDateParser.TryParseFileDate(file, out var date))
+            LoggerFactory.GetInstance().Log($"Couldnt parse date from file: {file}", LogLevel.Error);
 
         var fi = _jsonSerializer.Deserialize<RootData>(fileData);
         if (fi.Data?.Name != null && (!_ignoredLocations?.Contains(fi.Data.Name) ?? true))
         {
-            basicInfo = new BasicInfo
+            int counter;
+            if (!_totalMapDumpsCounter.TryGetValue(fi.Data.Name, out counter))
             {
-                Map = fi.Data.Name,
-                FileHash = ProcessorUtil.HashFile(fileData),
-                Data = fi,
-                Date = date,
-                FileName = file
-            };
-            LoggerFactory.GetInstance().Log($"File {file} fully read, returning data", LogLevel.Info);
-            return true;
+                counter = 0;
+                _totalMapDumpsCounter[fi.Data.Name] = counter;
+            }
+
+            if (counter < LootDumpProcessorContext.GetConfig().ReaderConfig.IntakeReaderConfig.MaxDumpsPerMap)
+            {
+                basicInfo = new BasicInfo
+                {
+                    Map = fi.Data.Name,
+                    FileHash = ProcessorUtil.HashFile(fileData),
+                    Data = fi,
+                    Date = date.Value,
+                    FileName = file
+                };
+                _totalMapDumpsCounter[fi.Data.Name] += 1;
+                LoggerFactory.GetInstance().Log($"File {file} fully read, returning data", LogLevel.Info);
+                return true;
+            }
+            LoggerFactory.GetInstance().Log($"Ignoring file {file} as the file cap for map {fi.Data.Name} has been reached", LogLevel.Info);
         }
 
         LoggerFactory.GetInstance().Log(

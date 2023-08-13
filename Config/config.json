@@ -1,5 +1,5 @@
 ﻿{
-  "serverLocation": "D:\\Spt Stuff\\server",
+  "serverLocation": "E:\\spt\\Server",
   "threads": 20,
   "threadPoolingTimeoutMs": 1000,
   "jsonSerializer": "DotNet",
@@ -24,13 +24,14 @@
       "cleanupTempFolderAfterProcess": true
     },
     "intakeReaderConfig": {
+      "maxDumpsPerMap": 1500,
       "readerType": "Json",
       "ignoredDumpLocations": [
         "Hideout"
       ]
     },
     "dumpFilesLocation": [
-      "D:\\Spt Stuff\\Lootgenerator\\dumps\\input"
+      "E:\\spt\\dumps\\input"
     ],
     "thresholdDate": "2023-01-08",
     "acceptedFileExtensions": [
@@ -46,6 +47,6 @@
     "spawnPointToleranceForForced": 99.5
   },
   "writerConfig": {
-    "outputLocation": "D:\\Spt Stuff\\Lootgenerator\\dumps\\output"
+    "outputLocation": "E:\\spt\\dumps\\output"
   }
 }
