@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Storage;
+﻿using LootDumpProcessor.Serializers.Json.Converters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -11,7 +11,8 @@ public class NewtonsoftJsonSerializer : IJsonSerializer
         Converters =
         {
             new NewtonsoftJsonKeyConverter(),
-            new StringEnumConverter()
+            new StringEnumConverter(),
+            new NewtonsoftDateTimeConverter()
         }
     };
 

@@ -4,6 +4,9 @@
   "threadPoolingTimeoutMs": 1000,
   "jsonSerializer": "DotNet",
   "manualGarbageCollectionCalls": false,
+  "dumpProcessorConfig": {
+    "spawnContainerChanceIncludeAfterDate": "2023-08-01 00:00:00"
+  },
   "dataStorageConfig": {
     "dataStorageType": "Memory",
     "fileDataStorageTempLocation": "D:\\Spt Stuff\\Lootgenerator\\Dumps\\cache"

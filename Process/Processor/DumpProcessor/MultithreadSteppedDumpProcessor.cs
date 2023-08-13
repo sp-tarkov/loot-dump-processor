@@ -78,14 +78,21 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                         }
                     }
 
-                    foreach (var dynamicStaticContainer in StaticLootProcessor.CreateDynamicStaticContainers(data))
+                    // Only process the dump file if the date is higher (after) the configuration date
+                    if (FileDateParser.TryParseFileDate(dumped.BasicInfo.FileName, out var fileDate) &&
+                        fileDate.HasValue &&
+                        fileDate.Value > LootDumpProcessorContext.GetConfig().DumpProcessorConfig
+                            .SpawnContainerChanceIncludeAfterDate)
                     {
-                        lock (mapStaticContainersAggregatedLock)
+                        foreach (var dynamicStaticContainer in StaticLootProcessor.CreateDynamicStaticContainers(data))
                         {
-                            if (mapAggregatedData.ContainsKey(dynamicStaticContainer))
-                                mapAggregatedData[dynamicStaticContainer] += 1;
-                            else
-                                mapAggregatedData.Add(dynamicStaticContainer, 1);
+                            lock (mapStaticContainersAggregatedLock)
+                            {
+                                if (mapAggregatedData.ContainsKey(dynamicStaticContainer))
+                                    mapAggregatedData[dynamicStaticContainer] += 1;
+                                else
+                                    mapAggregatedData.Add(dynamicStaticContainer, 1);
+                            }
                         }
                     }
 

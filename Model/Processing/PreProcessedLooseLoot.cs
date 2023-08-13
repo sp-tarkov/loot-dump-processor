@@ -1,5 +1,5 @@
-﻿using LootDumpProcessor.Storage;
-using Newtonsoft.Json;
+﻿using LootDumpProcessor.Serializers.Json.Converters;
+using LootDumpProcessor.Storage;
 
 namespace LootDumpProcessor.Model.Processing;
 
@@ -7,7 +7,8 @@ public class PreProcessedLooseLoot : IKeyable
 {
     public Dictionary<string, int> Counts { get; set; }
 
-    [JsonConverter(typeof(NewtonsoftJsonKeyConverter))]
+    [Newtonsoft.Json.JsonConverter(typeof(NewtonsoftJsonKeyConverter))]
+    [System.Text.Json.Serialization.JsonConverter(typeof(NetJsonKeyConverter))]
     public IKey ItemProperties { get; set; }
 
     public int MapSpawnpointCount { get; set; }

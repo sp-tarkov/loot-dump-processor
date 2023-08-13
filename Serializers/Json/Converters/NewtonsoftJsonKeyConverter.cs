@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using LootDumpProcessor.Storage;
+using Newtonsoft.Json;
 
-namespace LootDumpProcessor.Storage;
+namespace LootDumpProcessor.Serializers.Json.Converters;
 
 public class NewtonsoftJsonKeyConverter : JsonConverter<AbstractKey>
 {
