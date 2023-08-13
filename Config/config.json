@@ -1,6 +1,6 @@
 ﻿{
   "serverLocation": "E:\\spt\\Server",
-  "threads": 20,
+  "threads": 10,
   "threadPoolingTimeoutMs": 1000,
   "jsonSerializer": "DotNet",
   "manualGarbageCollectionCalls": false,

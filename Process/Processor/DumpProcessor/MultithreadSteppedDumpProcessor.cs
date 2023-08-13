@@ -42,11 +42,13 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
 
         Runners.Clear();
         // BSG changed the map data so static containers are now dynamic, so we need to scan all dumps for the static containers.
+        LoggerFactory.GetInstance().Log("Queuing dumps for static data processing", LogLevel.Info);
         foreach (var dumped in dumps)
         {
             Runners.Add(
                 Task.Factory.StartNew(() =>
                 {
+                    LoggerFactory.GetInstance().Log($"Processing static data for file {dumped.BasicInfo.FileName}", LogLevel.Info);
                     var data = _jsonSerializer.Deserialize<RootData>(File.ReadAllText(dumped.BasicInfo.FileName));
                     // the if statement below will keep track of how many dumps we have for each map
                     lock (mapDumpCounterLock)
@@ -62,6 +64,7 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                     {
                         if (!staticContainers.ContainsKey(data.Data.Name))
                         {
+                            LoggerFactory.GetInstance().Log($"Doing first time process for map {data.Data.Name} of real static data", LogLevel.Info);
                             var mapStaticLoot = StaticLootProcessor.CreateRealStaticContainers(data);
                             staticContainers[mapStaticLoot.Item1] = mapStaticLoot.Item2;
                         }
@@ -102,6 +105,7 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
         }
 
         Task.WaitAll(Runners.ToArray());
+        LoggerFactory.GetInstance().Log("All static data processing threads finished", LogLevel.Info);
         // Aggregate and calculate the probability of a static container
         mapStaticContainersAggregated.ToDictionary(
             kv => kv.Key,
@@ -117,29 +121,34 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
         // Static containers
         output.Add(OutputFileType.StaticContainer, staticContainers);
 
+        LoggerFactory.GetInstance().Log("Processing ammo distribution", LogLevel.Info);
         // Ammo distribution
         output.Add(
             OutputFileType.StaticAmmo,
             StaticLootProcessor.CreateAmmoDistribution(dumpProcessData.ContainerCounts)
         );
 
+        LoggerFactory.GetInstance().Log("Processing static loot distribution", LogLevel.Info);
         // Static loot distribution
         output.Add(
             OutputFileType.StaticLoot,
             StaticLootProcessor.CreateStaticLootDistribution(dumpProcessData.ContainerCounts)
         );
 
+        LoggerFactory.GetInstance().Log("Processing loose loot distribution", LogLevel.Info);
         // Loose loot distribution
         var looseLootDistribution = LooseLootProcessor.CreateLooseLootDistribution(
             dumpProcessData.MapCounts,
             dumpProcessData.LooseLootCounts
         );
 
+        LoggerFactory.GetInstance().Log("Collecting loose loot distribution information", LogLevel.Info);
         var loot = dumpProcessData.MapCounts
             .Select(mapCount => mapCount.Key)
             .ToDictionary(mi => mi, mi => looseLootDistribution[mi]);
 
         output.Add(OutputFileType.LooseLoot, loot);
+        LoggerFactory.GetInstance().Log("Dump processing fully completed!", LogLevel.Info);
         return output;
     }
 
