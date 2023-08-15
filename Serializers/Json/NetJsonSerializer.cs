@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using LootDumpProcessor.Storage;
+using LootDumpProcessor.Serializers.Json.Converters;
 
 namespace LootDumpProcessor.Serializers.Json;
 
@@ -12,9 +12,11 @@ public class NetJsonSerializer : IJsonSerializer
         Converters =
         {
             new NetJsonKeyConverter(),
-            new JsonStringEnumConverter()
+            new JsonStringEnumConverter(),
+            new NetDateTimeConverter()
         }
     };
+
     public string Serialize<T>(T obj)
     {
         return JsonSerializer.Serialize(obj, _serializeOptions);

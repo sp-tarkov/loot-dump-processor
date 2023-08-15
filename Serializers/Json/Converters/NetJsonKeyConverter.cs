@@ -1,7 +1,8 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using LootDumpProcessor.Storage;
 
-namespace LootDumpProcessor.Storage;
+namespace LootDumpProcessor.Serializers.Json.Converters;
 
 public class NetJsonKeyConverter : JsonConverter<IKey?>
 {

@@ -41,8 +41,13 @@ public class QueuePipeline : IPipeline
 
         try
         {
-            // Gather all files, then add them into the processing queue
-            GatherFiles().ForEach(f => _filesToProcess.Add(f));
+            // Gather all files, sort them by date descending and then add them into the processing queue
+            GatherFiles().OrderByDescending(f =>
+                {
+                    FileDateParser.TryParseFileDate(f, out var date);
+                    return date;
+                }
+            ).ToList().ForEach(f => _filesToProcess.Add(f));
 
             // We startup all the threads and collect them into a runners list
             for (int i = 0; i < threads; i++)

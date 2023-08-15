@@ -41,6 +41,10 @@ public class Config
     [JsonProperty("processorConfig")]
     [JsonPropertyName("processorConfig")]
     public ProcessorConfig ProcessorConfig { get; set; }
+    
+    [JsonProperty("dumpProcessorConfig")]
+    [JsonPropertyName("dumpProcessorConfig")]
+    public DumpProcessorConfig DumpProcessorConfig { get; set; }
 
     [JsonProperty("writerConfig")]
     [JsonPropertyName("writerConfig")]

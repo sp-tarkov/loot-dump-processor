@@ -60,9 +60,17 @@ public class StaticLootProcessor
     
     public static List<Template> CreateDynamicStaticContainers(RootData rawMapDump)
     {
-        return (from li in rawMapDump.Data.Loot
+        var data = (from li in rawMapDump.Data.Loot
             where (li.IsContainer ?? false) && (!LootDumpProcessorContext.GetStaticWeaponIds().Contains(li.Items[0].Tpl))
             select li).ToList();
+
+        foreach (var item in data)
+        {
+            // remove all but first item from containers items
+            item.Items = new List<Item> { item.Items[0] };
+        }
+
+        return data;
     }
 
     public static Dictionary<string, List<AmmoDistribution>> CreateAmmoDistribution(
