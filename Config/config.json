@@ -9,7 +9,7 @@
   },
   "dataStorageConfig": {
     "dataStorageType": "Memory",
-    "fileDataStorageTempLocation": "D:\\Spt Stuff\\Lootgenerator\\Dumps\\cache"
+    "fileDataStorageTempLocation": "E:\\spt\\dumps\\cache"
   },
   "loggerConfig": {
     "logLevel": "Info",
@@ -20,11 +20,11 @@
       "preProcessors": [
         "SevenZip"
       ],
-      "preProcessorTempFolder": "D:\\Spt Stuff\\Lootgenerator\\TEMP",
+      "preProcessorTempFolder": "E:\\spt\\dumps\\temp",
       "cleanupTempFolderAfterProcess": true
     },
     "intakeReaderConfig": {
-      "maxDumpsPerMap": 1500,
+      "maxDumpsPerMap": 5000,
       "readerType": "Json",
       "ignoredDumpLocations": [
         "Hideout"
