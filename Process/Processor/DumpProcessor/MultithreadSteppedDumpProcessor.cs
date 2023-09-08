@@ -88,13 +88,13 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                                 mapDumpCounter.Add(data.Data.Name, 1);
                         }
 
-                        LootDumpProcessorContext.GetConfig().ContainerIgnoreList.TryGetValue(data.Data.Id.ToLower(), out string[]? ignoreListForMap);
+                        var containerIgnoreListExists = LootDumpProcessorContext.GetConfig().ContainerIgnoreList.TryGetValue(data.Data.Id.ToLower(), out string[]? ignoreListForMap);
                         foreach (var dynamicStaticContainer in StaticLootProcessor.CreateDynamicStaticContainers(data))
                         {
                             lock (mapStaticContainersAggregatedLock)
                             {
                                 // Skip adding containers to aggredated data if container id is in ignore list
-                                if (ignoreListForMap != null && ignoreListForMap.Contains(dynamicStaticContainer.Id))
+                                if (containerIgnoreListExists && ignoreListForMap.Contains(dynamicStaticContainer.Id))
                                 {
                                     continue;
                                 }
