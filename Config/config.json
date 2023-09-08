@@ -1,15 +1,15 @@
 ﻿{
   "serverLocation": "E:\\spt\\Server",
-  "threads": 20,
+  "threads": 10,
   "threadPoolingTimeoutMs": 1000,
   "jsonSerializer": "DotNet",
   "manualGarbageCollectionCalls": false,
   "dumpProcessorConfig": {
-    "spawnContainerChanceIncludeAfterDate": "2023-08-01 00:00:00"
+    "spawnContainerChanceIncludeAfterDate": "2023-08-10 00:00:01"
   },
   "dataStorageConfig": {
     "dataStorageType": "Memory",
-    "fileDataStorageTempLocation": "D:\\Spt Stuff\\Lootgenerator\\Dumps\\cache"
+    "fileDataStorageTempLocation": "E:\\spt\\dumps\\cache"
   },
   "loggerConfig": {
     "logLevel": "Info",
@@ -20,11 +20,11 @@
       "preProcessors": [
         "SevenZip"
       ],
-      "preProcessorTempFolder": "D:\\Spt Stuff\\Lootgenerator\\TEMP",
+      "preProcessorTempFolder": "E:\\spt\\dumps\\temp",
       "cleanupTempFolderAfterProcess": true
     },
     "intakeReaderConfig": {
-      "maxDumpsPerMap": 1500,
+      "maxDumpsPerMap": 5000,
       "readerType": "Json",
       "ignoredDumpLocations": [
         "Hideout"
