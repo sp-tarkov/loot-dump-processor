@@ -48,5 +48,8 @@
   },
   "writerConfig": {
     "outputLocation": "E:\\spt\\dumps\\output"
+  },
+  "containerIgnoreList": {
+	  "tarkovstreets": ["container_City_SW_04_DesignStuff_00002"]
   }
 }

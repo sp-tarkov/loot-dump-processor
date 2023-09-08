@@ -87,11 +87,18 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                             else
                                 mapDumpCounter.Add(data.Data.Name, 1);
                         }
-                        
+
+                        LootDumpProcessorContext.GetConfig().ContainerIgnoreList.TryGetValue(data.Data.Id.ToLower(), out string[]? ignoreListForMap);
                         foreach (var dynamicStaticContainer in StaticLootProcessor.CreateDynamicStaticContainers(data))
                         {
                             lock (mapStaticContainersAggregatedLock)
                             {
+                                // Skip adding containers to aggredated data if container id is in ignore list
+                                if (ignoreListForMap != null && ignoreListForMap.Contains(dynamicStaticContainer.Id))
+                                {
+                                    continue;
+                                }
+
                                 if (mapAggregatedData.ContainsKey(dynamicStaticContainer))
                                     mapAggregatedData[dynamicStaticContainer] += 1;
                                 else
@@ -154,7 +161,7 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
     }
 
     private static double GetStaticProbability(string mapName, KeyValuePair<Template, int> td, Dictionary<string, int> mapDumpCounter)
-    {        
+    {
         return Math.Round((double)((decimal)td.Value / (decimal)mapDumpCounter[mapName]), 2);
     }
 

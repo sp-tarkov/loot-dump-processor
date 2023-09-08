@@ -49,4 +49,8 @@ public class Config
     [JsonProperty("writerConfig")]
     [JsonPropertyName("writerConfig")]
     public WriterConfig WriterConfig { get; set; }
+
+    [JsonProperty("containerIgnoreList")]
+    [JsonPropertyName("containerIgnoreList")]
+    public Dictionary<string, string[]> ContainerIgnoreList { get; set; }
 }
