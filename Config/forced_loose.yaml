@@ -12,6 +12,7 @@ Customs:
 - 5937fd0086f7742bf33fc198  # Bronze pocket watch on a chain
 - 5939a00786f7742fe8132936  # Golden Zibbo lighter
 - 5939e5a786f77461f11c0098  # Secure Folder 0013
+- 64e74a3d4d49d23b2c39d319 # item_quest_clock_07 (Out of Time)
 #- 64bd1abff3a668f08805ce4f  # Secure Flash drive V4 REMOVED BY BSG
 
 Woods:
@@ -39,6 +40,7 @@ Shoreline:
 - 5b4c72c686f77462ac37e907  # Motor Controller: item_barter_electr_controller3
 - 5b43237186f7742f3a4ab252  # Chemical container: item_quest_chem_container
 - 5a29284f86f77463ef3db363  # Toughbook reinforced laptop
+- 64e74a534d49d23b2c39d31b # item_quest_clock_10 (Out of Time)
 
 Interchange:
 - 5ae9a18586f7746e381e16a3  # OLI cargo manifests
@@ -49,6 +51,7 @@ Interchange:
 - 5ae9a4fc86f7746e381e1753  # Clothes design handbook - Part 2
 - 5b4c81a086f77417d26be63f  # Chemical container item_quest_chem_container2
 - 5b4c81bd86f77418a75ae159  # Chemical container item_quest_chem_container3
+- 64e74a5ac2b4f829615ec336 # item_quest_clock_11 (Out of Time)
 
 Factory:
 - 591093bb86f7747caa7bb2ee  # On the neck of the dead scav in the bunker (Postman Pat Part 2)
@@ -64,6 +67,7 @@ Lighthouse:
 - 6331bb0d1aa9f42b804997a6  # V3 Flash Drive
 - 6398a0861c712b1e1d4dadf1  # Forged Lightkeeper intelligence (Snatch)
 - 6399f54b0a36db13c823ad21  # Radio transmitter body (Key to the Tower)
+- 64e74a64aac4cd0a7264ecdf # item_quest_clock_12 (Out of Time)
 # - 64b91627dd13d43b9d01d6d1  # Toughbook reinforced laptop (Event quest) REMOVED BY BSG
 
 ReserveBase:
@@ -75,10 +79,12 @@ ReserveBase:
 - 609267a2bb3f46069c3e6c7d  # T-90M Commander Control Panel
 - 60c080eb991ac167ad1c3ad4  # MBT Integrated Navigation System
 - 6398a072e301557ae24cec92  # Original Lightkeeper Intelligence (Snatch)
+- 64e74a4baac4cd0a7264ecdd # item_quest_clock_09 (Out of Time)
 
 Laboratory:
 - 5eff135be0d3331e9d282b7b  # Flash drive marked with blue tape (TerraGroup employee)
 - 6398a4cfb5992f573c6562b3  # Secured tape
+- 64e74a44c2b4f829615ec334 # item_quest_clock_08 (Out of Time)
 #- 64bdcfed8f3a947a990aa49a  # Hermetic container for storing various chemicals #1 REMOVED BY BSG
 #- 64bdd008b0bf3baa6702f35f  # Hermetic container for storing various chemicals #2 REMOVED BY BSG
 #- 64bdd014f3a668f08805ce64  # Hermetic container for storing various chemicals #3 REMOVED BY BSG
@@ -101,12 +107,6 @@ Streets of Tarkov:
 - 64e74a274d49d23b2c39d317 # item_quest_clock_04 (Out of Time)
 - 64e74a2fc2b4f829615ec332 # item_quest_clock_05 (Out of Time)
 - 64e74a35aac4cd0a7264ecdb # item_quest_clock_06 (Out of Time)
-- 64e74a3d4d49d23b2c39d319 # item_quest_clock_07 (Out of Time)
-- 64e74a44c2b4f829615ec334 # item_quest_clock_08 (Out of Time)
-- 64e74a4baac4cd0a7264ecdd # item_quest_clock_09 (Out of Time)
-- 64e74a534d49d23b2c39d31b # item_quest_clock_10 (Out of Time)
-- 64e74a5ac2b4f829615ec336 # item_quest_clock_11 (Out of Time)
-- 64e74a64aac4cd0a7264ecdf # item_quest_clock_12 (Out of Time)
 - 64f09c02b63b74469b6c149f # Paramedic's GPhone X (Ambulances Again)
 - 64f07f7726cfa02c506f8ac0 # Journal item_quest_kpss2 (Glory To CPSU P2)
 - 64f69b4267e11a7c6206e010 # Chef's diary (Beyond the Red Meat - Part 1)
