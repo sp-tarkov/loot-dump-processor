@@ -130,7 +130,8 @@ public class LooseLootProcessor
                 }).ToList();
 
                 // If any of the items is a quest item or forced loose loot items, or the item normally appreas 99.5%
-                if (itemDistribution.Any(item =>
+                // Only add position to forced loot if it has only 1 item in the array.
+                if (itemDistribution.Count == 1 && itemDistribution.Any(item =>
                         LootDumpProcessorContext.GetTarkovItems().IsQuestItem(item.ComposedKey?.FirstItem?.Tpl) ||
                         LootDumpProcessorContext.GetForcedLooseItems()[mapName].Contains(item.ComposedKey?.FirstItem?.Tpl))
                    )
