@@ -50,6 +50,9 @@
     "outputLocation": "E:\\spt\\dumps\\output"
   },
   "containerIgnoreList": {
-	  "tarkovstreets": ["container_City_SW_04_DesignStuff_00002"]
+    "tarkovstreets": [
+      "container_City_SW_04_DesignStuff_00002",
+      "Lootable_00063"
+    ]
   }
 }
