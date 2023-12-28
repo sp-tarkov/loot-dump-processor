@@ -40,5 +40,9 @@ namespace LootDumpProcessor.Model.Output.StaticContainer
         [JsonProperty("Lighthouse", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("Lighthouse")]
         public MapStaticLoot? Lighthouse { get; set; }
+
+        [JsonProperty("Sandbox", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("Sandbox")]
+        public MapStaticLoot? GroundZero { get; set; }
     }
 }
