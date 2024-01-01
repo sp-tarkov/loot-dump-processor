@@ -68,6 +68,7 @@ Lighthouse:
 - 6398a0861c712b1e1d4dadf1  # Forged Lightkeeper intelligence (Snatch)
 - 6399f54b0a36db13c823ad21  # Radio transmitter body (Key to the Tower)
 - 64e74a64aac4cd0a7264ecdf # item_quest_clock_12 (Out of Time)
+- 578f87a3245977356274f2cb # 
 # - 64b91627dd13d43b9d01d6d1  # Toughbook reinforced laptop (Event quest) REMOVED BY BSG
 
 ReserveBase:
@@ -111,6 +112,7 @@ Streets of Tarkov:
 - 64f07f7726cfa02c506f8ac0 # Journal item_quest_kpss2 (Glory To CPSU P2)
 - 64f69b4267e11a7c6206e010 # Chef's diary (Beyond the Red Meat - Part 1)
 - 64f5b4f71a5f313cb144c06c # Secret component (Beyond the Red Meat - Part 2)
+- 657acb2ac900be5902191ac9 # Cadastral registry records
 
 Sandbox:
 - 6582bd252b50c61c565828e2 # Bottle of Le Jean wine

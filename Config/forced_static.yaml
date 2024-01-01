@@ -14,3 +14,8 @@ forced_items:
   # Backup hideout key
   - containerId: container_City_SE_02_Primorskiy_51_indoor_00001
     itemTpl: 6398fd8ad3de3849057f5128
+
+  Sandbox:
+  # TerraGroup science office key
+  - containerId: container_Test_for_export_00002
+    itemTpl: 658199aa38c79576a2569e13
