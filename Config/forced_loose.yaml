@@ -85,7 +85,7 @@ ReserveBase:
 Laboratory:
 - 5eff135be0d3331e9d282b7b  # Flash drive marked with blue tape (TerraGroup employee)
 - 6398a4cfb5992f573c6562b3  # Secured tape
-- 64e74a44c2b4f829615ec334 # item_quest_clock_08 (Out of Time)
+#- 64e74a44c2b4f829615ec334 # item_quest_clock_08 (Out of Time) #1 REMOVED BY BSG
 #- 64bdcfed8f3a947a990aa49a  # Hermetic container for storing various chemicals #1 REMOVED BY BSG
 #- 64bdd008b0bf3baa6702f35f  # Hermetic container for storing various chemicals #2 REMOVED BY BSG
 #- 64bdd014f3a668f08805ce64  # Hermetic container for storing various chemicals #3 REMOVED BY BSG
