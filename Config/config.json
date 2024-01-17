@@ -44,7 +44,8 @@
     ]
   },
   "processorConfig": {
-    "spawnPointToleranceForForced": 99.5
+    "spawnPointToleranceForForced": 99.5,
+    "looseLootCountTolerancePercentage": 75
   },
   "writerConfig": {
     "outputLocation": "E:\\spt\\dumps\\output"

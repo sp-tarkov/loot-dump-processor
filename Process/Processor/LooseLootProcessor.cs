@@ -81,6 +81,16 @@ public class LooseLootProcessor
             // No longer used, dispose
             counts = null;
 
+            // we want to cleanup the data, so we calculate the mean for the values we get raw
+            // For whatever reason, we sometimes get dumps that have A LOT more loose loot point than 
+            // the average
+            var initialMean = np.mean(np.array(looseLootCounts.MapSpawnpointCount)).ToArray<double>().First();
+            var looseLootCountTolerancePercentage = LootDumpProcessorContext.GetConfig().ProcessorConfig.LooseLootCountTolerancePercentage / 100;
+            // We calculate here a high point to check, anything above this value will be ignored
+            // The data that was inside those loose loot points still counts for them though!
+            var high = initialMean * (1 + looseLootCountTolerancePercentage);
+            looseLootCounts.MapSpawnpointCount = looseLootCounts.MapSpawnpointCount.Where(v => v <= high).ToList();
+
             looseLootDistribution[mapName] = new LooseLootRoot
             {
                 SpawnPointCount = new SpawnPointCount
