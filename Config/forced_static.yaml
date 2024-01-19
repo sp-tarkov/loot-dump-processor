@@ -16,6 +16,7 @@ forced_items:
     itemTpl: 6398fd8ad3de3849057f5128
 
   Sandbox:
-  # TerraGroup science office key
-  - containerId: container_Test_for_export_00002
-    itemTpl: 658199aa38c79576a2569e13
+  - containerId: container_Test_for_export_00002 # Lab technician body
+    itemTpl: 658199aa38c79576a2569e13 # TerraGroup science office key
+  - containerId: container_custom_DesignStuff_00029 # dead body of scav near exit
+    itemTpl: 6217726288ed9f0845317459 # RSP-30 reactive signal cartridge (Green)
