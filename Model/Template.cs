@@ -9,7 +9,7 @@ namespace LootDumpProcessor.Model
     {
         [Newtonsoft.Json.JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
-        public string __ID { get; } = Guid.NewGuid().ToString();
+        public string __ID { get; } = KeyGenerator.GetNextKey();
 
         [JsonProperty("Id", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("Id")]

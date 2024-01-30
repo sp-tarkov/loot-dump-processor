@@ -49,6 +49,10 @@ public class Config
     [JsonProperty("writerConfig")]
     [JsonPropertyName("writerConfig")]
     public WriterConfig WriterConfig { get; set; }
+    
+    [JsonProperty("collectorConfig")]
+    [JsonPropertyName("collectorConfig")]
+    public CollectorConfig CollectorConfig { get; set; }
 
     [JsonProperty("containerIgnoreList")]
     [JsonPropertyName("containerIgnoreList")]

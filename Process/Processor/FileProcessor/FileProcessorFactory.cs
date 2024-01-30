@@ -2,7 +2,7 @@
 
 public static class FileProcessorFactory
 {
-    private static IFileProcessor _fileProcessor;
+    private static IFileProcessor? _fileProcessor;
     public static IFileProcessor GetInstance()
     {
         // TODO: implement actual factory someday
