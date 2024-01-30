@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor;
+namespace LootDumpProcessor;
 
 public static class GCHandler
 {
