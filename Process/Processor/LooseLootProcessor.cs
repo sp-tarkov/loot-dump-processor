@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Logger;
+using LootDumpProcessor.Logger;
 using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.LooseLoot;

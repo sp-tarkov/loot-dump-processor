@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Process.Processor.FileProcessor;
+namespace LootDumpProcessor.Process.Processor.FileProcessor;
 
 public static class FileProcessorFactory
 {

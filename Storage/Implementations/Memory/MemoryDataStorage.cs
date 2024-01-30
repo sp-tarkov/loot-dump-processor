@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Storage.Implementations.Memory;
+namespace LootDumpProcessor.Storage.Implementations.Memory;
 
 public class MemoryDataStorage : IDataStorage
 {

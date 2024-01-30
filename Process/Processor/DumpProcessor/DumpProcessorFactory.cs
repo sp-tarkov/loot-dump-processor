@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Process.Processor.DumpProcessor;
+namespace LootDumpProcessor.Process.Processor.DumpProcessor;
 
 public static class DumpProcessorFactory
 {

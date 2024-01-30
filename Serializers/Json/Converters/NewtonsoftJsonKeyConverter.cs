@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Storage;
+using LootDumpProcessor.Storage;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Serializers.Json.Converters;

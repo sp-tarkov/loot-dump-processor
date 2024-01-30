@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Serializers.Json.Converters;
+using LootDumpProcessor.Serializers.Json.Converters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 

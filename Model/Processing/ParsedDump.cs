@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using LootDumpProcessor.Storage;
 
 namespace LootDumpProcessor.Model.Processing;

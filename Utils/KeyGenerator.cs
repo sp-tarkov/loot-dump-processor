@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Utils;
+namespace LootDumpProcessor.Utils;
 
 public class KeyGenerator
 {

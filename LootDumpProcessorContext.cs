@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Model.Config;
+using LootDumpProcessor.Model.Config;
 using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Process;
 using LootDumpProcessor.Serializers.Json;

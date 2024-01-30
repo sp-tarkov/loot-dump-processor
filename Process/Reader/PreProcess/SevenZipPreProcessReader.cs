@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Logger;
+using LootDumpProcessor.Logger;
 using SevenZip;
 using SevenZip.Sdk.Compression.Lzma;
 

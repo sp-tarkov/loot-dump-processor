@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Model.Processing;
+using LootDumpProcessor.Model.Processing;
 
 namespace LootDumpProcessor.Process.Collector;
 

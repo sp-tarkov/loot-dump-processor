@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Utils;
+using LootDumpProcessor.Utils;
 
 namespace LootDumpProcessor.Storage.Collections;
 

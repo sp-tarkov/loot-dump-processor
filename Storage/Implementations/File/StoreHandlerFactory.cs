@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Storage.Implementations.File.Handlers;
+using LootDumpProcessor.Storage.Implementations.File.Handlers;
 
 namespace LootDumpProcessor.Storage.Implementations.File;
 

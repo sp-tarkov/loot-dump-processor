@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using LootDumpProcessor.Process.Processor;
 using LootDumpProcessor.Utils;
 using Newtonsoft.Json;

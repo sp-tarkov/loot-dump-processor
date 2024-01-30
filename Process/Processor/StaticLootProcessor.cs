@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Model;
+using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.StaticContainer;

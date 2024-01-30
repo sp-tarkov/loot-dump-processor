@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Logger;
+using LootDumpProcessor.Logger;
 using LootDumpProcessor.Model.Tarkov;
 using LootDumpProcessor.Serializers.Json;
 

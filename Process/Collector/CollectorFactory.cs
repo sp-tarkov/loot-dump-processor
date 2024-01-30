@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Process.Collector;
+namespace LootDumpProcessor.Process.Collector;
 
 public static class CollectorFactory
 {

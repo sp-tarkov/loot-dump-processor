@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Storage.Implementations.File;
+using LootDumpProcessor.Storage.Implementations.File;
 using LootDumpProcessor.Storage.Implementations.Memory;
 
 namespace LootDumpProcessor.Storage;

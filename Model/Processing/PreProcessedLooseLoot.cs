@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Serializers.Json.Converters;
+using LootDumpProcessor.Serializers.Json.Converters;
 using LootDumpProcessor.Storage;
 
 namespace LootDumpProcessor.Model.Processing;

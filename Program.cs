@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Logger;
+using LootDumpProcessor.Logger;
 using LootDumpProcessor.Process;
 using LootDumpProcessor.Storage;
 

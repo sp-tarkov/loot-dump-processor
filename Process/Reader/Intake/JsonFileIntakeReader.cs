@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using LootDumpProcessor.Logger;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Processing;

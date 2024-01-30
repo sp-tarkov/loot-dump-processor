@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Model.Processing;
+namespace LootDumpProcessor.Model.Processing;
 
 public class CaliberTemplateCount
 {

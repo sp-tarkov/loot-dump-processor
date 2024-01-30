@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Process.Reader.Intake;
+namespace LootDumpProcessor.Process.Reader.Intake;
 
 public static class IntakeReaderFactory
 {

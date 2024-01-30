@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Logger;
+namespace LootDumpProcessor.Logger;
 
 public enum LogLevel
 {

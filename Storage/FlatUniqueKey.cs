@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Storage;
+namespace LootDumpProcessor.Storage;
 
 public class FlatUniqueKey(string[] indexes) : AbstractKey(indexes)
 {

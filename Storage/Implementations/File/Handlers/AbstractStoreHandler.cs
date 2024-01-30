@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Storage.Implementations.File.Serializers;
+using LootDumpProcessor.Storage.Implementations.File.Serializers;
 
 namespace LootDumpProcessor.Storage.Implementations.File.Handlers;
 

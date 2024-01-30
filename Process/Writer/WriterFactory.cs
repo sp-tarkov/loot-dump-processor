@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Process.Writer;
+namespace LootDumpProcessor.Process.Writer;
 
 public static class WriterFactory
 {

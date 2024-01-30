@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Logger;
+using LootDumpProcessor.Logger;
 
 namespace LootDumpProcessor.Process.Reader.PreProcess;
 

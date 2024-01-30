@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Storage;
+namespace LootDumpProcessor.Storage;
 
 public class SubdivisionedUniqueKey(string[] indexes) : AbstractKey(indexes)
 {

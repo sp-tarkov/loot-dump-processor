@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Storage.Implementations.File.Serializers;
+namespace LootDumpProcessor.Storage.Implementations.File.Serializers;
 
 public static class DataStorageFileSerializerFactory
 {

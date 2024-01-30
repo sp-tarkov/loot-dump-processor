@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Serializers;
+namespace LootDumpProcessor.Serializers;
 
 public interface ISerializer
 {

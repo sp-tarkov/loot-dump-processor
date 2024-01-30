@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Model.Output.StaticContainer;
+using LootDumpProcessor.Model.Output.StaticContainer;
 using YamlDotNet.Serialization;
 
 namespace LootDumpProcessor.Model.Config;
