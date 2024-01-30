@@ -16,7 +16,8 @@ public class TarkovItems(string items)
             throw new Exception("The server items couldnt be found or loaded. Check server config is pointing to the correct place");
         if (!_items.TryGetValue(tpl, out var item_template))
         {
-            LoggerFactory.GetInstance().Log($"[IsBaseClass] Item template '{tpl}' with base class id '{baseclass_id}' was not found on the server items!", LogLevel.Error);
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
+                LoggerFactory.GetInstance().Log($"[IsBaseClass] Item template '{tpl}' with base class id '{baseclass_id}' was not found on the server items!", LogLevel.Error);
             return false;
         }
         
@@ -32,7 +33,8 @@ public class TarkovItems(string items)
             throw new Exception("The server items couldnt be found or loaded. Check server config is pointing to the correct place");
         if (!_items.TryGetValue(tpl, out var item_template))
         {
-            LoggerFactory.GetInstance().Log($"[IsQuestItem] Item template '{tpl}' was not found on the server items!", LogLevel.Error);
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
+                LoggerFactory.GetInstance().Log($"[IsQuestItem] Item template '{tpl}' was not found on the server items!", LogLevel.Error);
             return false;
         }
         return item_template.Props.QuestItem;
@@ -44,7 +46,8 @@ public class TarkovItems(string items)
             throw new Exception("The server items couldnt be found or loaded. Check server config is pointing to the correct place");
         if (!_items.TryGetValue(tpl, out var item_template))
         {
-            LoggerFactory.GetInstance().Log($"[MaxDurability] Item template '{tpl}' was not found on the server items!", LogLevel.Error);
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
+                LoggerFactory.GetInstance().Log($"[MaxDurability] Item template '{tpl}' was not found on the server items!", LogLevel.Error);
             return null;
         }
         return item_template.Props.MaxDurability?.ToString() ?? "";
@@ -56,7 +59,8 @@ public class TarkovItems(string items)
             throw new Exception("The server items couldnt be found or loaded. Check server config is pointing to the correct place");
         if (!_items.TryGetValue(tpl, out var item_template))
         {
-            LoggerFactory.GetInstance().Log($"[AmmoCaliber] Item template '{tpl}' was not found on the server items!", LogLevel.Error);
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
+                LoggerFactory.GetInstance().Log($"[AmmoCaliber] Item template '{tpl}' was not found on the server items!", LogLevel.Error);
             return null;
         }
         return item_template.Props.Caliber;

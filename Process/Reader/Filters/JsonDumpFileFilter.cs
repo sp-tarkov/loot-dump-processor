@@ -14,9 +14,10 @@ public class JsonDumpFileFilter : IFileFilter
         // Calculate parsed date from config threshold
         if (string.IsNullOrEmpty(LootDumpProcessorContext.GetConfig().ReaderConfig.ThresholdDate))
         {
-            LoggerFactory.GetInstance()
-                .Log($"ThresholdDate is null or empty in configs, defaulting to current day minus 30 days",
-                    LogLevel.Warning);
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Warning))
+                LoggerFactory.GetInstance()
+                    .Log($"ThresholdDate is null or empty in configs, defaulting to current day minus 30 days",
+                        LogLevel.Warning);
             _parsedThresholdDate = (DateTime.Now - TimeSpan.FromDays(30));
         }
         else

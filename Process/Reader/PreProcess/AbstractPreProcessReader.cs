@@ -12,11 +12,12 @@ public abstract class AbstractPreProcessReader : IPreProcessReader
         if (string.IsNullOrEmpty(tempFolder))
         {
             tempFolder = GetBaseDirectory();
-            LoggerFactory.GetInstance()
-                .Log(
-                    $"No temp folder was assigned preProcessorTempFolder in PreProcessorConfig, defaulting to {tempFolder}",
-                    LogLevel.Warning
-                );
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Warning))
+                LoggerFactory.GetInstance()
+                    .Log(
+                        $"No temp folder was assigned preProcessorTempFolder in PreProcessorConfig, defaulting to {tempFolder}",
+                        LogLevel.Warning
+                    );
         }
 
         // Cleanup the temp directory before starting the process

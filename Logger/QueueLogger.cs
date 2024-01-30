@@ -72,6 +72,11 @@ public class QueueLogger : ILogger
             queuedMessages.Add(new LoggedMessage { Message = message, LogLevel = level });
     }
 
+    public bool CanBeLogged(LogLevel level)
+    {
+        return GetLogLevel(level) <= logLevel;
+    }
+
     // Wait for graceful termination of the logging thread
     public void Stop()
     {

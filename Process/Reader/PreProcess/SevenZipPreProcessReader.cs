@@ -18,17 +18,23 @@ public class SevenZipPreProcessReader : AbstractPreProcessReader
         var fileRaw = Path.GetFileNameWithoutExtension(file);
         // SevenZip library doesnt like forward slashes for some reason
         var outPath = $"{_tempFolder}\\{fileRaw}".Replace("/", "\\");
-        LoggerFactory.GetInstance().Log(
-            $"Unzipping {file} into temp path {outPath}, this may take a while...",
-            LogLevel.Info);
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            LoggerFactory.GetInstance().Log(
+                $"Unzipping {file} into temp path {outPath}, this may take a while...",
+                LogLevel.Info);
         var extractor = new SevenZipExtractor(file);
-        extractor.Extracting += (_, args) =>
+        // Only log process on debug mode
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
         {
-            if (args.PercentDone % 10 == 0)
-                LoggerFactory.GetInstance().Log($"Unzip progress: {args.PercentDone}%", LogLevel.Info);
-        };
+            extractor.Extracting += (_, args) =>
+            {
+                if (args.PercentDone % 10 == 0)
+                    LoggerFactory.GetInstance().Log($"Unzip progress: {args.PercentDone}%", LogLevel.Debug);
+            };
+        }
         extractor.ExtractArchive(outPath);
-        LoggerFactory.GetInstance().Log($"Finished unzipping {file} into temp path {outPath}", LogLevel.Info);
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            LoggerFactory.GetInstance().Log($"Finished unzipping {file} into temp path {outPath}", LogLevel.Info);
 
         files = Directory.GetFiles(outPath).ToList();
         directories = Directory.GetDirectories(outPath).ToList();
