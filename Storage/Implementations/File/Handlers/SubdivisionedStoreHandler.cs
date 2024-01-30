@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Storage.Implementations.Handlers;
+﻿namespace LootDumpProcessor.Storage.Implementations.File.Handlers;
 
 public class SubdivisionedStoreHandler : AbstractStoreHandler
 {

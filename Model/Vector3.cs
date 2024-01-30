@@ -21,9 +21,9 @@ namespace LootDumpProcessor.Model
         {
             return new Vector3
             {
-                X = this.X,
-                Y = this.Y,
-                Z = this.Z
+                X = X,
+                Y = Y,
+                Z = Z
             };
         }
     }

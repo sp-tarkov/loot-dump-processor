@@ -2,10 +2,8 @@
 
 public static class JsonSerializerFactory
 {
-    private static readonly Dictionary<JsonSerializerTypes, IJsonSerializer> _jsonSerializers =
-        new Dictionary<JsonSerializerTypes, IJsonSerializer>();
-
-    private static object lockObject = new object();
+    private static readonly Dictionary<JsonSerializerTypes, IJsonSerializer> _jsonSerializers = new();
+    private static object lockObject = new();
 
     /**
      * Requires LootDumpProcessorContext to be initialized before using
@@ -22,17 +20,12 @@ public static class JsonSerializerFactory
         {
             if (!_jsonSerializers.TryGetValue(type, out serializer))
             {
-                switch (type)
+                serializer = type switch
                 {
-                    case JsonSerializerTypes.Newtonsoft:
-                        serializer = new NewtonsoftJsonSerializer();
-                        break;
-                    case JsonSerializerTypes.DotNet:
-                        serializer = new NetJsonSerializer();
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(type), type, null);
-                }
+                    JsonSerializerTypes.Newtonsoft => new NewtonsoftJsonSerializer(),
+                    JsonSerializerTypes.DotNet => new NetJsonSerializer(),
+                    _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+                };
 
                 _jsonSerializers.Add(type, serializer);
             }

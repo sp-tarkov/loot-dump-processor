@@ -1,10 +1,9 @@
 ﻿using LootDumpProcessor.Logger;
 using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Processing;
-using LootDumpProcessor.Process.Processor;
 using LootDumpProcessor.Storage;
 
-namespace LootDumpProcessor.Process.Impl;
+namespace LootDumpProcessor.Process.Processor.FileProcessor;
 
 public class FileProcessor : IFileProcessor
 {

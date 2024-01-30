@@ -4,9 +4,9 @@ namespace LootDumpProcessor.Process.Collector;
 
 public class HashSetCollector : ICollector
 {
-    private HashSet<PartialData> processedDumps = new HashSet<PartialData>();
+    private readonly HashSet<PartialData> processedDumps = new();
 
-    private object lockObject = new object();
+    private readonly object lockObject = new();
 
 
     public void Setup()

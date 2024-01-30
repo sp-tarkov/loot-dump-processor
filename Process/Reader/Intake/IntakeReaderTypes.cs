@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Process.Reader;
+﻿namespace LootDumpProcessor.Process.Reader.Intake;
 
 public enum IntakeReaderTypes
 {

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using LootDumpProcessor.Process.Reader;
+using LootDumpProcessor.Process.Reader.Intake;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model.Config;
@@ -17,5 +18,5 @@ public class IntakeReaderConfig
     
     [JsonProperty("ignoredDumpLocations")]
     [JsonPropertyName("ignoredDumpLocations")]
-    public List<string> IgnoredDumpLocations { get; set; } = new List<string>();
+    public List<string> IgnoredDumpLocations { get; set; } = new();
 }

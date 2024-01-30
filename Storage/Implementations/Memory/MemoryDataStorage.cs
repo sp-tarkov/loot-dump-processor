@@ -2,8 +2,8 @@
 
 public class MemoryDataStorage : IDataStorage
 {
-    private static readonly Dictionary<string, object> CachedObjects = new Dictionary<string, object>();
-    private static readonly object _cacheObjectLock = new object();
+    private static readonly Dictionary<string, object> CachedObjects = new();
+    private static readonly object _cacheObjectLock = new();
 
     public void Setup()
     {

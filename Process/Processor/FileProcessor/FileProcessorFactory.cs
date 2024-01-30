@@ -1,6 +1,4 @@
-﻿using LootDumpProcessor.Process.Impl;
-
-namespace LootDumpProcessor.Process.Processor;
+﻿namespace LootDumpProcessor.Process.Processor.FileProcessor;
 
 public static class FileProcessorFactory
 {

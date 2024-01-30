@@ -2,10 +2,10 @@
 using LootDumpProcessor.Logger;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Processing;
-using LootDumpProcessor.Process.Processor;
 using LootDumpProcessor.Serializers.Json;
+using LootDumpProcessor.Utils;
 
-namespace LootDumpProcessor.Process.Impl;
+namespace LootDumpProcessor.Process.Reader.Intake;
 
 public class JsonFileIntakeReader : IIntakeReader
 {
@@ -26,14 +26,13 @@ public class JsonFileIntakeReader : IIntakeReader
         var fi = _jsonSerializer.Deserialize<RootData>(fileData);
         if (fi.Data?.Name != null && (!_ignoredLocations?.Contains(fi.Data.Name) ?? true))
         {
-            int counter;
-            if (!_totalMapDumpsCounter.TryGetValue(fi.Data.Name, out counter))
+            if (!_totalMapDumpsCounter.TryGetValue(fi.Data.Name, out var counter))
             {
                 counter = 0;
                 _totalMapDumpsCounter[fi.Data.Name] = counter;
             }
 
-            if (counter < LootDumpProcessorContext.GetConfig().ReaderConfig.IntakeReaderConfig.MaxDumpsPerMap)
+            if (counter < (LootDumpProcessorContext.GetConfig().ReaderConfig.IntakeReaderConfig?.MaxDumpsPerMap ?? 1500))
             {
                 basicInfo = new BasicInfo
                 {

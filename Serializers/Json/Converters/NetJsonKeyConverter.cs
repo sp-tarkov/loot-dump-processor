@@ -31,18 +31,12 @@ public class NetJsonKeyConverter : JsonConverter<IKey?>
             throw new Exception("Key serializedKey was missing from json definition");
         }
 
-        AbstractKey key;
-        switch (Enum.Parse<KeyType>(type))
+        AbstractKey key = Enum.Parse<KeyType>(type) switch
         {
-            case KeyType.Subdivisioned:
-                key = new SubdivisionedUniqueKey(serializedKey.Split("|"));
-                break;
-            case KeyType.Unique:
-                key = new FlatUniqueKey(serializedKey.Split("|"));
-                break;
-            default:
-                throw new Exception("Unknown key type used!");
-        }
+            KeyType.Subdivisioned => new SubdivisionedUniqueKey(serializedKey.Split("|")),
+            KeyType.Unique => new FlatUniqueKey(serializedKey.Split("|")),
+            _ => throw new Exception("Unknown key type used!")
+        };
 
         return key;
     }

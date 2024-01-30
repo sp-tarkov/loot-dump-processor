@@ -13,7 +13,7 @@ namespace LootDumpProcessor.Model
         {
             return new Foldable
             {
-                Folded = this.Folded
+                Folded = Folded
             };
         }
     }

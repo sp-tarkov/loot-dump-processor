@@ -1,42 +1,37 @@
-﻿using LootDumpProcessor.Storage.Implementations.Serializers;
+﻿using LootDumpProcessor.Storage.Implementations.File.Serializers;
 
-namespace LootDumpProcessor.Storage.Implementations.Handlers;
+namespace LootDumpProcessor.Storage.Implementations.File.Handlers;
 
 public abstract class AbstractStoreHandler : IStoreHandler
 {
-    protected readonly IDataStorageFileSerializer _serializer;
-
-    public AbstractStoreHandler()
-    {
-        _serializer = DataStorageFileSerializerFactory.GetInstance();
-    }
+    protected readonly IDataStorageFileSerializer _serializer = DataStorageFileSerializerFactory.GetInstance();
 
     public void Store<T>(T obj, bool failIfDuplicate = true) where T : IKeyable
     {
         var locationWithFile = GetLocation(obj.GetKey());
-        if (File.Exists(locationWithFile) && failIfDuplicate)
+        if (System.IO.File.Exists(locationWithFile) && failIfDuplicate)
         {
             throw new Exception($"Attempted to save duplicated object into data storage: {locationWithFile}");
         }
 
-        File.WriteAllText(locationWithFile, _serializer.GetSerializer().Serialize(obj));
+        System.IO.File.WriteAllText(locationWithFile, _serializer.GetSerializer().Serialize(obj));
     }
 
     public T? Retrieve<T>(IKey obj) where T : IKeyable
     {
         var locationWithFile = GetLocation(obj);
-        if (!File.Exists(locationWithFile))
+        if (!System.IO.File.Exists(locationWithFile))
         {
             return default;
         }
 
-        return _serializer.GetSerializer().Deserialize<T>(File.ReadAllText(locationWithFile));
+        return _serializer.GetSerializer().Deserialize<T>(System.IO.File.ReadAllText(locationWithFile));
     }
 
     public bool Exists(IKey obj)
     {
         var locationWithFile = GetLocation(obj);
-        return File.Exists(locationWithFile);
+        return System.IO.File.Exists(locationWithFile);
     }
 
     public abstract List<T> RetrieveAll<T>() where T : IKeyable;

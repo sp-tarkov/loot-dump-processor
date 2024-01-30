@@ -22,7 +22,7 @@ public class NetJsonSerializer : IJsonSerializer
         return JsonSerializer.Serialize(obj, _serializeOptions);
     }
 
-    public T Deserialize<T>(string obj)
+    public T? Deserialize<T>(string obj)
     {
         return JsonSerializer.Deserialize<T>(obj, _serializeOptions);
     }

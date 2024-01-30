@@ -3,7 +3,6 @@
 public static class PreProcessReaderFactory
 {
     private static readonly Dictionary<PreProcessReaderTypes, IPreProcessReader> _proProcessReaders = new();
-    private static object lockObject = new object();
 
     public static IPreProcessReader GetInstance(PreProcessReaderTypes type)
     {

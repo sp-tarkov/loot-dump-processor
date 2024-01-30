@@ -1,6 +1,6 @@
 ﻿using LootDumpProcessor.Model.Processing;
 
-namespace LootDumpProcessor.Process;
+namespace LootDumpProcessor.Process.Reader.Intake;
 
 public interface IIntakeReader
 {

@@ -4,7 +4,7 @@ namespace LootDumpProcessor.Process.Reader.PreProcess;
 
 public abstract class AbstractPreProcessReader : IPreProcessReader
 {
-    protected string _tempFolder;
+    protected readonly string _tempFolder;
 
     public AbstractPreProcessReader()
     {
@@ -35,7 +35,7 @@ public abstract class AbstractPreProcessReader : IPreProcessReader
 
     protected string GetBaseDirectory()
     {
-        return $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\\SPT\\tmp\\PreProcessor";
+        return $@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\SPT\tmp\PreProcessor";
     }
 
     public void Dispose()

@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Storage.Implementations;
+﻿namespace LootDumpProcessor.Storage.Implementations.File;
 
 public interface IStoreHandler
 {

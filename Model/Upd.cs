@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using LootDumpProcessor.Process.Processor;
+using LootDumpProcessor.Utils;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model
@@ -26,10 +27,10 @@ namespace LootDumpProcessor.Model
         {
             return new Upd
             {
-                StackObjectsCount = this.StackObjectsCount,
-                FireMode = ProcessorUtil.Copy(this.FireMode),
-                Foldable = ProcessorUtil.Copy(this.Foldable),
-                Repairable = ProcessorUtil.Copy(this.Repairable)
+                StackObjectsCount = StackObjectsCount,
+                FireMode = ProcessorUtil.Copy(FireMode),
+                Foldable = ProcessorUtil.Copy(Foldable),
+                Repairable = ProcessorUtil.Copy(Repairable)
             };
         }
     }

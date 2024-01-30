@@ -3,12 +3,12 @@ using LootDumpProcessor.Model.Output.LooseLoot;
 using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Serializers.Json;
 
-namespace LootDumpProcessor.Process.Impl;
+namespace LootDumpProcessor.Process.Writer;
 
 public class FileWriter : IWriter
 {
     private static readonly IJsonSerializer _jsonSerializer = JsonSerializerFactory.GetInstance();
-    private static string _outputPath;
+    private static readonly string _outputPath;
 
     static FileWriter()
     {
@@ -47,9 +47,9 @@ public class FileWriter : IWriter
                 {
                     foreach (var s in LootDumpProcessorContext.GetDirectoryMappings()[key].Name)
                     {
-                        if (!Directory.Exists($"{_outputPath}\\locations\\{s}"))
-                            Directory.CreateDirectory($"{_outputPath}\\locations\\{s}");
-                        File.WriteAllText($"{_outputPath}\\locations\\{s}\\looseLoot.json",
+                        if (!Directory.Exists($@"{_outputPath}\locations\{s}"))
+                            Directory.CreateDirectory($@"{_outputPath}\locations\{s}");
+                        File.WriteAllText($@"{_outputPath}\locations\{s}\looseLoot.json",
                             _jsonSerializer.Serialize(value));
                     }
                 }
@@ -57,17 +57,17 @@ public class FileWriter : IWriter
                 break;
             case OutputFileType.StaticContainer:
                 var staticContainer = (Dictionary<string, MapStaticLoot>)data;
-                File.WriteAllText($"{_outputPath}\\loot\\staticContainers.json",
+                File.WriteAllText($@"{_outputPath}\loot\staticContainers.json",
                     _jsonSerializer.Serialize(staticContainer));
                 break;
             case OutputFileType.StaticLoot:
                 var staticLoot = (Dictionary<string, StaticItemDistribution>)data;
-                File.WriteAllText($"{_outputPath}\\loot\\staticLoot.json",
+                File.WriteAllText($@"{_outputPath}\loot\staticLoot.json",
                     _jsonSerializer.Serialize(staticLoot));
                 break;
             case OutputFileType.StaticAmmo:
                 var staticAmmo = (Dictionary<string, List<AmmoDistribution>>)data;
-                File.WriteAllText($"{_outputPath}\\loot\\staticAmmo.json",
+                File.WriteAllText($@"{_outputPath}\loot\staticAmmo.json",
                     _jsonSerializer.Serialize(staticAmmo));
                 break;
             default:

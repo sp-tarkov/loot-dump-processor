@@ -13,7 +13,7 @@ namespace LootDumpProcessor.Model
         {
             return new FireMode
             {
-                FireModeType = this.FireModeType
+                FireModeType = FireModeType
             };
         }
     }

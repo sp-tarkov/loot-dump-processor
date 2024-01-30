@@ -5,11 +5,12 @@ using LootDumpProcessor.Model.Output.LooseLoot;
 using LootDumpProcessor.Model.Processing;
 using LootDumpProcessor.Storage;
 using LootDumpProcessor.Storage.Collections;
+using LootDumpProcessor.Utils;
 using NumSharp;
 
 namespace LootDumpProcessor.Process.Processor;
 
-public class LooseLootProcessor
+public static class LooseLootProcessor
 {
     public static PreProcessedLooseLoot PreProcessLooseLoot(List<Template> looseloot)
     {

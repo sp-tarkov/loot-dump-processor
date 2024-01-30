@@ -4,9 +4,9 @@ using LootDumpProcessor.Storage;
 
 namespace LootDumpProcessor;
 
-public class Program
+public static class Program
 {
-    public static void Main(String[] args)
+    public static void Main()
     {
         // Bootstrap the config before anything else, its required by the whole application to work
         LootDumpProcessorContext.GetConfig();

@@ -34,7 +34,7 @@ public class ComposedKey
     {
         if (obj is not ComposedKey key)
             return false;
-        return this.Key == key.Key;
+        return Key == key.Key;
     }
 
     public override int GetHashCode() => Key.GetHashCode();

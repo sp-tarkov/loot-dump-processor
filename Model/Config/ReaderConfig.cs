@@ -24,7 +24,7 @@ public class ReaderConfig
 
     [JsonProperty("acceptedFileExtensions")]
     [JsonPropertyName("acceptedFileExtensions")]
-    public List<string> AcceptedFileExtensions { get; set; } = new List<string>();
+    public List<string> AcceptedFileExtensions { get; set; } = new();
 
     [JsonProperty("processSubFolders")]
     [JsonPropertyName("processSubFolders")]
