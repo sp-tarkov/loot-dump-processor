@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Model.Input;
+using LootDumpProcessor.Model.Input;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model.Processing;

@@ -1,6 +1,6 @@
-﻿using LootDumpProcessor.Model.Processing;
+using LootDumpProcessor.Model.Processing;
 
-namespace LootDumpProcessor.Process;
+namespace LootDumpProcessor.Process.Processor.FileProcessor;
 
 public interface IFileProcessor
 {

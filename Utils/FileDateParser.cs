@@ -1,6 +1,6 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
-namespace LootDumpProcessor.Process.Processor;
+namespace LootDumpProcessor.Utils;
 
 public static class FileDateParser
 {

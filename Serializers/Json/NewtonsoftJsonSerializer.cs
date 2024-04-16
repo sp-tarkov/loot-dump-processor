@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Serializers.Json.Converters;
+using LootDumpProcessor.Serializers.Json.Converters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -6,7 +6,7 @@ namespace LootDumpProcessor.Serializers.Json;
 
 public class NewtonsoftJsonSerializer : IJsonSerializer
 {
-    private static readonly JsonSerializerSettings _settings = new JsonSerializerSettings
+    private static readonly JsonSerializerSettings _settings = new()
     {
         Converters =
         {
@@ -21,7 +21,7 @@ public class NewtonsoftJsonSerializer : IJsonSerializer
         return JsonConvert.SerializeObject(obj, _settings);
     }
 
-    public T Deserialize<T>(string obj)
+    public T? Deserialize<T>(string obj)
     {
         return JsonConvert.DeserializeObject<T>(obj, _settings);
     }

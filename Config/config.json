@@ -1,4 +1,4 @@
-﻿{
+{
   "serverLocation": "E:\\spt\\Server",
   "threads": 10,
   "threadPoolingTimeoutMs": 1000,
@@ -46,6 +46,11 @@
   "processorConfig": {
     "spawnPointToleranceForForced": 99.5,
     "looseLootCountTolerancePercentage": 75
+  },
+  "collectorConfig": {
+    "collectorType": "Dump",
+    "maxEntitiesBeforeDumping": 1000,
+      "dumpLocation": "C:\\Users\\USER\\SPT\\tmp"
   },
   "writerConfig": {
     "outputLocation": "E:\\spt\\dumps\\output"

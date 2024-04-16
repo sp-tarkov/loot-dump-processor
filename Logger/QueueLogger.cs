@@ -1,15 +1,15 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 
 namespace LootDumpProcessor.Logger;
 
 public class QueueLogger : ILogger
 {
-    private BlockingCollection<LoggedMessage> queuedMessages = new BlockingCollection<LoggedMessage>();
+    private readonly BlockingCollection<LoggedMessage> queuedMessages = new();
     private Task? loggerThread;
     private bool isRunning;
     private int logLevel;
-    private static readonly int _logTerminationTimeoutMs = 1000;
-    private static readonly int _logTerminationRetryCount = 3;
+    private const int LogTerminationTimeoutMs = 1000;
+    private const int LogTerminationRetryCount = 3;
 
     public void Setup()
     {
@@ -56,25 +56,25 @@ public class QueueLogger : ILogger
 
     private int GetLogLevel(LogLevel level)
     {
-        switch (level)
+        return level switch
         {
-            case LogLevel.Error:
-                return 1;
-            case LogLevel.Warning:
-                return 2;
-            case LogLevel.Info:
-                return 3;
-            case LogLevel.Debug:
-                return 4;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+            LogLevel.Error => 1,
+            LogLevel.Warning => 2,
+            LogLevel.Info => 3,
+            LogLevel.Debug => 4,
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 
     public void Log(string message, LogLevel level)
     {
         if (GetLogLevel(level) <= logLevel)
             queuedMessages.Add(new LoggedMessage { Message = message, LogLevel = level });
+    }
+
+    public bool CanBeLogged(LogLevel level)
+    {
+        return GetLogLevel(level) <= logLevel;
     }
 
     // Wait for graceful termination of the logging thread
@@ -84,24 +84,24 @@ public class QueueLogger : ILogger
         if (loggerThread != null)
         {
             Console.ResetColor();
-            int retryCount = 0;
+            var retryCount = 0;
             while (!loggerThread.IsCompleted)
             {
-                if (retryCount == _logTerminationRetryCount)
+                if (retryCount == LogTerminationRetryCount)
                 {
                     Console.WriteLine(
                         $"Logger thread did not terminate by itself after {retryCount} retries. Some log messages may be lost.");
                     break;
                 }
 
-                Console.WriteLine($"Waiting {_logTerminationTimeoutMs}ms for logger termination");
-                Thread.Sleep(_logTerminationTimeoutMs);
+                Console.WriteLine($"Waiting {LogTerminationTimeoutMs}ms for logger termination");
+                Thread.Sleep(LogTerminationTimeoutMs);
                 retryCount++;
             }
         }
     }
 
-    class LoggedMessage
+    private class LoggedMessage
     {
         public string Message { get; init; }
         public LogLevel LogLevel { get; init; }

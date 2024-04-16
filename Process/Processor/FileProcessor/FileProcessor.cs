@@ -1,16 +1,16 @@
-﻿using LootDumpProcessor.Logger;
+using LootDumpProcessor.Logger;
 using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Processing;
-using LootDumpProcessor.Process.Processor;
 using LootDumpProcessor.Storage;
 
-namespace LootDumpProcessor.Process.Impl;
+namespace LootDumpProcessor.Process.Processor.FileProcessor;
 
 public class FileProcessor : IFileProcessor
 {
     public PartialData Process(BasicInfo parsedData)
     {
-        LoggerFactory.GetInstance().Log($"Processing file {parsedData.FileName}...", LogLevel.Info);
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
+            LoggerFactory.GetInstance().Log($"Processing file {parsedData.FileName}...", LogLevel.Debug);
         List<Template> looseLoot = new List<Template>();
         List<Template> staticLoot = new List<Template>();
 
@@ -29,7 +29,7 @@ public class FileProcessor : IFileProcessor
             BasicInfo = parsedData
         };
 
-        PartialData data = new PartialData
+        var data = new PartialData
         {
             BasicInfo = parsedData,
             ParsedDumpKey = (AbstractKey)dumpData.GetKey()
@@ -37,16 +37,17 @@ public class FileProcessor : IFileProcessor
 
         if (!DataStorageFactory.GetInstance().Exists(dumpData.GetKey()))
         {
-            LoggerFactory.GetInstance().Log(
-                $"Cached not found for {string.Join("/", dumpData.GetKey().GetLookupIndex())} processing.",
-                LogLevel.Info
-            );
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
+                LoggerFactory.GetInstance().Log(
+                    $"Cached not found for {string.Join("/", dumpData.GetKey().GetLookupIndex())} processing.",
+                    LogLevel.Debug
+                );
             dumpData.Containers = StaticLootProcessor.PreProcessStaticLoot(staticLoot);
             dumpData.LooseLoot = LooseLootProcessor.PreProcessLooseLoot(looseLoot);
             DataStorageFactory.GetInstance().Store(dumpData);
         }
-
-        LoggerFactory.GetInstance().Log($"File {parsedData.FileName} finished processing!", LogLevel.Info);
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
+            LoggerFactory.GetInstance().Log($"File {parsedData.FileName} finished processing!", LogLevel.Debug);
         return data;
     }
 }

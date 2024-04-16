@@ -1,12 +1,15 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using LootDumpProcessor.Logger;
 using LootDumpProcessor.Process.Collector;
 using LootDumpProcessor.Process.Processor;
 using LootDumpProcessor.Process.Processor.DumpProcessor;
+using LootDumpProcessor.Process.Processor.FileProcessor;
 using LootDumpProcessor.Process.Reader;
 using LootDumpProcessor.Process.Reader.Filters;
+using LootDumpProcessor.Process.Reader.Intake;
 using LootDumpProcessor.Process.Reader.PreProcess;
 using LootDumpProcessor.Process.Writer;
+using LootDumpProcessor.Utils;
 
 namespace LootDumpProcessor.Process;
 
@@ -38,7 +41,8 @@ public class QueuePipeline : IPipeline
         // We add 2 more threads to the total count to account for subprocesses and others
         int threads = LootDumpProcessorContext.GetConfig().Threads;
         ThreadPool.SetMaxThreads(threads + 2, threads + 2);
-
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            LoggerFactory.GetInstance().Log("Gathering files to begin processing", LogLevel.Info);
         try
         {
             // Gather all files, sort them by date descending and then add them into the processing queue
@@ -48,10 +52,15 @@ public class QueuePipeline : IPipeline
                     return date;
                 }
             ).ToList().ForEach(f => _filesToProcess.Add(f));
-
+            
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+                LoggerFactory.GetInstance().Log("Files sorted and ready to begin pre-processing", LogLevel.Info);
+            
             // We startup all the threads and collect them into a runners list
             for (int i = 0; i < threads; i++)
             {
+                if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+                    LoggerFactory.GetInstance().Log("Creating pre-processing threads", LogLevel.Info);
                 Runners.Add(
                     Task.Factory.StartNew(
                         () =>
@@ -67,9 +76,10 @@ public class QueuePipeline : IPipeline
                                 }
                                 catch (Exception e)
                                 {
-                                    LoggerFactory.GetInstance().Log(
-                                        $"Error occurred while processing file {file}\n{e.Message}\n{e.StackTrace}",
-                                        LogLevel.Error);
+                                    if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
+                                        LoggerFactory.GetInstance().Log(
+                                            $"Error occurred while processing file {file}\n{e.Message}\n{e.StackTrace}",
+                                            LogLevel.Error);
                                 }
                             }
                         },
@@ -80,12 +90,14 @@ public class QueuePipeline : IPipeline
             // Wait until all runners are done processing
             while (!Runners.All(r => r.IsCompleted))
             {
-                LoggerFactory.GetInstance().Log(
-                    $"One or more file processors are still processing files. Waiting {LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs}ms before checking again",
-                    LogLevel.Info);
+                if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+                    LoggerFactory.GetInstance().Log(
+                        $"One or more file processors are still processing files. Waiting {LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs}ms before checking again",
+                        LogLevel.Info);
                 Thread.Sleep(TimeSpan.FromMilliseconds(LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs));
             }
-
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+                LoggerFactory.GetInstance().Log("Pre-processing finished", LogLevel.Info);
             // Single writer instance to collect results
             var writer = WriterFactory.GetInstance();
             // Single collector instance to collect results

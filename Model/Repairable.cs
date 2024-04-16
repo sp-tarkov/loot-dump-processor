@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model
@@ -17,8 +17,8 @@ namespace LootDumpProcessor.Model
         {
             return new Repairable
             {
-                Durability = this.Durability,
-                MaxDurability = this.MaxDurability
+                Durability = Durability,
+                MaxDurability = MaxDurability
             };
         }
     }

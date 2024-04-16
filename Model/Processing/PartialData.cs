@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Storage;
+using LootDumpProcessor.Storage;
 
 namespace LootDumpProcessor.Model.Processing;
 
@@ -10,12 +10,12 @@ public class PartialData
     public override bool Equals(object? obj)
     {
         if (obj is ParsedDump dump)
-            return dump.BasicInfo.Equals(this.BasicInfo);
+            return dump.BasicInfo.Equals(BasicInfo);
         return false;
     }
 
     public override int GetHashCode()
     {
-        return this.BasicInfo.GetHashCode();
+        return BasicInfo.GetHashCode();
     }
 }

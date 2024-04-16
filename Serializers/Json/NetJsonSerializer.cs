@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using LootDumpProcessor.Serializers.Json.Converters;
 
@@ -22,7 +22,7 @@ public class NetJsonSerializer : IJsonSerializer
         return JsonSerializer.Serialize(obj, _serializeOptions);
     }
 
-    public T Deserialize<T>(string obj)
+    public T? Deserialize<T>(string obj)
     {
         return JsonSerializer.Deserialize<T>(obj, _serializeOptions);
     }

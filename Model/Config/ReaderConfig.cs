@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using LootDumpProcessor.Process.Reader.Filters;
 using Newtonsoft.Json;
 
@@ -24,7 +24,7 @@ public class ReaderConfig
 
     [JsonProperty("acceptedFileExtensions")]
     [JsonPropertyName("acceptedFileExtensions")]
-    public List<string> AcceptedFileExtensions { get; set; } = new List<string>();
+    public List<string> AcceptedFileExtensions { get; set; } = new();
 
     [JsonProperty("processSubFolders")]
     [JsonPropertyName("processSubFolders")]

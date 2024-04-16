@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Serialization;
-using LootDumpProcessor.Process.Processor;
+using System.Text.Json.Serialization;
+using LootDumpProcessor.Utils;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model
@@ -26,10 +26,10 @@ namespace LootDumpProcessor.Model
         {
             return new GroupPosition
             {
-                Name = this.Name,
-                Weight = this.Weight,
-                Position = ProcessorUtil.Copy(this.Position),
-                Rotation = ProcessorUtil.Copy(this.Rotation)
+                Name = Name,
+                Weight = Weight,
+                Position = ProcessorUtil.Copy(Position),
+                Rotation = ProcessorUtil.Copy(Rotation)
             };
         }
     }

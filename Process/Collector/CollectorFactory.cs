@@ -1,10 +1,17 @@
-﻿namespace LootDumpProcessor.Process.Collector;
+namespace LootDumpProcessor.Process.Collector;
 
 public static class CollectorFactory
 {
+    private static ICollector? _collector;
     public static ICollector GetInstance()
     {
-        // TODO: implement real factory
-        return new HashSetCollector();
+        if (_collector == null)
+            _collector = LootDumpProcessorContext.GetConfig().CollectorConfig.CollectorType switch
+            {
+                CollectorType.Memory => new HashSetCollector(),
+                CollectorType.Dump => new DumpCollector(),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        return _collector;
     }
 }

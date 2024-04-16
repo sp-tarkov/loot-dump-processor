@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Process.Reader.Filters;
+namespace LootDumpProcessor.Process.Reader.Filters;
 
 public static class FileFilterFactory
 {

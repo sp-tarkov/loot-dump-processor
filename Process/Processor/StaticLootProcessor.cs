@@ -1,12 +1,13 @@
-﻿using LootDumpProcessor.Model;
+using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Model.Processing;
+using LootDumpProcessor.Utils;
 
 namespace LootDumpProcessor.Process.Processor;
 
-public class StaticLootProcessor
+public static class StaticLootProcessor
 {
     public static List<PreProcessedStaticLoot> PreProcessStaticLoot(List<Template> staticloot)
     {
@@ -30,7 +31,6 @@ public class StaticLootProcessor
 
     public static Tuple<string, MapStaticLoot> CreateRealStaticContainers(RootData rawMapDump)
     {
-        List<StaticForced> forcedStaticItems;
         var mapName = rawMapDump.Data.Name;
         var staticLootPositions = (from li in rawMapDump.Data.Loot
             where li.IsContainer ?? false
@@ -46,7 +46,7 @@ public class StaticLootProcessor
             }
         }
 
-        forcedStaticItems = LootDumpProcessorContext.GetForcedItems().ContainsKey(mapName)
+        var forcedStaticItems = LootDumpProcessorContext.GetForcedItems().ContainsKey(mapName)
             ? LootDumpProcessorContext.GetForcedItems()[mapName]
             : new List<StaticForced>();
 
@@ -145,15 +145,12 @@ public class StaticLootProcessor
             var itemsHitCounts = new Dictionary<string, int>();
             foreach (var ci in container_counts_selected)
             {
-                foreach (var cii in ci.Items)
+                foreach (var cii in ci.Items.Where(cii => cii.ParentId == ci.ContainerId))
                 {
-                    if (cii.ParentId == ci.ContainerId)
-                    {
-                        if (itemsHitCounts.ContainsKey(cii.Tpl))
-                            itemsHitCounts[cii.Tpl] += 1;
-                        else
-                            itemsHitCounts[cii.Tpl] = 1;
-                    }
+                    if (itemsHitCounts.ContainsKey(cii.Tpl))
+                        itemsHitCounts[cii.Tpl] += 1;
+                    else
+                        itemsHitCounts[cii.Tpl] = 1;
                 }
             }
 

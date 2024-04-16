@@ -1,29 +1,22 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Storage;
 
-public abstract class AbstractKey : IKey
+public abstract class AbstractKey(string[] indexes) : IKey
 {
     public abstract KeyType GetKeyType();
-
-    private string[] indexes;
 
     [JsonProperty("serializedKey")]
     [JsonPropertyName("serializedKey")]
     public string SerializedKey
     {
-        get { return string.Join("|", this.indexes); }
-        set { indexes = value.Split("|"); }
-    }
-
-    public AbstractKey(string[] indexes)
-    {
-        this.indexes = indexes;
+        get => string.Join("|", indexes);
+        set => indexes = value.Split("|");
     }
 
     public string[] GetLookupIndex()
     {
-        return this.indexes;
+        return indexes;
     }
 }

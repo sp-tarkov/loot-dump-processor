@@ -1,6 +1,6 @@
-﻿using System.Text.Json.Serialization;
-using LootDumpProcessor.Process.Processor;
+using System.Text.Json.Serialization;
 using LootDumpProcessor.Storage;
+using LootDumpProcessor.Utils;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model
@@ -9,7 +9,7 @@ namespace LootDumpProcessor.Model
     {
         [Newtonsoft.Json.JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
-        public string __ID { get; } = Guid.NewGuid().ToString();
+        public string __ID { get; } = KeyGenerator.GetNextKey();
 
         [JsonProperty("Id", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("Id")]
@@ -82,17 +82,17 @@ namespace LootDumpProcessor.Model
         {
             return new Template
             {
-                Id = this.Id,
-                IsContainer = this.IsContainer,
-                UseGravity = this.UseGravity,
-                RandomRotation = this.RandomRotation,
-                Position = ProcessorUtil.Copy(this.Position),
-                Rotation = ProcessorUtil.Copy(this.Rotation),
-                IsGroupPosition = this.IsGroupPosition,
-                GroupPositions = ProcessorUtil.Copy(this.GroupPositions),
-                IsAlwaysSpawn = this.IsAlwaysSpawn,
-                Root = this.Root,
-                Items = ProcessorUtil.Copy(this.Items)
+                Id = Id,
+                IsContainer = IsContainer,
+                UseGravity = UseGravity,
+                RandomRotation = RandomRotation,
+                Position = ProcessorUtil.Copy(Position),
+                Rotation = ProcessorUtil.Copy(Rotation),
+                IsGroupPosition = IsGroupPosition,
+                GroupPositions = ProcessorUtil.Copy(GroupPositions),
+                IsAlwaysSpawn = IsAlwaysSpawn,
+                Root = Root,
+                Items = ProcessorUtil.Copy(Items)
             };
         }
     }

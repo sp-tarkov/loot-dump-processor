@@ -1,5 +1,6 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using LootDumpProcessor.Model.Processing;
+using LootDumpProcessor.Utils;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model;
@@ -26,7 +27,7 @@ public class ComposedKey
             .Cast<string>()
             .Select(i => (double)i.GetHashCode())
             .Sum()
-            .ToString() ?? Guid.NewGuid().ToString();
+            .ToString() ?? KeyGenerator.GetNextKey();
         FirstItem = items?[0];
     }
 
@@ -34,7 +35,7 @@ public class ComposedKey
     {
         if (obj is not ComposedKey key)
             return false;
-        return this.Key == key.Key;
+        return Key == key.Key;
     }
 
     public override int GetHashCode() => Key.GetHashCode();

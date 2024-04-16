@@ -1,15 +1,16 @@
-﻿using LootDumpProcessor.Logger;
+using LootDumpProcessor.Logger;
 using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.LooseLoot;
 using LootDumpProcessor.Model.Processing;
 using LootDumpProcessor.Storage;
 using LootDumpProcessor.Storage.Collections;
+using LootDumpProcessor.Utils;
 using NumSharp;
 
 namespace LootDumpProcessor.Process.Processor;
 
-public class LooseLootProcessor
+public static class LooseLootProcessor
 {
     public static PreProcessedLooseLoot PreProcessLooseLoot(List<Template> looseloot)
     {
@@ -163,10 +164,11 @@ public class LooseLootProcessor
                         Template = template
                     };
                     looseLootDistribution[mapName].SpawnPointsForced.Add(spawnPointToAdd);
-                    LoggerFactory.GetInstance().Log(
-                        $"Item: {template.Id} has > {LootDumpProcessorContext.GetConfig().ProcessorConfig.SpawnPointToleranceForForced}% spawn chance in spawn point: {spawnPointToAdd.LocationId} but isn't in forced loot, adding to forced",
-                        LogLevel.Warning
-                    );
+                    if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Warning))
+                        LoggerFactory.GetInstance().Log(
+                            $"Item: {template.Id} has > {LootDumpProcessorContext.GetConfig().ProcessorConfig.SpawnPointToleranceForForced}% spawn chance in spawn point: {spawnPointToAdd.LocationId} but isn't in forced loot, adding to forced",
+                            LogLevel.Warning
+                        );
                 }
                 else // Normal spawn point, add to non-forced spawnpoint array
                 {
@@ -204,10 +206,11 @@ public class LooseLootProcessor
                         }
                         else
                         {
-                            LoggerFactory.GetInstance().Log(
-                                $"Item template {distribution.ComposedKey?.FirstItem?.Tpl} was on loose loot distribution for spawn point {template.Id} but the spawn points didnt contain a template matching it.",
-                                LogLevel.Error
-                            );
+                            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
+                                LoggerFactory.GetInstance().Log(
+                                    $"Item template {distribution.ComposedKey?.FirstItem?.Tpl} was on loose loot distribution for spawn point {template.Id} but the spawn points didnt contain a template matching it.",
+                                    LogLevel.Error
+                                );
                         }
                     }
 
@@ -248,10 +251,11 @@ public class LooseLootProcessor
             {
                 if (!forcedTplsFound.Contains(itemTpl))
                 {
-                    LoggerFactory.GetInstance().Log(
-                        $"Expected item: {itemTpl} defined in forced_loose.yaml config not found in forced loot",
-                        LogLevel.Error
-                    );
+                    if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
+                        LoggerFactory.GetInstance().Log(
+                            $"Expected item: {itemTpl} defined in forced_loose.yaml config not found in forced loot",
+                            LogLevel.Error
+                        );
                 }
             }
 
@@ -260,10 +264,11 @@ public class LooseLootProcessor
             {
                 if (!forcedTplsInConfig.Contains(itemTpl))
                 {
-                    LoggerFactory.GetInstance().Log(
-                        $"Map: {mapName} Item: {itemTpl} not defined in forced_loose.yaml config but was flagged as forced by code",
-                        LogLevel.Warning
-                    );
+                    if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Warning))
+                        LoggerFactory.GetInstance().Log(
+                            $"Map: {mapName} Item: {itemTpl} not defined in forced_loose.yaml config but was flagged as forced by code",
+                            LogLevel.Warning
+                        );
                 }
             }
         }

@@ -1,4 +1,4 @@
-﻿using LootDumpProcessor.Model.Config;
+using LootDumpProcessor.Model.Config;
 using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Process;
 using LootDumpProcessor.Serializers.Json;
@@ -6,22 +6,22 @@ using LootDumpProcessor.Serializers.Yaml;
 
 namespace LootDumpProcessor;
 
-public class LootDumpProcessorContext
+public static class LootDumpProcessorContext
 {
     private static Config? _config;
-    private static readonly object _configLock = new object();
+    private static readonly object _configLock = new();
     private static ForcedStatic? _forcedStatic;
-    private static readonly object _forcedStaticLock = new object();
+    private static readonly object _forcedStaticLock = new();
     private static Dictionary<string, MapDirectoryMapping>? _mapDirectoryMappings;
-    private static readonly object _mapDirectoryMappingsLock = new object();
+    private static readonly object _mapDirectoryMappingsLock = new();
     private static HashSet<string>? _staticWeaponIds;
-    private static readonly object _staticWeaponIdsLock = new object();
+    private static readonly object _staticWeaponIdsLock = new();
     private static Dictionary<string, List<StaticForced>>? _forcedItems;
-    private static readonly object _forcedItemsLock = new object();
+    private static readonly object _forcedItemsLock = new();
     private static Dictionary<string, HashSet<string>>? _forcedLoose;
-    private static readonly object _forcedLooseLock = new object();
+    private static readonly object _forcedLooseLock = new();
     private static TarkovItems? _tarkovItems;
-    private static readonly object _tarkovItemsLock = new object();
+    private static readonly object _tarkovItemsLock = new();
 
     public static Config GetConfig()
     {

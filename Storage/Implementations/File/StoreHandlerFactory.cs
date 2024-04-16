@@ -1,11 +1,11 @@
-﻿using LootDumpProcessor.Storage.Implementations.Handlers;
+using LootDumpProcessor.Storage.Implementations.File.Handlers;
 
-namespace LootDumpProcessor.Storage.Implementations;
+namespace LootDumpProcessor.Storage.Implementations.File;
 
 public class StoreHandlerFactory
 {
-    private static Dictionary<KeyType, IStoreHandler> _handlers = new Dictionary<KeyType, IStoreHandler>();
-    private static object lockObject = new object();
+    private static Dictionary<KeyType, IStoreHandler> _handlers = new();
+    private static object lockObject = new();
 
     public static IStoreHandler GetInstance(KeyType type)
     {

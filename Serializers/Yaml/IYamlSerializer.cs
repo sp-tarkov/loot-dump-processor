@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Serializers.Yaml;
+namespace LootDumpProcessor.Serializers.Yaml;
 
 public interface IYamlSerializer : ISerializer
 {

@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Serialization;
-using LootDumpProcessor.Process.Processor;
+using System.Text.Json.Serialization;
+using LootDumpProcessor.Utils;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model
@@ -34,24 +34,24 @@ namespace LootDumpProcessor.Model
         {
             if (obj is not Item parsed)
                 return false;
-            return parsed.Tpl == this.Tpl && parsed.ParentId == this.ParentId;
+            return parsed.Tpl == Tpl && parsed.ParentId == ParentId;
         }
 
         public override int GetHashCode()
         {
-            return (this.Tpl?.GetHashCode() + this.ParentId?.GetHashCode()) ?? base.GetHashCode();
+            return (Tpl?.GetHashCode() + ParentId?.GetHashCode()) ?? base.GetHashCode();
         }
 
         public object Clone()
         {
             return new Item
             {
-                Id = this.Id,
-                Tpl = this.Tpl,
-                ParentId = this.ParentId,
-                SlotId = this.SlotId,
-                Location = this.Location,
-                Upd = ProcessorUtil.Copy(this.Upd)
+                Id = Id,
+                Tpl = Tpl,
+                ParentId = ParentId,
+                SlotId = SlotId,
+                Location = Location,
+                Upd = ProcessorUtil.Copy(Upd)
             };
         }
     }

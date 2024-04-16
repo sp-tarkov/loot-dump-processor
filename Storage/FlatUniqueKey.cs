@@ -1,10 +1,6 @@
-﻿namespace LootDumpProcessor.Storage;
+namespace LootDumpProcessor.Storage;
 
-public class FlatUniqueKey : AbstractKey
+public class FlatUniqueKey(string[] indexes) : AbstractKey(indexes)
 {
     public override KeyType GetKeyType() => KeyType.Unique;
-
-    public FlatUniqueKey(string[] indexes) : base(indexes)
-    {
-    }
 }

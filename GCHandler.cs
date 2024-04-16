@@ -1,6 +1,6 @@
-﻿namespace LootDumpProcessor;
+namespace LootDumpProcessor;
 
-public class GCHandler
+public static class GCHandler
 {
     public static void Collect()
     {

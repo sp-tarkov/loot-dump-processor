@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model
@@ -13,7 +13,7 @@ namespace LootDumpProcessor.Model
         {
             return new FireMode
             {
-                FireModeType = this.FireModeType
+                FireModeType = FireModeType
             };
         }
     }

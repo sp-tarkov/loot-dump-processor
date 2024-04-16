@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Serializers.Json;
+namespace LootDumpProcessor.Serializers.Json;
 
 public enum JsonSerializerTypes
 {

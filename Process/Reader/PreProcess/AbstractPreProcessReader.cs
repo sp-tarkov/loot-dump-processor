@@ -1,10 +1,10 @@
-﻿using LootDumpProcessor.Logger;
+using LootDumpProcessor.Logger;
 
 namespace LootDumpProcessor.Process.Reader.PreProcess;
 
 public abstract class AbstractPreProcessReader : IPreProcessReader
 {
-    protected string _tempFolder;
+    protected readonly string _tempFolder;
 
     public AbstractPreProcessReader()
     {
@@ -12,11 +12,12 @@ public abstract class AbstractPreProcessReader : IPreProcessReader
         if (string.IsNullOrEmpty(tempFolder))
         {
             tempFolder = GetBaseDirectory();
-            LoggerFactory.GetInstance()
-                .Log(
-                    $"No temp folder was assigned preProcessorTempFolder in PreProcessorConfig, defaulting to {tempFolder}",
-                    LogLevel.Warning
-                );
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Warning))
+                LoggerFactory.GetInstance()
+                    .Log(
+                        $"No temp folder was assigned preProcessorTempFolder in PreProcessorConfig, defaulting to {tempFolder}",
+                        LogLevel.Warning
+                    );
         }
 
         // Cleanup the temp directory before starting the process
@@ -35,7 +36,7 @@ public abstract class AbstractPreProcessReader : IPreProcessReader
 
     protected string GetBaseDirectory()
     {
-        return $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\\SPT\\tmp\\PreProcessor";
+        return $@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\SPT\tmp\PreProcessor";
     }
 
     public void Dispose()

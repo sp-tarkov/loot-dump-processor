@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Model.Tarkov;
+namespace LootDumpProcessor.Model.Tarkov;
 
 public class Category
 {

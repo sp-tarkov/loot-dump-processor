@@ -1,16 +1,11 @@
-﻿using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Text;
 using LootDumpProcessor.Model;
-using LootDumpProcessor.Serializers;
-using LootDumpProcessor.Serializers.Json;
 
-namespace LootDumpProcessor.Process.Processor;
+namespace LootDumpProcessor.Utils;
 
 public static class ProcessorUtil
 {
-    private static readonly ISerializer Serializer = JsonSerializerFactory.GetInstance();
-
     public static string GetSaneId(this Template x)
     {
         return $"({x.Position.X}, {x.Position.Y}, {x.Position.Z}, {Math.Round(x.Rotation.X ?? 0, 3)}," +
@@ -32,9 +27,7 @@ public static class ProcessorUtil
 
     public static List<T>? Copy<T>(List<T>? obj) where T : ICloneable
     {
-        if (obj == null)
-            return null;
-        return obj.Select(o => o.Clone()).Cast<T>().ToList();
+        return obj?.Select(o => o.Clone()).Cast<T>().ToList();
     }
 
     public static string HashFile(string text)

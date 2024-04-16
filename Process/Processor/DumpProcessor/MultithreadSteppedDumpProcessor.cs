@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using LootDumpProcessor.Logger;
 using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Input;
@@ -7,6 +7,7 @@ using LootDumpProcessor.Model.Processing;
 using LootDumpProcessor.Serializers.Json;
 using LootDumpProcessor.Storage;
 using LootDumpProcessor.Storage.Collections;
+using LootDumpProcessor.Utils;
 
 namespace LootDumpProcessor.Process.Processor.DumpProcessor;
 
@@ -25,11 +26,13 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
 
     public Dictionary<OutputFileType, object> ProcessDumps(List<PartialData> dumps)
     {
-        LoggerFactory.GetInstance().Log("Starting final dump processing", LogLevel.Info);
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            LoggerFactory.GetInstance().Log("Starting final dump processing", LogLevel.Info);
         var output = new Dictionary<OutputFileType, object>();
 
         var dumpProcessData = GetDumpProcessData(dumps);
-        LoggerFactory.GetInstance().Log("Heavy processing done!", LogLevel.Info);
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            LoggerFactory.GetInstance().Log("Heavy processing done!", LogLevel.Info);
 
         var staticContainers = new Dictionary<string, MapStaticLoot>();
         var staticContainersLock = new object();
@@ -42,13 +45,15 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
 
         Runners.Clear();
         // BSG changed the map data so static containers are now dynamic, so we need to scan all dumps for the static containers.
-        LoggerFactory.GetInstance().Log("Queuing dumps for static data processing", LogLevel.Info);
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            LoggerFactory.GetInstance().Log("Queuing dumps for static data processing", LogLevel.Info);
         foreach (var dumped in dumps)
         {
             Runners.Add(
                 Task.Factory.StartNew(() =>
                 {
-                    LoggerFactory.GetInstance().Log($"Processing static data for file {dumped.BasicInfo.FileName}", LogLevel.Info);
+                    if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
+                        LoggerFactory.GetInstance().Log($"Processing static data for file {dumped.BasicInfo.FileName}", LogLevel.Debug);
                     var data = _jsonSerializer.Deserialize<RootData>(File.ReadAllText(dumped.BasicInfo.FileName));
                     // the if statement below takes care of processing "forced" or real static data for each map, we only need
                     // to do this once per map, so we dont care about doing it again
@@ -56,7 +61,8 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                     {
                         if (!staticContainers.ContainsKey(data.Data.Name))
                         {
-                            LoggerFactory.GetInstance().Log($"Doing first time process for map {data.Data.Name} of real static data", LogLevel.Info);
+                            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+                                LoggerFactory.GetInstance().Log($"Doing first time process for map {data.Data.Name} of real static data", LogLevel.Info);
                             var mapStaticLoot = StaticLootProcessor.CreateRealStaticContainers(data);
                             staticContainers[mapStaticLoot.Item1] = mapStaticLoot.Item2;
                         }
@@ -113,7 +119,8 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
         }
 
         Task.WaitAll(Runners.ToArray());
-        LoggerFactory.GetInstance().Log("All static data processing threads finished", LogLevel.Info);
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            LoggerFactory.GetInstance().Log("All static data processing threads finished", LogLevel.Info);
         // Aggregate and calculate the probability of a static container
         mapStaticContainersAggregated.ToDictionary(
             kv => kv.Key,
@@ -128,35 +135,39 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
 
         // Static containers
         output.Add(OutputFileType.StaticContainer, staticContainers);
-
-        LoggerFactory.GetInstance().Log("Processing ammo distribution", LogLevel.Info);
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            LoggerFactory.GetInstance().Log("Processing ammo distribution", LogLevel.Info);
         // Ammo distribution
         output.Add(
             OutputFileType.StaticAmmo,
             StaticLootProcessor.CreateAmmoDistribution(dumpProcessData.ContainerCounts)
         );
 
-        LoggerFactory.GetInstance().Log("Processing static loot distribution", LogLevel.Info);
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            LoggerFactory.GetInstance().Log("Processing static loot distribution", LogLevel.Info);
         // Static loot distribution
         output.Add(
             OutputFileType.StaticLoot,
             StaticLootProcessor.CreateStaticLootDistribution(dumpProcessData.ContainerCounts)
         );
 
-        LoggerFactory.GetInstance().Log("Processing loose loot distribution", LogLevel.Info);
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            LoggerFactory.GetInstance().Log("Processing loose loot distribution", LogLevel.Info);
         // Loose loot distribution
         var looseLootDistribution = LooseLootProcessor.CreateLooseLootDistribution(
             dumpProcessData.MapCounts,
             dumpProcessData.LooseLootCounts
         );
 
-        LoggerFactory.GetInstance().Log("Collecting loose loot distribution information", LogLevel.Info);
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            LoggerFactory.GetInstance().Log("Collecting loose loot distribution information", LogLevel.Info);
         var loot = dumpProcessData.MapCounts
             .Select(mapCount => mapCount.Key)
             .ToDictionary(mi => mi, mi => looseLootDistribution[mi]);
 
         output.Add(OutputFileType.LooseLoot, loot);
-        LoggerFactory.GetInstance().Log("Dump processing fully completed!", LogLevel.Info);
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            LoggerFactory.GetInstance().Log("Dump processing fully completed!", LogLevel.Info);
         return output;
     }
 
@@ -175,10 +186,11 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
             {
                 var mapi = tuple.Key;
                 var g = tuple.ToList();
-                LoggerFactory.GetInstance().Log(
-                    $"Processing map {mapi}, total dump data to process: {g.Count}",
-                    LogLevel.Info
-                );
+                if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+                    LoggerFactory.GetInstance().Log(
+                        $"Processing map {mapi}, total dump data to process: {g.Count}",
+                        LogLevel.Info
+                    );
                 dumpProcessData.MapCounts[mapi] = g.Count;
 
                 var lockObjectContainerCounts = new object();
@@ -274,18 +286,16 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
 
                                         lock (lockObjectCounts)
                                         {
-                                            counts.MapSpawnpointCount.AddRange(new List<int>
-                                            {
-                                                dumpData.LooseLoot.MapSpawnpointCount
-                                            });
+                                            counts.MapSpawnpointCount.Add(dumpData.LooseLoot.MapSpawnpointCount);
                                         }
                                     }
                                     catch (Exception e)
                                     {
-                                        LoggerFactory.GetInstance().Log(
-                                            $"ERROR OCCURRED:{e.Message}\n{e.StackTrace}",
-                                            LogLevel.Error
-                                        );
+                                        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
+                                            LoggerFactory.GetInstance().Log(
+                                                $"ERROR OCCURRED:{e.Message}\n{e.StackTrace}",
+                                                LogLevel.Error
+                                            );
                                     }
                                 }
                             },
@@ -296,10 +306,11 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                 // Wait until all runners are done processing
                 while (!Runners.All(r => r.IsCompleted))
                 {
-                    LoggerFactory.GetInstance().Log(
-                        $"One or more file processors are still processing files. Waiting {LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs}ms before checking again",
-                        LogLevel.Info
-                    );
+                    if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+                        LoggerFactory.GetInstance().Log(
+                            $"One or more file processors are still processing files. Waiting {LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs}ms before checking again",
+                            LogLevel.Info
+                        );
                     Thread.Sleep(
                         TimeSpan.FromMilliseconds(LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs));
                 }

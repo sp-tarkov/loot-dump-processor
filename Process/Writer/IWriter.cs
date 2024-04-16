@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Process;
+namespace LootDumpProcessor.Process.Writer;
 
 public interface IWriter
 {

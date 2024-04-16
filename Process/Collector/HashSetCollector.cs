@@ -1,13 +1,11 @@
-﻿using LootDumpProcessor.Model.Processing;
+using LootDumpProcessor.Model.Processing;
 
 namespace LootDumpProcessor.Process.Collector;
 
 public class HashSetCollector : ICollector
 {
-    private HashSet<PartialData> processedDumps = new HashSet<PartialData>();
-
-    private object lockObject = new object();
-
+    private readonly HashSet<PartialData> processedDumps = new(100_000);
+    private readonly object lockObject = new();
 
     public void Setup()
     {

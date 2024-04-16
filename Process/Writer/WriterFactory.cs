@@ -1,5 +1,3 @@
-﻿using LootDumpProcessor.Process.Impl;
-
 namespace LootDumpProcessor.Process.Writer;
 
 public static class WriterFactory
