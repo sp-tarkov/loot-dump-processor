@@ -12,16 +12,17 @@ public static class StaticLootProcessor
     public static List<PreProcessedStaticLoot> PreProcessStaticLoot(List<Template> staticloot)
     {
         var containers = new List<PreProcessedStaticLoot>();
-        foreach (var li in staticloot)
+        foreach (var lootSpawnPosition in staticloot)
         {
-            var tpl = li.Items[0].Tpl;
+            var tpl = lootSpawnPosition.Items[0].Tpl;
             if (!LootDumpProcessorContext.GetStaticWeaponIds().Contains(tpl))
             {
+                // Only add non-weapon static containers
                 containers.Add(new PreProcessedStaticLoot
                 {
                     Type = tpl,
-                    ContainerId = li.Items[0].Id,
-                    Items = li.Items.Skip(1).ToList()
+                    ContainerId = lootSpawnPosition.Items[0].Id,
+                    Items = lootSpawnPosition.Items.Skip(1).ToList()
                 });
             }
         }
@@ -29,7 +30,7 @@ public static class StaticLootProcessor
         return containers;
     }
 
-    public static Tuple<string, MapStaticLoot> CreateRealStaticContainers(RootData rawMapDump)
+    public static Tuple<string, MapStaticLoot> CreateStaticWeaponsAndStaticForcedContainers(RootData rawMapDump)
     {
         var mapName = rawMapDump.Data.Name;
         var staticLootPositions = (from li in rawMapDump.Data.Loot
@@ -39,8 +40,7 @@ public static class StaticLootProcessor
         staticLootPositions = staticLootPositions.OrderBy(x => x.Id).ToList();
         foreach (var staticLootPosition in staticLootPositions)
         {
-            var itemTpl = staticLootPosition.Items[0].Tpl;
-            if (LootDumpProcessorContext.GetStaticWeaponIds().Contains(itemTpl))
+            if (LootDumpProcessorContext.GetStaticWeaponIds().Contains(staticLootPosition.Items[0].Tpl))
             {
                 staticWeapons.Add(ProcessorUtil.Copy(staticLootPosition));
             }

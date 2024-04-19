@@ -52,46 +52,45 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
             Runners.Add(
                 Task.Factory.StartNew(() =>
                 {
+
                     if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
                         LoggerFactory.GetInstance().Log($"Processing static data for file {dumped.BasicInfo.FileName}", LogLevel.Debug);
                     var data = _jsonSerializer.Deserialize<RootData>(File.ReadAllText(dumped.BasicInfo.FileName));
-                    // the if statement below takes care of processing "forced" or real static data for each map, we only need
-                    // to do this once per map, so we dont care about doing it again
+                    var mapName = data.Data.Name;
+
+                    // the if statement below takes care of processing "forced" or real static data for each map, only need
+                    // to do this once per map, we dont care about doing it again
                     lock (staticContainersLock)
                     {
-                        if (!staticContainers.ContainsKey(data.Data.Name))
+                        if (!staticContainers.ContainsKey(mapName))
                         {
                             if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
-                                LoggerFactory.GetInstance().Log($"Doing first time process for map {data.Data.Name} of real static data", LogLevel.Info);
-                            var mapStaticLoot = StaticLootProcessor.CreateRealStaticContainers(data);
-                            staticContainers[mapStaticLoot.Item1] = mapStaticLoot.Item2;
+                                LoggerFactory.GetInstance().Log($"Doing first time process for map {mapName} of real static data", LogLevel.Info);
+                            var mapStaticContainers = StaticLootProcessor.CreateStaticWeaponsAndStaticForcedContainers(data);
+                            // .Item1 = map name
+                            staticContainers[mapStaticContainers.Item1] = mapStaticContainers.Item2;
                         }
                     }
 
-                    // the section below takes care of finding how many "dynamic static containers" we have on the map
-                    Dictionary<Template, int> mapAggregatedData;
+                    // Takes care of finding how many "dynamic static containers" we have on the map
+                    Dictionary<Template, int> mapAggregatedDataDict;
                     lock (mapStaticContainersAggregatedLock)
                     {
-                        if (!mapStaticContainersAggregated.TryGetValue(data.Data.Name, out mapAggregatedData))
+                        // Init dict if map key doesnt exist
+                        if (!mapStaticContainersAggregated.TryGetValue(mapName, out mapAggregatedDataDict))
                         {
-                            mapAggregatedData = new Dictionary<Template, int>();
-                            mapStaticContainersAggregated.Add(data.Data.Name, mapAggregatedData);
+                            mapAggregatedDataDict = new Dictionary<Template, int>();
+                            mapStaticContainersAggregated.Add(mapName, mapAggregatedDataDict);
                         }
                     }
 
                     // Only process the dump file if the date is higher (after) the configuration date
-                    if (FileDateParser.TryParseFileDate(dumped.BasicInfo.FileName, out var fileDate) &&
-                        fileDate.HasValue &&
-                        fileDate.Value > LootDumpProcessorContext.GetConfig().DumpProcessorConfig
-                            .SpawnContainerChanceIncludeAfterDate)
+                    if (DumpWasMadeAfterConfigThresholdDate(dumped))
                     {
-                        // the if statement below will keep track of how many dumps we have for each map
+                        // Keep track of how many dumps we have for each map
                         lock (mapDumpCounterLock)
                         {
-                            if (mapDumpCounter.ContainsKey(data.Data.Name))
-                                mapDumpCounter[data.Data.Name] += 1;
-                            else
-                                mapDumpCounter.Add(data.Data.Name, 1);
+                            IncrementMapCounterDictionaryValue(mapDumpCounter, mapName);
                         }
 
                         var containerIgnoreListExists = LootDumpProcessorContext.GetConfig().ContainerIgnoreList.TryGetValue(data.Data.Id.ToLower(), out string[]? ignoreListForMap);
@@ -105,10 +104,9 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                                     continue;
                                 }
 
-                                if (mapAggregatedData.ContainsKey(dynamicStaticContainer))
-                                    mapAggregatedData[dynamicStaticContainer] += 1;
-                                else
-                                    mapAggregatedData.Add(dynamicStaticContainer, 1);
+                                // Increment count by 1
+                                if (!mapAggregatedDataDict.TryAdd(dynamicStaticContainer, 1))
+                                    mapAggregatedDataDict[dynamicStaticContainer] += 1;
                             }
                         }
                     }
@@ -128,7 +126,7 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                 td => new StaticDataPoint
                 {
                     Template = td.Key,
-                    Probability = GetStaticProbability(kv.Key, td, mapDumpCounter)
+                    Probability = GetStaticContainerProbability(kv.Key, td, mapDumpCounter)
                 }
             ).ToList()
         ).ToList().ForEach(kv => staticContainers[kv.Key].StaticContainers = kv.Value);
@@ -171,16 +169,33 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
         return output;
     }
 
-    private static double GetStaticProbability(string mapName, KeyValuePair<Template, int> td, Dictionary<string, int> mapDumpCounter)
+    private static bool DumpWasMadeAfterConfigThresholdDate(PartialData dataDump)
+    {
+        return FileDateParser.TryParseFileDate(dataDump.BasicInfo.FileName, out var fileDate) &&
+                                fileDate.HasValue &&
+                                fileDate.Value > LootDumpProcessorContext.GetConfig().DumpProcessorConfig
+                                    .SpawnContainerChanceIncludeAfterDate;
+    }
+
+    private static void IncrementMapCounterDictionaryValue(Dictionary<string, int> mapDumpCounter, string mapName)
+    {
+        if (!mapDumpCounter.TryAdd(mapName, 1))
+        {
+            // Dict has map, increment count by 1
+            mapDumpCounter[mapName] += 1;
+        }
+    }
+
+    private static double GetStaticContainerProbability(string mapName, KeyValuePair<Template, int> td, Dictionary<string, int> mapDumpCounter)
     {
         return Math.Round((double)((decimal)td.Value / (decimal)mapDumpCounter[mapName]), 2);
     }
 
-    private DumpProcessData GetDumpProcessData(List<PartialData> dumps)
+    private static DumpProcessData GetDumpProcessData(List<PartialData> dumps)
     {
         var dumpProcessData = new DumpProcessData();
 
-        dumps.GroupBy(x => x.BasicInfo.Map)
+        dumps.GroupBy(dump => dump.BasicInfo.Map)
             .ToList()
             .ForEach(tuple =>
             {
