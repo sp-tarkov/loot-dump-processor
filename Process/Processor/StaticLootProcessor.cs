@@ -112,62 +112,119 @@ public static class StaticLootProcessor
         return ammo_distribution;
     }
 
-    public static Dictionary<string, StaticItemDistribution> CreateStaticLootDistribution(
-        List<PreProcessedStaticLoot> container_counts,
+    /// <summary>
+    /// Dict key = map,
+    /// value = sub dit:
+    ///     key = container Ids
+    ///     value = items + counts
+    /// </summary>
+    public static Dictionary<string, Dictionary<string, StaticItemDistribution>> CreateStaticLootDistribution(
+        Dictionary<string, List<PreProcessedStaticLoot>> container_counts,
         Dictionary<string, MapStaticLoot> staticContainers)
     {
+        var allMapsStaticLootDisto = new Dictionary< string, Dictionary<string, StaticItemDistribution>>();
         // Iterate over each map we have containers for
-        foreach (var map in staticContainers)
+        foreach (var mapContainersKvp in container_counts)
         {
-            var mapName = map.Key;
-            var mapContainers = map.Value;
+            var mapName = mapContainersKvp.Key;
+            var containers = mapContainersKvp.Value;
+
+            var static_loot_distribution = new Dictionary<string, StaticItemDistribution>();
+            var uniqueContainerTypeIds = Enumerable.Distinct((from ci in containers
+                                                              select ci.Type).ToList());
+
+            foreach (var typeId in uniqueContainerTypeIds)
+            {
+                var container_counts_selected = (from ci in containers
+                                                 where ci.Type == typeId
+                                                 select ci).ToList();
+
+                // Get array of all times a count of items was found in container
+                List<int> itemCountsInContainer = GetCountOfItemsInContainer(container_counts_selected);
+
+                // Create structure to hold item count + weight that it will be picked
+                // Group same counts together
+                static_loot_distribution[typeId] = new StaticItemDistribution();
+                static_loot_distribution[typeId].ItemCountDistribution = itemCountsInContainer.GroupBy(i => i)
+                    .Select(g => new ItemCountDistribution
+                    {
+                        Count = g.Key,
+                        RelativeProbability = g.Count()
+                    }).ToList();
+
+                static_loot_distribution[typeId].ItemDistribution = CreateItemDistribution(container_counts_selected);
+            }
+            // Key = containers tpl, value = items + count weights
+            allMapsStaticLootDisto.TryAdd(mapName, static_loot_distribution);
+
         }
 
-        var static_loot_distribution = new Dictionary<string, StaticItemDistribution>();
-        var uniqueContainerTypeIds = Enumerable.Distinct((from ci in container_counts
-            select ci.Type).ToList());
+        return allMapsStaticLootDisto;
 
-        foreach (var typeId in uniqueContainerTypeIds)
+        //var static_loot_distribution = new Dictionary<string, StaticItemDistribution>();
+        //var uniqueContainerTypeIds = Enumerable.Distinct((from ci in container_counts
+        //    select ci.Type).ToList());
+
+        //foreach (var typeId in uniqueContainerTypeIds)
+        //{
+        //    var container_counts_selected = (from ci in container_counts
+        //                                     where ci.Type == typeId
+        //                                     select ci).ToList();
+
+        //    // Get array of all times a count of items was found in container
+        //    List<int> itemCountsInContainer = GetCountOfItemsInContainer(container_counts_selected);
+
+        //    // Create structure to hold item count + weight that it will be picked
+        //    // Group same counts together
+        //    static_loot_distribution[typeId] = new StaticItemDistribution();
+        //    static_loot_distribution[typeId].ItemCountDistribution = itemCountsInContainer.GroupBy(i => i)
+        //        .Select(g => new ItemCountDistribution
+        //        {
+        //            Count = g.Key,
+        //            RelativeProbability = g.Count()
+        //        }).ToList();
+
+        //    static_loot_distribution[typeId].ItemDistribution = CreateItemDistribution(container_counts_selected);
+        //}
+        //// Key = containers tpl, value = items + count weights
+        //return static_loot_distribution;
+    }
+
+    private static List<StaticDistribution> CreateItemDistribution(List<PreProcessedStaticLoot> container_counts_selected)
+    {
+        // TODO: Change for different algo that splits items per parent once parentid = containerid, then compose
+        // TODO: key and finally create distribution based on composed Id instead
+        var itemsHitCounts = new Dictionary<string, int>();
+        foreach (var ci in container_counts_selected)
         {
-            var container_counts_selected = (from ci in container_counts
-                where ci.Type == typeId
-                select ci).ToList();
-            var itemscounts = new List<int>();
-            foreach (var ci in container_counts_selected)
+            foreach (var cii in ci.Items.Where(cii => cii.ParentId == ci.ContainerId))
             {
-                itemscounts.Add((from cii in ci.Items
-                    where cii.ParentId == ci.ContainerId
-                    select cii).ToList().Count);
+                if (itemsHitCounts.ContainsKey(cii.Tpl))
+                    itemsHitCounts[cii.Tpl] += 1;
+                else
+                    itemsHitCounts[cii.Tpl] = 1;
             }
-
-            static_loot_distribution[typeId] = new StaticItemDistribution();
-            static_loot_distribution[typeId].ItemCountDistribution = itemscounts.GroupBy(i => i)
-                .Select(g => new ItemCountDistribution
-                {
-                    Count = g.Key,
-                    RelativeProbability = g.Count()
-                }).ToList();
-            // TODO: Change for different algo that splits items per parent once parentid = containerid, then compose
-            // TODO: key and finally create distribution based on composed Id instead
-            var itemsHitCounts = new Dictionary<string, int>();
-            foreach (var ci in container_counts_selected)
-            {
-                foreach (var cii in ci.Items.Where(cii => cii.ParentId == ci.ContainerId))
-                {
-                    if (itemsHitCounts.ContainsKey(cii.Tpl))
-                        itemsHitCounts[cii.Tpl] += 1;
-                    else
-                        itemsHitCounts[cii.Tpl] = 1;
-                }
-            }
-
-            static_loot_distribution[typeId].ItemDistribution = itemsHitCounts.Select(v => new StaticDistribution
-            {
-                Tpl = v.Key,
-                RelativeProbability = v.Value
-            }).ToList();
         }
 
-        return static_loot_distribution;
+        // WIll create array of objects that have a tpl + relative probability weight value
+        return itemsHitCounts.Select(v => new StaticDistribution
+        {
+            Tpl = v.Key,
+            RelativeProbability = v.Value
+        }).ToList();
+    }
+
+    private static List<int> GetCountOfItemsInContainer(List<PreProcessedStaticLoot> container_counts_selected)
+    {
+        var itemCountsInContainer = new List<int>();
+        foreach (var containerWithItems in container_counts_selected)
+        {
+            // Only count item if its parent is the container, only root items are counted (not mod/attachment items)
+            itemCountsInContainer.Add((from cii in containerWithItems.Items
+                                       where cii.ParentId == containerWithItems.ContainerId
+                                       select cii).ToList().Count);
+        }
+
+        return itemCountsInContainer;
     }
 }

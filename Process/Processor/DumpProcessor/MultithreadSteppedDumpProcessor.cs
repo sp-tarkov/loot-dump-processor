@@ -67,6 +67,7 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                                 LoggerFactory.GetInstance().Log($"Doing first time process for map {mapName} of real static data", LogLevel.Info);
                             var mapStaticContainers = StaticLootProcessor.CreateStaticWeaponsAndStaticForcedContainers(dataDump);
                             // .Item1 = map name
+                            // .Item2 = force/weapon static arrays
                             staticContainers[mapStaticContainers.Item1] = mapStaticContainers.Item2;
                         }
                     }
@@ -84,28 +85,32 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                     }
 
                     // Only process the dump file if the date is higher (after) the configuration date
-                    if (DumpWasMadeAfterConfigThresholdDate(dumped))
+                    if (!DumpWasMadeAfterConfigThresholdDate(dumped))
                     {
-                        // Keep track of how many dumps we have for each map
-                        lock (mapDumpCounterLock)
-                        {
-                            IncrementMapCounterDictionaryValue(mapDumpCounter, mapName);
-                        }
+                        return;
+                    }
 
-                        var containerIgnoreListExists = LootDumpProcessorContext.GetConfig().ContainerIgnoreList.TryGetValue(dataDump.Data.Id.ToLower(), out string[]? ignoreListForMap);
-                        foreach (var dynamicStaticContainer in StaticLootProcessor.CreateDynamicStaticContainers(dataDump))
+                    // Keep track of how many dumps we have for each map
+                    lock (mapDumpCounterLock)
+                    {
+                        IncrementMapCounterDictionaryValue(mapDumpCounter, mapName);
+                    }
+
+                    var containerIgnoreListExists = LootDumpProcessorContext.GetConfig().ContainerIgnoreList.TryGetValue(dataDump.Data.Id.ToLower(), out string[]? ignoreListForMap);
+                    foreach (var dynamicStaticContainer in StaticLootProcessor.CreateDynamicStaticContainers(dataDump))
+                    {
+                        lock (mapStaticContainersAggregatedLock)
                         {
-                            lock (mapStaticContainersAggregatedLock)
+                            if (containerIgnoreListExists && ignoreListForMap.Contains(dynamicStaticContainer.Id))
                             {
-                                if (containerIgnoreListExists && ignoreListForMap.Contains(dynamicStaticContainer.Id))
-                                {
-                                    // Skip adding containers to aggregated data if container id is in ignore list
-                                    continue;
-                                }
+                                // Skip adding containers to aggregated data if container id is in ignore list
+                                continue;
+                            }
 
-                                // Increment times container seen in dump by 1
-                                if (!mapAggregatedDataDict.TryAdd(dynamicStaticContainer, 1))
-                                    mapAggregatedDataDict[dynamicStaticContainer] += 1;
+                            // Increment times container seen in dump by 1
+                            if (!mapAggregatedDataDict.TryAdd(dynamicStaticContainer, 1))
+                            {
+                                mapAggregatedDataDict[dynamicStaticContainer] += 1;
                             }
                         }
                     }
@@ -128,17 +133,17 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                     Probability = GetStaticContainerProbability(kv.Key, td, mapDumpCounter) // kv.Key = map name
                 }
             ).ToList()
-        ).ToList().ForEach(kv => staticContainers[kv.Key].StaticContainers = kv.Value);
+        ).ToList().ForEach(kv => staticContainers[kv.Key].StaticContainers = kv.Value); // Hydrate staticContainers.StaticContainers
 
         // Static containers
         output.Add(OutputFileType.StaticContainer, staticContainers);
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
             LoggerFactory.GetInstance().Log("Processing ammo distribution", LogLevel.Info);
         // Ammo distribution
-        output.Add(
-            OutputFileType.StaticAmmo,
-            StaticLootProcessor.CreateAmmoDistribution(dumpProcessData.ContainerCounts)
-        );
+        //output.Add(
+        //    OutputFileType.StaticAmmo,
+        //    StaticLootProcessor.CreateAmmoDistribution(dumpProcessData.ContainerCounts)
+        //);
 
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
             LoggerFactory.GetInstance().Log("Processing static loot distribution", LogLevel.Info);
@@ -198,23 +203,23 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
             .ToList()
             .ForEach(tuple =>
             {
-                var mapi = tuple.Key;
-                var g = tuple.ToList();
+                var mapName = tuple.Key;
+                var partialFileMetaData = tuple.ToList();
                 if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
                     LoggerFactory.GetInstance().Log(
-                        $"Processing map {mapi}, total dump data to process: {g.Count}",
+                        $"Processing map {mapName}, total dump data to process: {partialFileMetaData.Count}",
                         LogLevel.Info
                     );
-                dumpProcessData.MapCounts[mapi] = g.Count;
+                dumpProcessData.MapCounts[mapName] = partialFileMetaData.Count;
 
                 var lockObjectContainerCounts = new object();
 
                 var lockObjectCounts = new object();
-                var counts = new LooseLootCounts();
+                var looseLootCounts = new LooseLootCounts();
 
                 var lockObjectDictionaryCounts = new object();
                 var dictionaryCounts = new FlatKeyableDictionary<string, int>();
-                counts.Counts = dictionaryCounts.GetKey();
+                looseLootCounts.Counts = dictionaryCounts.GetKey();
 
                 /*
                 var dictionaryItemCounts = new FlatKeyableDictionary<string, List<string>>();
@@ -225,22 +230,21 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                 var dictionaryItemProperties = new FlatKeyableDictionary<string, FlatKeyableList<Template>>();
 
                 var actualDictionaryItemProperties = new FlatKeyableDictionary<string, IKey>();
-                counts.ItemProperties = actualDictionaryItemProperties.GetKey();
+                looseLootCounts.ItemProperties = actualDictionaryItemProperties.GetKey();
 
-                dumpProcessData.LooseLootCounts.Add(mapi, counts.GetKey());
+                dumpProcessData.LooseLootCounts.Add(mapName, looseLootCounts.GetKey());
                 // add the items to the queue
-                foreach (var gi in g)
+                foreach (var partialData in partialFileMetaData)
                 {
-                    _partialDataToProcess.Add(gi);
+                    _partialDataToProcess.Add(partialData);
                 }
 
                 // Call GC before running threads
-                g = null;
+                partialFileMetaData = null;
                 tuple = null;
                 GCHandler.Collect();
 
                 // The data storage factory has a lock, we dont want the locks to occur when multithreading
-
                 for (int i = 0; i < LootDumpProcessorContext.GetConfig().Threads; i++)
                 {
                     Runners.Add(
@@ -253,26 +257,35 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                                     try
                                     {
                                         var dumpData = _dataStorage.GetItem<ParsedDump>(partialData.ParsedDumpKey);
+
+                                        // Static containers
                                         lock (lockObjectContainerCounts)
                                         {
-                                            dumpProcessData.ContainerCounts.AddRange(dumpData.Containers);
+                                            if (!dumpProcessData.ContainerCounts.ContainsKey(mapName))
+                                            {
+                                                dumpProcessData.ContainerCounts.Add(mapName, dumpData.Containers);
+                                            }
+                                            else
+                                            {
+                                                dumpProcessData.ContainerCounts[mapName].AddRange(dumpData.Containers);
+                                            }
                                         }
 
-                                        // loose loot into ids on files
+                                        // Loose loot into ids on files
                                         var loadedDictionary =
                                             _dataStorage
                                                 .GetItem<SubdivisionedKeyableDictionary<string, List<Template>>>(
                                                     dumpData.LooseLoot.ItemProperties
                                                 );
-                                        foreach (var (k, v) in loadedDictionary)
+                                        foreach (var (uniqueKey, containerTemplate) in loadedDictionary)
                                         {
-                                            var count = dumpData.LooseLoot.Counts[k];
+                                            var count = dumpData.LooseLoot.Counts[uniqueKey];
                                             lock (lockObjectDictionaryCounts)
                                             {
-                                                if (dictionaryCounts.ContainsKey(k))
-                                                    dictionaryCounts[k] += count;
+                                                if (dictionaryCounts.ContainsKey(uniqueKey))
+                                                    dictionaryCounts[uniqueKey] += count;
                                                 else
-                                                    dictionaryCounts[k] = count;
+                                                    dictionaryCounts[uniqueKey] = count;
                                             }
 
                                             /*
@@ -287,20 +300,20 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
 
                                             lock (lockObjectDictionaryItemProperties)
                                             {
-                                                if (!dictionaryItemProperties.TryGetValue(k, out var values))
+                                                if (!dictionaryItemProperties.TryGetValue(uniqueKey, out var values))
                                                 {
                                                     values = new FlatKeyableList<Template>();
-                                                    dictionaryItemProperties.Add(k, values);
-                                                    actualDictionaryItemProperties.Add(k, values.GetKey());
+                                                    dictionaryItemProperties.Add(uniqueKey, values);
+                                                    actualDictionaryItemProperties.Add(uniqueKey, values.GetKey());
                                                 }
 
-                                                values.AddRange(v);
+                                                values.AddRange(containerTemplate);
                                             }
                                         }
 
                                         lock (lockObjectCounts)
                                         {
-                                            counts.MapSpawnpointCount.Add(dumpData.LooseLoot.MapSpawnpointCount);
+                                            looseLootCounts.MapSpawnpointCount.Add(dumpData.LooseLoot.MapSpawnpointCount);
                                         }
                                     }
                                     catch (Exception e)
@@ -345,8 +358,8 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                 _dataStorage.Store(actualDictionaryItemProperties);
                 actualDictionaryItemProperties = null;
                 GCHandler.Collect();
-                _dataStorage.Store(counts);
-                counts = null;
+                _dataStorage.Store(looseLootCounts);
+                looseLootCounts = null;
                 GCHandler.Collect();
             });
         return dumpProcessData;

@@ -1,7 +1,9 @@
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.LooseLoot;
 using LootDumpProcessor.Model.Output.StaticContainer;
+using LootDumpProcessor.Model.Processing;
 using LootDumpProcessor.Serializers.Json;
+using System.Collections.Generic;
 
 namespace LootDumpProcessor.Process.Writer;
 
@@ -59,16 +61,27 @@ public class FileWriter : IWriter
                 var staticContainer = (Dictionary<string, MapStaticLoot>)data;
                 File.WriteAllText($@"{_outputPath}\loot\staticContainers.json",
                     _jsonSerializer.Serialize(staticContainer));
+
                 break;
             case OutputFileType.StaticLoot:
-                var staticLoot = (Dictionary<string, StaticItemDistribution>)data;
-                File.WriteAllText($@"{_outputPath}\loot\staticLoot.json",
-                    _jsonSerializer.Serialize(staticLoot));
+                var staticLootData = (Dictionary<string, Dictionary<string, StaticItemDistribution>>)data;
+                foreach (var (key, value) in staticLootData)
+                {
+                    foreach (var s in LootDumpProcessorContext.GetDirectoryMappings()[key].Name)
+                    {
+                        if (!Directory.Exists($@"{_outputPath}\locations\{s}"))
+                            Directory.CreateDirectory($@"{_outputPath}\locations\{s}");
+                        File.WriteAllText($@"{_outputPath}\locations\{s}\staticLoot.json",
+                            _jsonSerializer.Serialize(value));
+                    }
+                }
+
                 break;
             case OutputFileType.StaticAmmo:
                 var staticAmmo = (Dictionary<string, List<AmmoDistribution>>)data;
                 File.WriteAllText($@"{_outputPath}\loot\staticAmmo.json",
                     _jsonSerializer.Serialize(staticAmmo));
+
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
