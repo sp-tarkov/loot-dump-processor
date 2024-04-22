@@ -59,8 +59,16 @@ public class FileWriter : IWriter
                 break;
             case OutputFileType.StaticContainer:
                 var staticContainer = (Dictionary<string, MapStaticLoot>)data;
-                File.WriteAllText($@"{_outputPath}\loot\staticContainers.json",
-                    _jsonSerializer.Serialize(staticContainer));
+                foreach (var (key, value) in staticContainer)
+                {
+                    foreach (var s in LootDumpProcessorContext.GetDirectoryMappings()[key].Name)
+                    {
+                        if (!Directory.Exists($@"{_outputPath}\locations\{s}"))
+                            Directory.CreateDirectory($@"{_outputPath}\locations\{s}");
+                        File.WriteAllText($@"{_outputPath}\locations\{s}\staticContainers.json",
+                            _jsonSerializer.Serialize(value));
+                    }
+                }
 
                 break;
             case OutputFileType.StaticLoot:
