@@ -5,17 +5,17 @@ static_weapon_ids:
   - 5cdeb229d7f00c000e7ce174
 
 forced_items:
-  Customs:
+  bigmap:
   # unknown key
   - containerId: custom_multiScene_00058
     itemTpl: 593962ca86f774068014d9af
 
-  Streets of Tarkov:
+  tarkovstreets:
   # Backup hideout key
   - containerId: container_City_SE_02_DesignStuff_00025
     itemTpl: 6398fd8ad3de3849057f5128
 
-  Sandbox:
+  sandbox:
   - containerId: container_Test_for_export_00002 # Lab technician body
     itemTpl: 658199aa38c79576a2569e13 # TerraGroup science office key
   - containerId: container_custom_DesignStuff_00029 # dead body of scav near exit

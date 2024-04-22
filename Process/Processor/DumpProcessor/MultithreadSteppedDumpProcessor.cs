@@ -55,16 +55,17 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                     if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
                         LoggerFactory.GetInstance().Log($"Processing static data for file {dumped.BasicInfo.FileName}", LogLevel.Debug);
                     var dataDump = _jsonSerializer.Deserialize<RootData>(File.ReadAllText(dumped.BasicInfo.FileName));
-                    var mapName = dataDump.Data.Name;
+                    //var mapName = dataDump.Data.Name;
+                    var mapId = dataDump.Data.Id.ToLower();
 
                     // the if statement below takes care of processing "forced" or real static data for each map, only need
                     // to do this once per map, we dont care about doing it again
                     lock (staticContainersLock)
                     {
-                        if (!staticContainers.ContainsKey(mapName))
+                        if (!staticContainers.ContainsKey(mapId))
                         {
                             if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
-                                LoggerFactory.GetInstance().Log($"Doing first time process for map {mapName} of real static data", LogLevel.Info);
+                                LoggerFactory.GetInstance().Log($"Doing first time process for map {mapId} of real static data", LogLevel.Info);
                             var mapStaticContainers = StaticLootProcessor.CreateStaticWeaponsAndStaticForcedContainers(dataDump);
                             // .Item1 = map name
                             // .Item2 = force/weapon static arrays
@@ -77,10 +78,10 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                     lock (mapStaticContainersAggregatedLock)
                     {
                         // Init dict if map key doesnt exist
-                        if (!mapStaticContainersAggregated.TryGetValue(mapName, out mapAggregatedDataDict))
+                        if (!mapStaticContainersAggregated.TryGetValue(mapId, out mapAggregatedDataDict))
                         {
                             mapAggregatedDataDict = new Dictionary<Template, int>();
-                            mapStaticContainersAggregated.Add(mapName, mapAggregatedDataDict);
+                            mapStaticContainersAggregated.Add(mapId, mapAggregatedDataDict);
                         }
                     }
 
@@ -93,10 +94,10 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                     // Keep track of how many dumps we have for each map
                     lock (mapDumpCounterLock)
                     {
-                        IncrementMapCounterDictionaryValue(mapDumpCounter, mapName);
+                        IncrementMapCounterDictionaryValue(mapDumpCounter, mapId);
                     }
 
-                    var containerIgnoreListExists = LootDumpProcessorContext.GetConfig().ContainerIgnoreList.TryGetValue(dataDump.Data.Id.ToLower(), out string[]? ignoreListForMap);
+                    var containerIgnoreListExists = LootDumpProcessorContext.GetConfig().ContainerIgnoreList.TryGetValue(mapId, out string[]? ignoreListForMap);
                     foreach (var dynamicStaticContainer in StaticLootProcessor.CreateDynamicStaticContainers(dataDump))
                     {
                         lock (mapStaticContainersAggregatedLock)

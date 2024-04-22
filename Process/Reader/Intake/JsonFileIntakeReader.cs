@@ -39,7 +39,7 @@ public class JsonFileIntakeReader : IIntakeReader
             {
                 basicInfo = new BasicInfo
                 {
-                    Map = fi.Data.Name,
+                    Map = fi.Data.Id.ToLower(),
                     FileHash = ProcessorUtil.HashFile(fileData),
                     Data = fi,
                     Date = date.Value,
