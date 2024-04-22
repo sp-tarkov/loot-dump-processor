@@ -146,7 +146,7 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
         // Static loot distribution
         output.Add(
             OutputFileType.StaticLoot,
-            StaticLootProcessor.CreateStaticLootDistribution(dumpProcessData.ContainerCounts)
+            StaticLootProcessor.CreateStaticLootDistribution(dumpProcessData.ContainerCounts, staticContainers)
         );
 
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))

@@ -113,17 +113,24 @@ public static class StaticLootProcessor
     }
 
     public static Dictionary<string, StaticItemDistribution> CreateStaticLootDistribution(
-        List<PreProcessedStaticLoot> container_counts
-    )
+        List<PreProcessedStaticLoot> container_counts,
+        Dictionary<string, MapStaticLoot> staticContainers)
     {
+        // Iterate over each map we have containers for
+        foreach (var map in staticContainers)
+        {
+            var mapName = map.Key;
+            var mapContainers = map.Value;
+        }
+
         var static_loot_distribution = new Dictionary<string, StaticItemDistribution>();
-        var types = Enumerable.Distinct((from ci in container_counts
+        var uniqueContainerTypeIds = Enumerable.Distinct((from ci in container_counts
             select ci.Type).ToList());
 
-        foreach (var typei in types)
+        foreach (var typeId in uniqueContainerTypeIds)
         {
             var container_counts_selected = (from ci in container_counts
-                where ci.Type == typei
+                where ci.Type == typeId
                 select ci).ToList();
             var itemscounts = new List<int>();
             foreach (var ci in container_counts_selected)
