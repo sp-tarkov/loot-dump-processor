@@ -30,3 +30,6 @@ Streets of Tarkov:
 Sandbox:
   name:
   - Sandbox
+SandboxHigh:
+  name:
+  - sandbox_high
