@@ -77,9 +77,14 @@ public class FileWriter : IWriter
 
                 break;
             case OutputFileType.StaticAmmo:
-                var staticAmmo = (Dictionary<string, List<AmmoDistribution>>)data;
-                File.WriteAllText($@"{_outputPath}\loot\staticAmmo.json",
-                    _jsonSerializer.Serialize(staticAmmo));
+                var staticAmmo = (Dictionary<string, Dictionary<string, List<AmmoDistribution>>>)data;
+                foreach (var (key, value) in staticAmmo)
+                {
+                    if (!Directory.Exists($@"{_outputPath}\locations\{key}"))
+                        Directory.CreateDirectory($@"{_outputPath}\locations\{key}");
+                    File.WriteAllText($@"{_outputPath}\locations\{key}\staticAmmo.json",
+                        _jsonSerializer.Serialize(value));
+                }
 
                 break;
             default:

@@ -141,10 +141,10 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
             LoggerFactory.GetInstance().Log("Processing ammo distribution", LogLevel.Info);
         // Ammo distribution
-        //output.Add(
-        //    OutputFileType.StaticAmmo,
-        //    StaticLootProcessor.CreateAmmoDistribution(dumpProcessData.ContainerCounts)
-        //);
+        output.Add(
+            OutputFileType.StaticAmmo,
+            StaticLootProcessor.CreateAmmoDistribution(dumpProcessData.ContainerCounts)
+        );
 
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
             LoggerFactory.GetInstance().Log("Processing static loot distribution", LogLevel.Info);

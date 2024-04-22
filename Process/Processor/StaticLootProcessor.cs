@@ -4,6 +4,7 @@ using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Model.Processing;
 using LootDumpProcessor.Utils;
+using System.Collections.Generic;
 
 namespace LootDumpProcessor.Process.Processor;
 
@@ -74,43 +75,92 @@ public static class StaticLootProcessor
         return data;
     }
 
-    public static Dictionary<string, List<AmmoDistribution>> CreateAmmoDistribution(
-        List<PreProcessedStaticLoot> container_counts
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="container_counts"></param>
+    /// <returns>key = mapid / </returns>
+    public static Dictionary<string, Dictionary<string, List<AmmoDistribution>>> CreateAmmoDistribution(
+        Dictionary<string, List<PreProcessedStaticLoot>> container_counts
     )
     {
-        var ammo = new List<string>();
-        foreach (var ci in container_counts)
+        var allMapsAmmoDistro = new Dictionary<string, Dictionary<string, List<AmmoDistribution>>>();
+        foreach (var mapAndContainers in container_counts)
         {
-            ammo.AddRange(from item in ci.Items
-                where LootDumpProcessorContext.GetTarkovItems().IsBaseClass(item.Tpl, BaseClasses.Ammo)
-                select item.Tpl);
+            var mapid = mapAndContainers.Key;
+            var containers = mapAndContainers.Value;
+            
+
+            var ammo = new List<string>();
+            foreach (var ci in containers)
+            {
+                ammo.AddRange(from item in ci.Items
+                              where LootDumpProcessorContext.GetTarkovItems().IsBaseClass(item.Tpl, BaseClasses.Ammo)
+                              select item.Tpl);
+            }
+
+            var ammo_counts = new List<CaliberTemplateCount>();
+            ammo_counts.AddRange(
+                ammo.GroupBy(a => a)
+                    .Select(g => new CaliberTemplateCount
+                    {
+                        Caliber = LootDumpProcessorContext.GetTarkovItems().AmmoCaliber(g.Key),
+                        Template = g.Key,
+                        Count = g.Count()
+                    })
+            );
+            ammo_counts = ammo_counts.OrderBy(x => x.Caliber).ToList();
+            var ammo_distribution = new Dictionary<string, List<AmmoDistribution>>();
+            foreach (var _tup_3 in ammo_counts.GroupBy(x => x.Caliber))
+            {
+                var k = _tup_3.Key;
+                var g = _tup_3.ToList();
+                ammo_distribution[k] = (from gi in g
+                                        select new AmmoDistribution
+                                        {
+                                            Tpl = gi.Template,
+                                            RelativeProbability = gi.Count
+                                        }).ToList();
+            }
+
+            allMapsAmmoDistro.TryAdd(mapid, ammo_distribution);
         }
 
-        var ammo_counts = new List<CaliberTemplateCount>();
-        ammo_counts.AddRange(
-            ammo.GroupBy(a => a)
-                .Select(g => new CaliberTemplateCount
-                {
-                    Caliber = LootDumpProcessorContext.GetTarkovItems().AmmoCaliber(g.Key),
-                    Template = g.Key,
-                    Count = g.Count()
-                })
-        );
-        ammo_counts = ammo_counts.OrderBy(x => x.Caliber).ToList();
-        var ammo_distribution = new Dictionary<string, List<AmmoDistribution>>();
-        foreach (var _tup_3 in ammo_counts.GroupBy(x => x.Caliber))
-        {
-            var k = _tup_3.Key;
-            var g = _tup_3.ToList();
-            ammo_distribution[k] = (from gi in g
-                select new AmmoDistribution
-                {
-                    Tpl = gi.Template,
-                    RelativeProbability = gi.Count
-                }).ToList();
-        }
+        return allMapsAmmoDistro;
 
-        return ammo_distribution;
+        //var ammo = new List<string>();
+        //foreach (var ci in container_counts)
+        //{
+        //    ammo.AddRange(from item in ci.Items
+        //        where LootDumpProcessorContext.GetTarkovItems().IsBaseClass(item.Tpl, BaseClasses.Ammo)
+        //        select item.Tpl);
+        //}
+
+        //var ammo_counts = new List<CaliberTemplateCount>();
+        //ammo_counts.AddRange(
+        //    ammo.GroupBy(a => a)
+        //        .Select(g => new CaliberTemplateCount
+        //        {
+        //            Caliber = LootDumpProcessorContext.GetTarkovItems().AmmoCaliber(g.Key),
+        //            Template = g.Key,
+        //            Count = g.Count()
+        //        })
+        //);
+        //ammo_counts = ammo_counts.OrderBy(x => x.Caliber).ToList();
+        //var ammo_distribution = new Dictionary<string, List<AmmoDistribution>>();
+        //foreach (var _tup_3 in ammo_counts.GroupBy(x => x.Caliber))
+        //{
+        //    var k = _tup_3.Key;
+        //    var g = _tup_3.ToList();
+        //    ammo_distribution[k] = (from gi in g
+        //        select new AmmoDistribution
+        //        {
+        //            Tpl = gi.Template,
+        //            RelativeProbability = gi.Count
+        //        }).ToList();
+        //}
+
+        //return ammo_distribution;
     }
 
     /// <summary>
