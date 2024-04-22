@@ -140,8 +140,8 @@ public static class StaticLootProcessor
                     select cii).ToList().Count);
             }
 
-            static_loot_distribution[typei] = new StaticItemDistribution();
-            static_loot_distribution[typei].ItemCountDistribution = itemscounts.GroupBy(i => i)
+            static_loot_distribution[typeId] = new StaticItemDistribution();
+            static_loot_distribution[typeId].ItemCountDistribution = itemscounts.GroupBy(i => i)
                 .Select(g => new ItemCountDistribution
                 {
                     Count = g.Key,
@@ -161,7 +161,7 @@ public static class StaticLootProcessor
                 }
             }
 
-            static_loot_distribution[typei].ItemDistribution = itemsHitCounts.Select(v => new StaticDistribution
+            static_loot_distribution[typeId].ItemDistribution = itemsHitCounts.Select(v => new StaticDistribution
             {
                 Tpl = v.Key,
                 RelativeProbability = v.Value

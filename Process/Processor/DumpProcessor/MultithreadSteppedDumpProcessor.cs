@@ -52,11 +52,10 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
             Runners.Add(
                 Task.Factory.StartNew(() =>
                 {
-
                     if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
                         LoggerFactory.GetInstance().Log($"Processing static data for file {dumped.BasicInfo.FileName}", LogLevel.Debug);
-                    var data = _jsonSerializer.Deserialize<RootData>(File.ReadAllText(dumped.BasicInfo.FileName));
-                    var mapName = data.Data.Name;
+                    var dataDump = _jsonSerializer.Deserialize<RootData>(File.ReadAllText(dumped.BasicInfo.FileName));
+                    var mapName = dataDump.Data.Name;
 
                     // the if statement below takes care of processing "forced" or real static data for each map, only need
                     // to do this once per map, we dont care about doing it again
@@ -66,7 +65,7 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                         {
                             if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
                                 LoggerFactory.GetInstance().Log($"Doing first time process for map {mapName} of real static data", LogLevel.Info);
-                            var mapStaticContainers = StaticLootProcessor.CreateStaticWeaponsAndStaticForcedContainers(data);
+                            var mapStaticContainers = StaticLootProcessor.CreateStaticWeaponsAndStaticForcedContainers(dataDump);
                             // .Item1 = map name
                             staticContainers[mapStaticContainers.Item1] = mapStaticContainers.Item2;
                         }
@@ -93,18 +92,18 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                             IncrementMapCounterDictionaryValue(mapDumpCounter, mapName);
                         }
 
-                        var containerIgnoreListExists = LootDumpProcessorContext.GetConfig().ContainerIgnoreList.TryGetValue(data.Data.Id.ToLower(), out string[]? ignoreListForMap);
-                        foreach (var dynamicStaticContainer in StaticLootProcessor.CreateDynamicStaticContainers(data))
+                        var containerIgnoreListExists = LootDumpProcessorContext.GetConfig().ContainerIgnoreList.TryGetValue(dataDump.Data.Id.ToLower(), out string[]? ignoreListForMap);
+                        foreach (var dynamicStaticContainer in StaticLootProcessor.CreateDynamicStaticContainers(dataDump))
                         {
                             lock (mapStaticContainersAggregatedLock)
                             {
-                                // Skip adding containers to aggredated data if container id is in ignore list
                                 if (containerIgnoreListExists && ignoreListForMap.Contains(dynamicStaticContainer.Id))
                                 {
+                                    // Skip adding containers to aggregated data if container id is in ignore list
                                     continue;
                                 }
 
-                                // Increment count by 1
+                                // Increment times container seen in dump by 1
                                 if (!mapAggregatedDataDict.TryAdd(dynamicStaticContainer, 1))
                                     mapAggregatedDataDict[dynamicStaticContainer] += 1;
                             }
@@ -126,7 +125,7 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                 td => new StaticDataPoint
                 {
                     Template = td.Key,
-                    Probability = GetStaticContainerProbability(kv.Key, td, mapDumpCounter)
+                    Probability = GetStaticContainerProbability(kv.Key, td, mapDumpCounter) // kv.Key = map name
                 }
             ).ToList()
         ).ToList().ForEach(kv => staticContainers[kv.Key].StaticContainers = kv.Value);
