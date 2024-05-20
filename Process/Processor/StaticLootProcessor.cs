@@ -48,8 +48,8 @@ public static class StaticLootProcessor
             }
         }
 
-        var forcedStaticItems = LootDumpProcessorContext.GetForcedItems().ContainsKey(mapName)
-            ? LootDumpProcessorContext.GetForcedItems()[mapName]
+        var forcedStaticItems = LootDumpProcessorContext.GetForcedItems().ContainsKey(mapId)
+            ? LootDumpProcessorContext.GetForcedItems()[mapId]
             : new List<StaticForced>();
 
         var mapStaticData = new MapStaticLoot
