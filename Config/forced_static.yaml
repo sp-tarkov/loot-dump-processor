@@ -12,7 +12,7 @@ forced_items:
 
   tarkovstreets:
   # Backup hideout key
-  - containerId: container_City_SE_02_DesignStuff_00025
+  - containerId: container_City_SE_02_Primorskiy_51_indoor_00001
     itemTpl: 6398fd8ad3de3849057f5128
 
   sandbox:
