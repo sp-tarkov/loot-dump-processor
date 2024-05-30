@@ -48,10 +48,18 @@ public class JsonFileIntakeReader : IIntakeReader
                 _totalMapDumpsCounter[fi.Data.Name] += 1;
                 if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
                     LoggerFactory.GetInstance().Log($"File {file} fully read, returning data", LogLevel.Debug);
+
                 return true;
             }
-            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
-                LoggerFactory.GetInstance().Log($"Ignoring file {file} as the file cap for map {fi.Data.Name} has been reached", LogLevel.Debug);
+            else
+            {
+                // Map dump limit reached, exit
+                if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
+                    LoggerFactory.GetInstance().Log($"Ignoring file {file} as the file cap for map {fi.Data.Id} has been reached", LogLevel.Debug);
+                basicInfo = null;
+
+                return false;
+            }
         }
 
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Warning))
