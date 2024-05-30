@@ -51,15 +51,13 @@ public class JsonFileIntakeReader : IIntakeReader
 
                 return true;
             }
-            else
-            {
-                // Map dump limit reached, exit
-                if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
-                    LoggerFactory.GetInstance().Log($"Ignoring file {file} as the file cap for map {fi.Data.Id} has been reached", LogLevel.Debug);
-                basicInfo = null;
 
-                return false;
-            }
+            // Map dump limit reached, exit
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
+                LoggerFactory.GetInstance().Log($"Ignoring file {file} as the file cap for map {fi.Data.Id} has been reached", LogLevel.Debug);
+            basicInfo = null;
+
+            return false;
         }
 
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Warning))
