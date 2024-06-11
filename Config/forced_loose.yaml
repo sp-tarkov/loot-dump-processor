@@ -13,6 +13,7 @@ bigmap:
 - 5939a00786f7742fe8132936  # Golden Zibbo lighter
 - 5939e5a786f77461f11c0098  # Secure Folder 0013
 - 64e74a3d4d49d23b2c39d319 # item_quest_clock_07 (Out of Time)
+- 6614230055afee107f05e998 # The Unheard's phone
 #- 64bd1abff3a668f08805ce4f  # Secure Flash drive V4 REMOVED BY BSG
 
 woods:
@@ -41,6 +42,10 @@ shoreline:
 - 5b43237186f7742f3a4ab252  # Chemical container: item_quest_chem_container
 - 5a29284f86f77463ef3db363  # Toughbook reinforced laptop
 - 64e74a534d49d23b2c39d31b # item_quest_clock_10 (Out of Time)
+- 6614238e0d240a5f5d0f679d # Skier and Peacekeeper correspondence
+- 661421c7c1f2f548c50ee649 # The Unheard's laptop
+- 6614217b6d9d5abcad0ff098 # The Unheard's phone
+- 661423200d240a5f5d0f679b # The Unheard's laptop
 
 interchange:
 - 5ae9a18586f7746e381e16a3  # OLI cargo manifests
@@ -73,6 +78,7 @@ lighthouse:
 - 6399f54b0a36db13c823ad21  # Radio transmitter body (Key to the Tower)
 - 64e74a64aac4cd0a7264ecdf # item_quest_clock_12 (Out of Time)
 - 578f87a3245977356274f2cb # 
+- 661666458c2aa9cb1602503b # Hard drive
 # - 64b91627dd13d43b9d01d6d1  # Toughbook reinforced laptop (Event quest) REMOVED BY BSG
 
 rezervbase:
@@ -89,6 +95,7 @@ rezervbase:
 laboratory:
 - 5eff135be0d3331e9d282b7b  # Flash drive marked with blue tape (TerraGroup employee)
 - 6398a4cfb5992f573c6562b3  # Secured tape
+- 64e74a44c2b4f829615ec334 # Picture 8
 #- 64e74a44c2b4f829615ec334 # item_quest_clock_08 (Out of Time) #1 REMOVED BY BSG
 #- 64bdcfed8f3a947a990aa49a  # Hermetic container for storing various chemicals #1 REMOVED BY BSG
 #- 64bdd008b0bf3baa6702f35f  # Hermetic container for storing various chemicals #2 REMOVED BY BSG
