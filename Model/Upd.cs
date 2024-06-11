@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using LootDumpProcessor.Process.Processor;
 using LootDumpProcessor.Utils;
 using Newtonsoft.Json;
 
@@ -9,7 +8,7 @@ namespace LootDumpProcessor.Model
     {
         [JsonProperty("StackObjectsCount", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("StackObjectsCount")]
-        public int? StackObjectsCount { get; set; }
+        public object? StackObjectsCount { get; set; }
 
         [JsonProperty("FireMode", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("FireMode")]
