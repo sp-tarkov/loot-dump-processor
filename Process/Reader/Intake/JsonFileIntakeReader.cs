@@ -39,7 +39,7 @@ public class JsonFileIntakeReader : IIntakeReader
             {
                 basicInfo = new BasicInfo
                 {
-                    Map = fi.Data.Name,
+                    Map = fi.Data.Id.ToLower(),
                     FileHash = ProcessorUtil.HashFile(fileData),
                     Data = fi,
                     Date = date.Value,
@@ -48,10 +48,16 @@ public class JsonFileIntakeReader : IIntakeReader
                 _totalMapDumpsCounter[fi.Data.Name] += 1;
                 if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
                     LoggerFactory.GetInstance().Log($"File {file} fully read, returning data", LogLevel.Debug);
+
                 return true;
             }
+
+            // Map dump limit reached, exit
             if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
-                LoggerFactory.GetInstance().Log($"Ignoring file {file} as the file cap for map {fi.Data.Name} has been reached", LogLevel.Debug);
+                LoggerFactory.GetInstance().Log($"Ignoring file {file} as the file cap for map {fi.Data.Id} has been reached", LogLevel.Debug);
+            basicInfo = null;
+
+            return false;
         }
 
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Warning))

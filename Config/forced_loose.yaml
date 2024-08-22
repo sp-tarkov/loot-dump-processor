@@ -1,5 +1,5 @@
 ---
-Customs:
+bigmap:
 - 5938188786f77474f723e87f  # Case 0031
 - 5c12301c86f77419522ba7e4  # Flash drive with fake info
 - 593965cf86f774087a77e1b6  # Case 0048
@@ -13,9 +13,10 @@ Customs:
 - 5939a00786f7742fe8132936  # Golden Zibbo lighter
 - 5939e5a786f77461f11c0098  # Secure Folder 0013
 - 64e74a3d4d49d23b2c39d319 # item_quest_clock_07 (Out of Time)
+- 6614230055afee107f05e998 # The Unheard's phone
 #- 64bd1abff3a668f08805ce4f  # Secure Flash drive V4 REMOVED BY BSG
 
-Woods:
+woods:
 - 5938878586f7741b797c562f  # Case 0052
 - 5d3ec50586f774183a607442  # Jaeger's message Underneath the wooden lookout post.
 - 5af04e0a86f7743a532b79e2  # Single-axis Fiber Optic Gyroscope: item_barter_electr_gyroscope
@@ -24,7 +25,7 @@ Woods:
 #- 64bde2248f3a947a990aa4a5  # Sliderkey Secure Flash drive #1 REMOVED BY BSG
 #- 64bde265807321a9b905f076  # Sliderkey Secure Flash drive #2 REMOVED BY BSG
 
-Shoreline:
+shoreline:
 - 5a294d7c86f7740651337cf9  # Drone 1 SAS disk
 - 5a294d8486f774068638cd93  # Drone 2 SAS disk: ambiguous with itemTpl 5a294f1686f774340c7b7e4a
 - 5efdafc1e70b5e33f86de058  # Sanitar's Surgery kit marked with a blue symbol
@@ -41,8 +42,12 @@ Shoreline:
 - 5b43237186f7742f3a4ab252  # Chemical container: item_quest_chem_container
 - 5a29284f86f77463ef3db363  # Toughbook reinforced laptop
 - 64e74a534d49d23b2c39d31b # item_quest_clock_10 (Out of Time)
+- 6614238e0d240a5f5d0f679d # Skier and Peacekeeper correspondence
+- 661421c7c1f2f548c50ee649 # The Unheard's laptop
+- 6614217b6d9d5abcad0ff098 # The Unheard's phone
+- 661423200d240a5f5d0f679b # The Unheard's laptop
 
-Interchange:
+interchange:
 - 5ae9a18586f7746e381e16a3  # OLI cargo manifests
 - 5ae9a0dd86f7742e5f454a05  # Goshan cargo manifests
 - 5ae9a1b886f77404c8537c62  # Idea cargo manifests
@@ -53,11 +58,15 @@ Interchange:
 - 5b4c81bd86f77418a75ae159  # Chemical container item_quest_chem_container3
 - 64e74a5ac2b4f829615ec336 # item_quest_clock_11 (Out of Time)
 
-Factory:
+factory4_day:
 - 591093bb86f7747caa7bb2ee  # On the neck of the dead scav in the bunker (Postman Pat Part 2)
 - 593a87af86f774122f54a951  # Syringe with a chemical
 
-Lighthouse:
+factory4_night:
+- 591093bb86f7747caa7bb2ee  # On the neck of the dead scav in the bunker (Postman Pat Part 2)
+- 593a87af86f774122f54a951  # Syringe with a chemical
+
+lighthouse:
 - 61904c9df62c89219a56e034  # The message is tucked under the bottom of the door to the cabin.
 - 619268ad78f4fa33f173dbe5  # Water pump operation data On the desk between other documents in the upper office.
 - 619268de2be33f2604340159  # Pumping Station Operation Data In the upper floor office on the shelf.
@@ -69,9 +78,10 @@ Lighthouse:
 - 6399f54b0a36db13c823ad21  # Radio transmitter body (Key to the Tower)
 - 64e74a64aac4cd0a7264ecdf # item_quest_clock_12 (Out of Time)
 - 578f87a3245977356274f2cb # 
+- 661666458c2aa9cb1602503b # Hard drive
 # - 64b91627dd13d43b9d01d6d1  # Toughbook reinforced laptop (Event quest) REMOVED BY BSG
 
-ReserveBase:
+rezervbase:
 - 60915994c49cf53e4772cc38  # Military documents 1 on the table inside bunker control room (Documents)
 - 60a3b6359c427533db36cf84  # Military documents 2 On the bottom shelf of the cupboard near the corner.
 - 60a3b65c27adf161da7b6e14  # Military documents 3 Inside the cupboard next to the 4x4 Weapon Box.
@@ -82,15 +92,16 @@ ReserveBase:
 - 6398a072e301557ae24cec92  # Original Lightkeeper Intelligence (Snatch)
 - 64e74a4baac4cd0a7264ecdd # item_quest_clock_09 (Out of Time)
 
-Laboratory:
+laboratory:
 - 5eff135be0d3331e9d282b7b  # Flash drive marked with blue tape (TerraGroup employee)
 - 6398a4cfb5992f573c6562b3  # Secured tape
+- 64e74a44c2b4f829615ec334 # Picture 8
 #- 64e74a44c2b4f829615ec334 # item_quest_clock_08 (Out of Time) #1 REMOVED BY BSG
 #- 64bdcfed8f3a947a990aa49a  # Hermetic container for storing various chemicals #1 REMOVED BY BSG
 #- 64bdd008b0bf3baa6702f35f  # Hermetic container for storing various chemicals #2 REMOVED BY BSG
 #- 64bdd014f3a668f08805ce64  # Hermetic container for storing various chemicals #3 REMOVED BY BSG
 
-Streets of Tarkov:
+tarkovstreets:
 - 63a943cead5cc12f22161ff7  # Accountant's notes (Audit)
 - 638cbc68a63f1b49be6a3010  # Registered letter (Youve Got Mail)
 - 638df4cc7b560b03794a18d2  # AG guitar pick (Audiophile)
@@ -114,6 +125,10 @@ Streets of Tarkov:
 - 64f5b4f71a5f313cb144c06c # Secret component (Beyond the Red Meat - Part 2)
 - 657acb2ac900be5902191ac9 # Cadastral registry records
 
-Sandbox:
+sandbox:
+- 6582bd252b50c61c565828e2 # Bottle of Le Jean wine
+- 6575a6ca8778e96ded05a802 # TerraGroup scientist's hard drive
+
+sandbox_high:
 - 6582bd252b50c61c565828e2 # Bottle of Le Jean wine
 - 6575a6ca8778e96ded05a802 # TerraGroup scientist's hard drive

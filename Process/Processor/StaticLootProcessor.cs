@@ -4,6 +4,7 @@ using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Model.Processing;
 using LootDumpProcessor.Utils;
+using System.Collections.Generic;
 
 namespace LootDumpProcessor.Process.Processor;
 
@@ -33,6 +34,7 @@ public static class StaticLootProcessor
     public static Tuple<string, MapStaticLoot> CreateStaticWeaponsAndStaticForcedContainers(RootData rawMapDump)
     {
         var mapName = rawMapDump.Data.Name;
+        var mapId = rawMapDump.Data.Id.ToLower();
         var staticLootPositions = (from li in rawMapDump.Data.Loot
             where li.IsContainer ?? false
             select li).ToList();
@@ -46,8 +48,8 @@ public static class StaticLootProcessor
             }
         }
 
-        var forcedStaticItems = LootDumpProcessorContext.GetForcedItems().ContainsKey(mapName)
-            ? LootDumpProcessorContext.GetForcedItems()[mapName]
+        var forcedStaticItems = LootDumpProcessorContext.GetForcedItems().ContainsKey(mapId)
+            ? LootDumpProcessorContext.GetForcedItems()[mapId]
             : new List<StaticForced>();
 
         var mapStaticData = new MapStaticLoot
@@ -55,7 +57,7 @@ public static class StaticLootProcessor
             StaticWeapons = staticWeapons,
             StaticForced = forcedStaticItems
         };
-        return Tuple.Create(mapName, mapStaticData);
+        return Tuple.Create(mapId, mapStaticData);
     }
     
     public static List<Template> CreateDynamicStaticContainers(RootData rawMapDump)
@@ -73,94 +75,207 @@ public static class StaticLootProcessor
         return data;
     }
 
-    public static Dictionary<string, List<AmmoDistribution>> CreateAmmoDistribution(
-        List<PreProcessedStaticLoot> container_counts
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="container_counts"></param>
+    /// <returns>key = mapid / </returns>
+    public static Dictionary<string, Dictionary<string, List<AmmoDistribution>>> CreateAmmoDistribution(
+        Dictionary<string, List<PreProcessedStaticLoot>> container_counts
     )
     {
-        var ammo = new List<string>();
-        foreach (var ci in container_counts)
+        var allMapsAmmoDistro = new Dictionary<string, Dictionary<string, List<AmmoDistribution>>>();
+        foreach (var mapAndContainers in container_counts)
         {
-            ammo.AddRange(from item in ci.Items
-                where LootDumpProcessorContext.GetTarkovItems().IsBaseClass(item.Tpl, BaseClasses.Ammo)
-                select item.Tpl);
+            var mapid = mapAndContainers.Key;
+            var containers = mapAndContainers.Value;
+            
+
+            var ammo = new List<string>();
+            foreach (var ci in containers)
+            {
+                ammo.AddRange(from item in ci.Items
+                              where LootDumpProcessorContext.GetTarkovItems().IsBaseClass(item.Tpl, BaseClasses.Ammo)
+                              select item.Tpl);
+            }
+
+            var ammo_counts = new List<CaliberTemplateCount>();
+            ammo_counts.AddRange(
+                ammo.GroupBy(a => a)
+                    .Select(g => new CaliberTemplateCount
+                    {
+                        Caliber = LootDumpProcessorContext.GetTarkovItems().AmmoCaliber(g.Key),
+                        Template = g.Key,
+                        Count = g.Count()
+                    })
+            );
+            ammo_counts = ammo_counts.OrderBy(x => x.Caliber).ToList();
+            var ammo_distribution = new Dictionary<string, List<AmmoDistribution>>();
+            foreach (var _tup_3 in ammo_counts.GroupBy(x => x.Caliber))
+            {
+                var k = _tup_3.Key;
+                var g = _tup_3.ToList();
+                ammo_distribution[k] = (from gi in g
+                                        select new AmmoDistribution
+                                        {
+                                            Tpl = gi.Template,
+                                            RelativeProbability = gi.Count
+                                        }).ToList();
+            }
+
+            allMapsAmmoDistro.TryAdd(mapid, ammo_distribution);
         }
 
-        var ammo_counts = new List<CaliberTemplateCount>();
-        ammo_counts.AddRange(
-            ammo.GroupBy(a => a)
-                .Select(g => new CaliberTemplateCount
-                {
-                    Caliber = LootDumpProcessorContext.GetTarkovItems().AmmoCaliber(g.Key),
-                    Template = g.Key,
-                    Count = g.Count()
-                })
-        );
-        ammo_counts = ammo_counts.OrderBy(x => x.Caliber).ToList();
-        var ammo_distribution = new Dictionary<string, List<AmmoDistribution>>();
-        foreach (var _tup_3 in ammo_counts.GroupBy(x => x.Caliber))
-        {
-            var k = _tup_3.Key;
-            var g = _tup_3.ToList();
-            ammo_distribution[k] = (from gi in g
-                select new AmmoDistribution
-                {
-                    Tpl = gi.Template,
-                    RelativeProbability = gi.Count
-                }).ToList();
-        }
+        return allMapsAmmoDistro;
 
-        return ammo_distribution;
+        //var ammo = new List<string>();
+        //foreach (var ci in container_counts)
+        //{
+        //    ammo.AddRange(from item in ci.Items
+        //        where LootDumpProcessorContext.GetTarkovItems().IsBaseClass(item.Tpl, BaseClasses.Ammo)
+        //        select item.Tpl);
+        //}
+
+        //var ammo_counts = new List<CaliberTemplateCount>();
+        //ammo_counts.AddRange(
+        //    ammo.GroupBy(a => a)
+        //        .Select(g => new CaliberTemplateCount
+        //        {
+        //            Caliber = LootDumpProcessorContext.GetTarkovItems().AmmoCaliber(g.Key),
+        //            Template = g.Key,
+        //            Count = g.Count()
+        //        })
+        //);
+        //ammo_counts = ammo_counts.OrderBy(x => x.Caliber).ToList();
+        //var ammo_distribution = new Dictionary<string, List<AmmoDistribution>>();
+        //foreach (var _tup_3 in ammo_counts.GroupBy(x => x.Caliber))
+        //{
+        //    var k = _tup_3.Key;
+        //    var g = _tup_3.ToList();
+        //    ammo_distribution[k] = (from gi in g
+        //        select new AmmoDistribution
+        //        {
+        //            Tpl = gi.Template,
+        //            RelativeProbability = gi.Count
+        //        }).ToList();
+        //}
+
+        //return ammo_distribution;
     }
 
-    public static Dictionary<string, StaticItemDistribution> CreateStaticLootDistribution(
-        List<PreProcessedStaticLoot> container_counts
-    )
+    /// <summary>
+    /// Dict key = map,
+    /// value = sub dit:
+    ///     key = container Ids
+    ///     value = items + counts
+    /// </summary>
+    public static Dictionary<string, Dictionary<string, StaticItemDistribution>> CreateStaticLootDistribution(
+        Dictionary<string, List<PreProcessedStaticLoot>> container_counts,
+        Dictionary<string, MapStaticLoot> staticContainers)
     {
-        var static_loot_distribution = new Dictionary<string, StaticItemDistribution>();
-        var types = Enumerable.Distinct((from ci in container_counts
-            select ci.Type).ToList());
-
-        foreach (var typei in types)
+        var allMapsStaticLootDisto = new Dictionary< string, Dictionary<string, StaticItemDistribution>>();
+        // Iterate over each map we have containers for
+        foreach (var mapContainersKvp in container_counts)
         {
-            var container_counts_selected = (from ci in container_counts
-                where ci.Type == typei
-                select ci).ToList();
-            var itemscounts = new List<int>();
-            foreach (var ci in container_counts_selected)
-            {
-                itemscounts.Add((from cii in ci.Items
-                    where cii.ParentId == ci.ContainerId
-                    select cii).ToList().Count);
-            }
+            var mapName = mapContainersKvp.Key;
+            var containers = mapContainersKvp.Value;
 
-            static_loot_distribution[typei] = new StaticItemDistribution();
-            static_loot_distribution[typei].ItemCountDistribution = itemscounts.GroupBy(i => i)
-                .Select(g => new ItemCountDistribution
-                {
-                    Count = g.Key,
-                    RelativeProbability = g.Count()
-                }).ToList();
-            // TODO: Change for different algo that splits items per parent once parentid = containerid, then compose
-            // TODO: key and finally create distribution based on composed Id instead
-            var itemsHitCounts = new Dictionary<string, int>();
-            foreach (var ci in container_counts_selected)
-            {
-                foreach (var cii in ci.Items.Where(cii => cii.ParentId == ci.ContainerId))
-                {
-                    if (itemsHitCounts.ContainsKey(cii.Tpl))
-                        itemsHitCounts[cii.Tpl] += 1;
-                    else
-                        itemsHitCounts[cii.Tpl] = 1;
-                }
-            }
+            var static_loot_distribution = new Dictionary<string, StaticItemDistribution>();
+            var uniqueContainerTypeIds = Enumerable.Distinct((from ci in containers
+                                                              select ci.Type).ToList());
 
-            static_loot_distribution[typei].ItemDistribution = itemsHitCounts.Select(v => new StaticDistribution
+            foreach (var typeId in uniqueContainerTypeIds)
             {
-                Tpl = v.Key,
-                RelativeProbability = v.Value
-            }).ToList();
+                var container_counts_selected = (from ci in containers
+                                                 where ci.Type == typeId
+                                                 select ci).ToList();
+
+                // Get array of all times a count of items was found in container
+                List<int> itemCountsInContainer = GetCountOfItemsInContainer(container_counts_selected);
+
+                // Create structure to hold item count + weight that it will be picked
+                // Group same counts together
+                static_loot_distribution[typeId] = new StaticItemDistribution();
+                static_loot_distribution[typeId].ItemCountDistribution = itemCountsInContainer.GroupBy(i => i)
+                    .Select(g => new ItemCountDistribution
+                    {
+                        Count = g.Key,
+                        RelativeProbability = g.Count()
+                    }).ToList();
+
+                static_loot_distribution[typeId].ItemDistribution = CreateItemDistribution(container_counts_selected);
+            }
+            // Key = containers tpl, value = items + count weights
+            allMapsStaticLootDisto.TryAdd(mapName, static_loot_distribution);
+
         }
 
-        return static_loot_distribution;
+        return allMapsStaticLootDisto;
+
+        //var static_loot_distribution = new Dictionary<string, StaticItemDistribution>();
+        //var uniqueContainerTypeIds = Enumerable.Distinct((from ci in container_counts
+        //    select ci.Type).ToList());
+
+        //foreach (var typeId in uniqueContainerTypeIds)
+        //{
+        //    var container_counts_selected = (from ci in container_counts
+        //                                     where ci.Type == typeId
+        //                                     select ci).ToList();
+
+        //    // Get array of all times a count of items was found in container
+        //    List<int> itemCountsInContainer = GetCountOfItemsInContainer(container_counts_selected);
+
+        //    // Create structure to hold item count + weight that it will be picked
+        //    // Group same counts together
+        //    static_loot_distribution[typeId] = new StaticItemDistribution();
+        //    static_loot_distribution[typeId].ItemCountDistribution = itemCountsInContainer.GroupBy(i => i)
+        //        .Select(g => new ItemCountDistribution
+        //        {
+        //            Count = g.Key,
+        //            RelativeProbability = g.Count()
+        //        }).ToList();
+
+        //    static_loot_distribution[typeId].ItemDistribution = CreateItemDistribution(container_counts_selected);
+        //}
+        //// Key = containers tpl, value = items + count weights
+        //return static_loot_distribution;
+    }
+
+    private static List<StaticDistribution> CreateItemDistribution(List<PreProcessedStaticLoot> container_counts_selected)
+    {
+        // TODO: Change for different algo that splits items per parent once parentid = containerid, then compose
+        // TODO: key and finally create distribution based on composed Id instead
+        var itemsHitCounts = new Dictionary<string, int>();
+        foreach (var ci in container_counts_selected)
+        {
+            foreach (var cii in ci.Items.Where(cii => cii.ParentId == ci.ContainerId))
+            {
+                if (itemsHitCounts.ContainsKey(cii.Tpl))
+                    itemsHitCounts[cii.Tpl] += 1;
+                else
+                    itemsHitCounts[cii.Tpl] = 1;
+            }
+        }
+
+        // WIll create array of objects that have a tpl + relative probability weight value
+        return itemsHitCounts.Select(v => new StaticDistribution
+        {
+            Tpl = v.Key,
+            RelativeProbability = v.Value
+        }).ToList();
+    }
+
+    private static List<int> GetCountOfItemsInContainer(List<PreProcessedStaticLoot> container_counts_selected)
+    {
+        var itemCountsInContainer = new List<int>();
+        foreach (var containerWithItems in container_counts_selected)
+        {
+            // Only count item if its parent is the container, only root items are counted (not mod/attachment items)
+            itemCountsInContainer.Add((from cii in containerWithItems.Items
+                                       where cii.ParentId == containerWithItems.ContainerId
+                                       select cii).ToList().Count);
+        }
+
+        return itemCountsInContainer;
     }
 }
