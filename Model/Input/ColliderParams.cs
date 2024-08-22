@@ -1,12 +1,13 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using LootDumpProcessor.Model.Tarkov;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model.Input
 {
     public class ColliderParams
     {
-        [JsonProperty("_parent", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("_parent")]
+        [JsonProperty("Parent", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("Parent")]
         public string? Parent { get; set; }
 
         [JsonProperty("_props", NullValueHandling = NullValueHandling.Ignore)]

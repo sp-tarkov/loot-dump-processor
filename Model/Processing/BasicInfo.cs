@@ -5,12 +5,12 @@ namespace LootDumpProcessor.Model.Processing;
 
 public class BasicInfo
 {
-    public string Map { get; set; }
-    public string FileHash { get; set; }
+    public required string Map { get; set; }
+    public required string FileHash { get; set; }
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-    public RootData Data { get; set; }
+    public RootData? Data { get; set; }
     public DateTime Date { get; set; }
-    public string FileName { get; set; }
+    public required string FileName { get; set; }
 
     public override bool Equals(object? obj)
     {

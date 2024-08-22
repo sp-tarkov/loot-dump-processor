@@ -54,9 +54,17 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                 {
                     if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
                         LoggerFactory.GetInstance().Log($"Processing static data for file {dumped.BasicInfo.FileName}", LogLevel.Debug);
+
                     var dataDump = _jsonSerializer.Deserialize<RootData>(File.ReadAllText(dumped.BasicInfo.FileName));
-                    //var mapName = dataDump.Data.Name;
-                    var mapId = dataDump.Data.Id.ToLower();
+
+                    if (dataDump == null)
+                    {
+                        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
+                            LoggerFactory.GetInstance().Log($"Failed to deserialize data from file {dumped.BasicInfo.FileName}", LogLevel.Error);
+                        return; // Skip processing this dump
+                    }
+
+                    var mapId = dataDump.Data.LocationLoot.Id.ToLower();
 
                     // the if statement below takes care of processing "forced" or real static data for each map, only need
                     // to do this once per map, we dont care about doing it again

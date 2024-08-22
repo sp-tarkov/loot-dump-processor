@@ -14,6 +14,10 @@ namespace LootDumpProcessor.Model
         [JsonPropertyName("_tpl")]
         public string? Tpl { get; set; }
 
+        [JsonProperty("upd", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("upd")]
+        public Upd? Upd { get; set; }
+
         [JsonProperty("parentId", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("parentId")]
         public string? ParentId { get; set; }
@@ -25,10 +29,6 @@ namespace LootDumpProcessor.Model
         [JsonProperty("location", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("location")]
         public object? Location { get; set; }
-
-        [JsonProperty("upd", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("upd")]
-        public Upd? Upd { get; set; }
 
         public override bool Equals(object? obj)
         {

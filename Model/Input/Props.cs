@@ -1,4 +1,5 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using LootDumpProcessor.Model.Tarkov;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model.Input
@@ -11,6 +12,6 @@ namespace LootDumpProcessor.Model.Input
 
         [JsonProperty("Radius", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("Radius")]
-        public double? Radius { get; set; }
+        public float? Radius { get; set; }
     }
 }

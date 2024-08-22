@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model.Input
 {
-    public class Preview
+    public class Scene
     {
         [JsonProperty("path", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("path")]

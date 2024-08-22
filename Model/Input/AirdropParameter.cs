@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model.Input
@@ -19,7 +19,7 @@ namespace LootDumpProcessor.Model.Input
 
         [JsonProperty("PlaneAirdropChance", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("PlaneAirdropChance")]
-        public double? PlaneAirdropChance { get; set; }
+        public float? PlaneAirdropChance { get; set; }
 
         [JsonProperty("PlaneAirdropMax", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("PlaneAirdropMax")]

@@ -11,10 +11,11 @@ public class FileProcessor : IFileProcessor
     {
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
             LoggerFactory.GetInstance().Log($"Processing file {parsedData.FileName}...", LogLevel.Debug);
+
         List<Template> looseLoot = new List<Template>();
         List<Template> staticLoot = new List<Template>();
 
-        foreach (var item in parsedData.Data.Data.Loot)
+        foreach (var item in parsedData.Data.Data.LocationLoot.Loot)
         {
             if (item.IsContainer ?? false)
                 staticLoot.Add(item);

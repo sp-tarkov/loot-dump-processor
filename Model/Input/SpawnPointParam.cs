@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model.Input
@@ -15,7 +15,7 @@ namespace LootDumpProcessor.Model.Input
 
         [JsonProperty("Rotation", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("Rotation")]
-        public double? Rotation { get; set; }
+        public float? Rotation { get; set; }
 
         [JsonProperty("Sides", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("Sides")]
@@ -31,10 +31,18 @@ namespace LootDumpProcessor.Model.Input
 
         [JsonProperty("DelayToCanSpawnSec", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("DelayToCanSpawnSec")]
-        public int? DelayToCanSpawnSec { get; set; }
+        public float? DelayToCanSpawnSec { get; set; }
 
         [JsonProperty("ColliderParams", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("ColliderParams")]
         public ColliderParams? ColliderParams { get; set; }
+
+        [JsonProperty("BotZoneName", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("BotZoneName")]
+        public string? BotZoneName { get; set; }
+
+        [JsonProperty("CorePointId", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("CorePointId")]
+        public int? CorePointId { get; set; }
     }
 }

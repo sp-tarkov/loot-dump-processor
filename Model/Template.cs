@@ -51,9 +51,9 @@ namespace LootDumpProcessor.Model
         [JsonPropertyName("Root")]
         public string? Root { get; set; }
 
-        [JsonProperty("Items", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("Items")]
         [JsonPropertyName("Items")]
-        public List<Item>? Items { get; set; }
+        public required List<Item> Items { get; set; }
 
         protected bool Equals(Template other)
         {

@@ -33,9 +33,9 @@ public static class StaticLootProcessor
 
     public static Tuple<string, MapStaticLoot> CreateStaticWeaponsAndStaticForcedContainers(RootData rawMapDump)
     {
-        var mapName = rawMapDump.Data.Name;
-        var mapId = rawMapDump.Data.Id.ToLower();
-        var staticLootPositions = (from li in rawMapDump.Data.Loot
+        var mapName = rawMapDump.Data.LocationLoot.Name;
+        var mapId = rawMapDump.Data.LocationLoot.Id.ToLower();
+        var staticLootPositions = (from li in rawMapDump.Data.LocationLoot.Loot
             where li.IsContainer ?? false
             select li).ToList();
         var staticWeapons = new List<Template>();
@@ -62,7 +62,7 @@ public static class StaticLootProcessor
     
     public static List<Template> CreateDynamicStaticContainers(RootData rawMapDump)
     {
-        var data = (from li in rawMapDump.Data.Loot
+        var data = (from li in rawMapDump.Data.LocationLoot.Loot
             where (li.IsContainer ?? false) && (!LootDumpProcessorContext.GetStaticWeaponIds().Contains(li.Items[0].Tpl))
             select li).ToList();
 

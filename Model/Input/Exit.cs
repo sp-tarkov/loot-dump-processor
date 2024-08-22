@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model.Input
@@ -15,7 +15,7 @@ namespace LootDumpProcessor.Model.Input
 
         [JsonProperty("Chance", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("Chance")]
-        public int? Chance { get; set; }
+        public float? Chance { get; set; }
 
         [JsonProperty("MinTime", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("MinTime")]
@@ -31,7 +31,7 @@ namespace LootDumpProcessor.Model.Input
 
         [JsonProperty("ExfiltrationTime", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("ExfiltrationTime")]
-        public int? ExfiltrationTime { get; set; }
+        public float? ExfiltrationTime { get; set; }
 
         [JsonProperty("PassageRequirement", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("PassageRequirement")]
@@ -56,5 +56,33 @@ namespace LootDumpProcessor.Model.Input
         [JsonProperty("Count", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("Count")]
         public int? Count { get; set; }
+
+        [JsonProperty("EventAvailable", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("EventAvailable")]
+        public bool? EventAvailable { get; set; }
+
+        [JsonProperty("MinTimePVE", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("MinTimePVE")]
+        public int? MinTimePVE { get; set; }
+
+        [JsonProperty("MaxTimePVE", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("MaxTimePVE")]
+        public int? MaxTimePVE { get; set; }
+
+        [JsonProperty("ChancePVE", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("ChancePVE")]
+        public float? ChancePVE { get; set; }
+
+        [JsonProperty("CountPVE", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("CountPVE")]
+        public int? CountPVE { get; set; }
+
+        [JsonProperty("ExfiltrationTimePVE", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("ExfiltrationTimePVE")]
+        public float? ExfiltrationTimePVE { get; set; }
+
+        [JsonProperty("PlayersCountPVE", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("PlayersCountPVE")]
+        public int? PlayersCountPVE { get; set; }
     }
 }

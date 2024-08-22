@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model.Input
@@ -9,12 +9,12 @@ namespace LootDumpProcessor.Model.Input
         [JsonPropertyName("err")]
         public int? Err { get; set; }
 
-        [JsonProperty("errmsg")]
-        [JsonPropertyName("errmsg")]
-        public object? errmsg { get; set; }
-
         [JsonProperty("data", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("data")]
-        public Data? Data { get; set; }
+        public required Data Data { get; set; }
+
+        [JsonProperty("errmsg", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("errmsg")]
+        public object? Errmsg { get; set; }
     }
 }
