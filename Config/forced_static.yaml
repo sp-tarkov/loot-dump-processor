@@ -7,7 +7,7 @@ static_weapon_ids:
 forced_items:
   bigmap:
   # unknown key
-  - containerId: custom_multiScene_00058
+  - containerId: container_custom_DesignStuff_00058
     itemTpl: 593962ca86f774068014d9af
 
   tarkovstreets:
