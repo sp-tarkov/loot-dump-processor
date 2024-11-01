@@ -9,6 +9,7 @@ public class NetJsonSerializer : IJsonSerializer
     private static JsonSerializerOptions _serializeOptions = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals,
         Converters =
         {
             new NetJsonKeyConverter(),
