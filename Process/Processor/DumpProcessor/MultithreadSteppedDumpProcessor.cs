@@ -66,18 +66,31 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
 
                     var mapId = dataDump.Data.LocationLoot.Id.ToLower();
 
-                    // the if statement below takes care of processing "forced" or real static data for each map, only need
-                    // to do this once per map, we dont care about doing it again
+                    // Because we may use multiple version dumps for map data, merge the static loot between dumps
                     lock (staticContainersLock)
                     {
-                        if (!staticContainers.ContainsKey(mapId))
+                        if (!staticContainers.TryGetValue(mapId, out var mapStaticLoot))
                         {
                             if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
                                 LoggerFactory.GetInstance().Log($"Doing first time process for map {mapId} of real static data", LogLevel.Info);
-                            var mapStaticContainers = StaticLootProcessor.CreateStaticWeaponsAndStaticForcedContainers(dataDump);
+
+                            staticContainers[mapId] = new MapStaticLoot
+                            {
+                                StaticWeapons = new List<Template>(),
+                                StaticForced = new List<StaticForced>()
+                            };
+                        }
+                        else
+                        {
                             // .Item1 = map name
                             // .Item2 = force/weapon static arrays
-                            staticContainers[mapStaticContainers.Item1] = mapStaticContainers.Item2;
+                            var mapStaticContainers = StaticLootProcessor.CreateStaticWeaponsAndStaticForcedContainers(dataDump);
+
+                            var newStaticWeapons = mapStaticContainers.Item2.StaticWeapons.Where(x => !mapStaticLoot.StaticWeapons.Exists(y => y.Id == x.Id));
+                            var newStaticForced = mapStaticContainers.Item2.StaticForced.Where(x => !mapStaticLoot.StaticForced.Exists(y => y.ContainerId == x.ContainerId));
+
+                            mapStaticLoot.StaticWeapons.AddRange(newStaticWeapons);
+                            mapStaticLoot.StaticForced.AddRange(newStaticForced);
                         }
                     }
 
