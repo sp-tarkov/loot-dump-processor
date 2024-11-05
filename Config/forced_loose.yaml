@@ -53,6 +53,7 @@ shoreline:
 - 661423200d240a5f5d0f679b  # The Unheard's laptop
 - 666073159916667083033cb9  # Item_quest_tattered_diary
 - 66760b3deb51b08bd40c2b08  # item_barter_electr_hdd_NosQuests_quest
+- 6707d1f9571b50abc703b651  # True vaccine recipe (Halloween 2024)
 
 interchange:
 - 5ae9a18586f7746e381e16a3  # OLI cargo manifests
@@ -65,6 +66,7 @@ interchange:
 - 5b4c81bd86f77418a75ae159  # Chemical container item_quest_chem_container3
 - 64e74a5ac2b4f829615ec336  # item_quest_clock_11 (Out of Time)
 - 667a8ef464eea5fdef0db135  # item_quest_gamemagazine
+- 671a406a6d315b526708f103  # Stolen weapon case
 
 factory4_day:
 - 591093bb86f7747caa7bb2ee  # On the neck of the dead scav in the bunker (Postman Pat Part 2)
@@ -109,6 +111,10 @@ laboratory:
 - 6398a4cfb5992f573c6562b3  # Secured tape
 - 64e74a44c2b4f829615ec334  # Picture 8
 - 666879d498b97e3a8f09f1ae  # Item_barter_medical_transilluminator_quest
+- 6707cef3571b50abc703b64f  # Infected blood sample (Halloween 2024)
+- 6707cf827d279daad80fa95f  # Vaccine sample IV (Halloween 2024)
+- 6707cd70aab679420007e018  # TG-Vi-24 sample (Halloween 2024)
+- 6707cc67cc1667e49e0f7232  # Infected blood sample (Halloween 2024)
 #- 64e74a44c2b4f829615ec334  # item_quest_clock_08 (Out of Time) #1 REMOVED BY BSG
 #- 64bdcfed8f3a947a990aa49a  # Hermetic container for storing various chemicals #1 REMOVED BY BSG
 #- 64bdd008b0bf3baa6702f35f  # Hermetic container for storing various chemicals #2 REMOVED BY BSG
