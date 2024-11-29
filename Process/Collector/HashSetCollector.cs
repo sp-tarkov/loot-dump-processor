@@ -23,4 +23,9 @@ public class HashSetCollector : ICollector
     {
         return processedDumps.ToList();
     }
+
+    public void Clear()
+    {
+        processedDumps.Clear();
+    }
 }
