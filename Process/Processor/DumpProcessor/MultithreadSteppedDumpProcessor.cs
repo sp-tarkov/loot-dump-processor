@@ -17,8 +17,6 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
 
     private static readonly List<Task> Runners = new();
 
-    private static readonly BlockingCollection<PartialData> _partialDataToProcess = new();
-
     // if we need to, this variable can be moved to use the factory, but since the factory
     // needs a locking mechanism to prevent dictionary access exceptions, its better to keep
     // a reference to use here
@@ -255,6 +253,9 @@ public class MultithreadSteppedDumpProcessor : IDumpProcessor
                 looseLootCounts.ItemProperties = actualDictionaryItemProperties.GetKey();
 
                 dumpProcessData.LooseLootCounts.Add(mapName, looseLootCounts.GetKey());
+
+                BlockingCollection<PartialData> _partialDataToProcess = new();
+                
                 // add the items to the queue
                 foreach (var partialData in partialFileMetaData)
                 {

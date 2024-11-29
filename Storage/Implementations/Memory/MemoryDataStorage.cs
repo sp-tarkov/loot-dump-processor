@@ -47,4 +47,12 @@ public class MemoryDataStorage : IDataStorage
     {
         return string.Join("-", key.GetLookupIndex());
     }
+
+    public void Clear()
+    {
+        lock (_cacheObjectLock)
+        {
+            CachedObjects.Clear();
+        }
+    }
 }

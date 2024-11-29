@@ -42,4 +42,16 @@ public class DumpCollector : ICollector
 
         return processedDumps;
     }
+
+    public void Clear()
+    {
+        lock (lockObject)
+        {
+            foreach (var file in Directory.GetFiles(DumpLocation))
+            {
+                File.Delete(file);
+            }
+            processedDumps.Clear();
+        }
+    }
 }

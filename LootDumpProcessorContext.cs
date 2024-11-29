@@ -54,6 +54,10 @@ public static class LootDumpProcessorContext
         return _forcedStatic;
     }
 
+    /// <summary>
+    /// Not Used
+    /// </summary>
+    /// <returns></returns>
     public static Dictionary<string, MapDirectoryMapping> GetDirectoryMappings()
     {
         lock (_mapDirectoryMappingsLock)
