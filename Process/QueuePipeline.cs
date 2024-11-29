@@ -23,11 +23,7 @@ public class QueuePipeline : IPipeline
     private static readonly List<Task> Runners = new();
     private static readonly List<Task> Renamers = new();
 
-    private readonly List<string> _mapNames =
-    [
-        "bigmap", "factory4_day", "factory4_night", "interchange", "laboratory", "lighthouse", "rezervbase", "sandbox", "sandbox_high", "shorline",
-        "tarkovstreets", "woods"
-    ];
+    private readonly List<string> _mapNames = LootDumpProcessorContext.GetConfig().MapsToProcess;
 
     private static readonly Dictionary<string, IPreProcessReader> _preProcessReaders;
 
@@ -280,7 +276,7 @@ public class QueuePipeline : IPipeline
     private void ProcessFilesFromDumpsPerMap(int threads, ICollector collector, string mapName)
     {
         // Gather all files, sort them by date descending and then add them into the processing queue
-        GatherFiles().FindAll(f => f.ToLower().Contains(mapName)).OrderByDescending(f =>
+        GatherFiles().FindAll(f => f.ToLower().Contains($"{mapName}--")).OrderByDescending(f =>
             {
                 FileDateParser.TryParseFileDate(f, out var date);
                 return date;
@@ -387,10 +383,7 @@ public class QueuePipeline : IPipeline
             {
                 while (_filesToRename.TryTake(out var file, TimeSpan.FromMilliseconds(5000)))
                 {
-                    // Todo: make this better
-                    if (file.Contains("woods") || file.Contains("interchange") || file.Contains("factory4_day") || file.Contains("factory4_night") ||
-                        file.Contains("laboratory") || file.Contains("bigmap") || file.Contains("lighthouse") || file.Contains("rezervbase") || 
-                        file.Contains("sandbox") || file.Contains("sandbox_high") || file.Contains("shoreline") || file.Contains("tarkovstreets"))
+                    if (_mapNames.Any(x => file.Contains(x)))
                     {
                         continue;
                     }
