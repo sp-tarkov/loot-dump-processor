@@ -191,7 +191,7 @@ public class QueuePipeline : IPipeline
 
     /// <summary>
     /// Gets all files and adds them to the processor.
-    /// TODO: Want to split this up to be per map to hopefully reduce Memory usage
+    /// use per map version now
     /// </summary>
     /// <param name="threads"></param>
     /// <param name="collector"></param>
