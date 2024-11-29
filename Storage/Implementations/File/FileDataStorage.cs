@@ -28,6 +28,6 @@ public class FileDataStorage : IDataStorage
 
     public void Clear()
     {
-        throw new NotImplementedException();
+        // leaving empty so this the File version can still be used it needed
     }
 }
