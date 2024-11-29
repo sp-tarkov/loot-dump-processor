@@ -17,8 +17,10 @@ namespace LootDumpProcessor.Process;
 
 public class QueuePipeline : IPipeline
 {
+    private static readonly BlockingCollection<string> _filesToRename = new();
     private static readonly BlockingCollection<string> _filesToProcess = new();
     private static readonly List<Task> Runners = new();
+    private static readonly List<Task> Renamers = new();
 
     private static readonly Dictionary<string, IPreProcessReader> _preProcessReaders;
 
@@ -43,8 +45,12 @@ public class QueuePipeline : IPipeline
         // We add 2 more threads to the total count to account for subprocesses and others
         int threads = LootDumpProcessorContext.GetConfig().Threads;
         ThreadPool.SetMaxThreads(threads + 2, threads + 2);
+
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+        {
             LoggerFactory.GetInstance().Log("Gathering files to begin processing", LogLevel.Info);
+        }
+
         try
         {
             FixFilesFromDumps(threads);
@@ -66,7 +72,9 @@ public class QueuePipeline : IPipeline
         var inputPath = LootDumpProcessorContext.GetConfig().ReaderConfig.DumpFilesLocation;
 
         if (inputPath == null || inputPath.Count == 0)
+        {
             throw new Exception("Reader dumpFilesLocations must be set to a valid value");
+        }
 
         // We gather up all files into a queue
         var queuedFilesToProcess = GetFileQueue(inputPath);
@@ -79,7 +87,9 @@ public class QueuePipeline : IPipeline
         var gatheredFiles = new List<string>();
 
         if (queuedFilesToProcess.Count == 0)
+        {
             throw new Exception("No files matched accepted extension types in configs");
+        }
 
         var fileFilters = GetFileFilters() ?? new Dictionary<string, IFileFilter>();
 
@@ -93,8 +103,7 @@ public class QueuePipeline : IPipeline
                 if (preProcessor.TryPreProcess(file, out var outputFiles, out var outputDirectories))
                 {
                     // all new directories need to be processed as well
-                    GetFileQueue(outputDirectories).ToList()
-                        .ForEach(queuedFilesToProcess.Enqueue);
+                    GetFileQueue(outputDirectories).ToList().ForEach(queuedFilesToProcess.Enqueue);
                     // all output files need to be queued as well
                     outputFiles.ForEach(queuedFilesToProcess.Enqueue);
                 }
@@ -105,7 +114,9 @@ public class QueuePipeline : IPipeline
                 if (fileFilters.TryGetValue(extension, out var filter))
                 {
                     if (filter.Accept(file))
+                    {
                         gatheredFiles.Add(file);
+                    }
                 }
                 else
                 {
@@ -134,17 +145,28 @@ public class QueuePipeline : IPipeline
         {
             // Check the input file to be sure its going to have data on it.
             if (!Directory.Exists(path))
+            {
                 throw new Exception($"Input directory \"{inputPath}\" could not be found");
+            }
+
             // If we should process subfolder, queue them up as well
             if (LootDumpProcessorContext.GetConfig().ReaderConfig.ProcessSubFolders)
+            {
                 foreach (var directory in Directory.GetDirectories(path))
+                {
                     queuedPathsToProcess.Enqueue(directory);
+                }
+            }
 
             var files = Directory.GetFiles(path);
 
             foreach (var file in files)
+            {
                 if (acceptedFileExtension.Contains(Path.GetExtension(file)[1..].ToLower()))
+                {
                     queuedFilesToProcess.Enqueue(file);
+                }
+            }
         }
 
         return queuedFilesToProcess;
@@ -161,6 +183,12 @@ public class QueuePipeline : IPipeline
             );
     }
 
+    /// <summary>
+    /// Gets all files and adds them to the processor.
+    /// TODO: Want to split this up to be per map to hopefully reduce Memory usage
+    /// </summary>
+    /// <param name="threads"></param>
+    /// <param name="collector"></param>
     private void ProcessFilesFromDumps(int threads, ICollector collector)
     {
         // Gather all files, sort them by date descending and then add them into the processing queue
@@ -172,13 +200,18 @@ public class QueuePipeline : IPipeline
         ).ToList().ForEach(f => _filesToProcess.Add(f));
 
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+        {
             LoggerFactory.GetInstance().Log("Files sorted and ready to begin pre-processing", LogLevel.Info);
+        }
 
         // We startup all the threads and collect them into a runners list
         for (int i = 0; i < threads; i++)
         {
             if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            {
                 LoggerFactory.GetInstance().Log("Creating pre-processing threads", LogLevel.Info);
+            }
+
             Runners.Add(
                 Task.Factory.StartNew(
                     () =>
@@ -190,14 +223,18 @@ public class QueuePipeline : IPipeline
                                 var reader = IntakeReaderFactory.GetInstance();
                                 var processor = FileProcessorFactory.GetInstance();
                                 if (reader.Read(file, out var basicInfo))
+                                {
                                     collector.Hold(processor.Process(basicInfo));
+                                }
                             }
                             catch (Exception e)
                             {
                                 if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
+                                {
                                     LoggerFactory.GetInstance().Log(
                                         $"Error occurred while processing file {file}\n{e.Message}\n{e.StackTrace}",
                                         LogLevel.Error);
+                                }
                             }
                         }
                     },
@@ -209,14 +246,18 @@ public class QueuePipeline : IPipeline
         while (!Runners.All(r => r.IsCompleted))
         {
             if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            {
                 LoggerFactory.GetInstance().Log(
                     $"One or more file processors are still processing files. Waiting {LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs}ms before checking again",
                     LogLevel.Info);
+            }
             Thread.Sleep(TimeSpan.FromMilliseconds(LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs));
         }
 
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+        {
             LoggerFactory.GetInstance().Log("Pre-processing finished", LogLevel.Info);
+        }
         // Single writer instance to collect results
         var writer = WriterFactory.GetInstance();
         // Single collector instance to collect results
@@ -224,9 +265,10 @@ public class QueuePipeline : IPipeline
         writer.WriteAll(dumpProcessor.ProcessDumps(collector.Retrieve()));
     }
 
-    private static readonly BlockingCollection<string> _queuedFiles = new();
-    private static readonly List<Task> _tasks = new();
-
+    /// <summary>
+    /// Adds map name to file if they dont have it already.
+    /// </summary>
+    /// <param name="threads">Number of threads to use</param>
     private void FixFilesFromDumps(int threads)
     {
         var inputPath = LootDumpProcessorContext.GetConfig().ReaderConfig.DumpFilesLocation;
@@ -236,7 +278,7 @@ public class QueuePipeline : IPipeline
             throw new Exception("Reader dumpFilesLocations must be set to a valid value");
         }
 
-        GetFileQueue(inputPath).ToList().ForEach(f => _queuedFiles.Add(f));
+        GetFileQueue(inputPath).ToList().ForEach(f => _filesToRename.Add(f));
 
         var jsonUtil = JsonSerializerFactory.GetInstance(JsonSerializerTypes.DotNet);
 
@@ -247,9 +289,9 @@ public class QueuePipeline : IPipeline
                 LoggerFactory.GetInstance().Log("Creating file-processing threads", LogLevel.Info);
             }
 
-            _tasks.Add(Task.Factory.StartNew(() =>
+            Renamers.Add(Task.Factory.StartNew(() =>
             {
-                while (_queuedFiles.TryTake(out var file, TimeSpan.FromMilliseconds(5000)))
+                while (_filesToRename.TryTake(out var file, TimeSpan.FromMilliseconds(5000)))
                 {
                     // Todo: make this better
                     if (file.Contains("woods") || file.Contains("interchange") || file.Contains("factory4_day") || file.Contains("laboratory") ||
@@ -280,7 +322,7 @@ public class QueuePipeline : IPipeline
             }, TaskCreationOptions.LongRunning));
         }
 
-        while (!_tasks.All(r => r.IsCompleted))
+        while (!Runners.All(r => r.IsCompleted))
         {
             if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
             {
