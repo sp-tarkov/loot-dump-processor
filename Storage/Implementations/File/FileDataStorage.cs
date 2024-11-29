@@ -25,4 +25,9 @@ public class FileDataStorage : IDataStorage
     {
         throw new NotImplementedException();
     }
+
+    public void Clear()
+    {
+        throw new NotImplementedException();
+    }
 }
