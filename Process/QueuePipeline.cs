@@ -11,6 +11,7 @@ using LootDumpProcessor.Process.Reader.Intake;
 using LootDumpProcessor.Process.Reader.PreProcess;
 using LootDumpProcessor.Process.Writer;
 using LootDumpProcessor.Serializers.Json;
+using LootDumpProcessor.Storage;
 using LootDumpProcessor.Utils;
 
 namespace LootDumpProcessor.Process;
@@ -21,6 +22,12 @@ public class QueuePipeline : IPipeline
     private static readonly BlockingCollection<string> _filesToProcess = new();
     private static readonly List<Task> Runners = new();
     private static readonly List<Task> Renamers = new();
+
+    private readonly List<string> _mapNames =
+    [
+        "bigmap", "factory4_day", "factory4_night", "interchange", "laboratory", "lighthouse", "rezervbase", "sandbox", "sandbox_high", "shorline",
+        "tarkovstreets", "woods"
+    ];
 
     private static readonly Dictionary<string, IPreProcessReader> _preProcessReaders;
 
@@ -54,7 +61,10 @@ public class QueuePipeline : IPipeline
         try
         {
             FixFilesFromDumps(threads);
-            ProcessFilesFromDumps(threads, collector);
+            foreach (var mapName in _mapNames)
+            {
+                ProcessFilesFromDumpsPerMap(threads, collector, mapName);
+            }
         }
         finally
         {
@@ -251,6 +261,7 @@ public class QueuePipeline : IPipeline
                     $"One or more file processors are still processing files. Waiting {LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs}ms before checking again",
                     LogLevel.Info);
             }
+
             Thread.Sleep(TimeSpan.FromMilliseconds(LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs));
         }
 
@@ -258,11 +269,94 @@ public class QueuePipeline : IPipeline
         {
             LoggerFactory.GetInstance().Log("Pre-processing finished", LogLevel.Info);
         }
+
         // Single writer instance to collect results
         var writer = WriterFactory.GetInstance();
         // Single collector instance to collect results
         var dumpProcessor = DumpProcessorFactory.GetInstance();
         writer.WriteAll(dumpProcessor.ProcessDumps(collector.Retrieve()));
+    }
+
+    private void ProcessFilesFromDumpsPerMap(int threads, ICollector collector, string mapName)
+    {
+        // Gather all files, sort them by date descending and then add them into the processing queue
+        GatherFiles().FindAll(f => f.ToLower().Contains(mapName)).OrderByDescending(f =>
+            {
+                FileDateParser.TryParseFileDate(f, out var date);
+                return date;
+            }
+        ).ToList().ForEach(f => _filesToProcess.Add(f));
+
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+        {
+            LoggerFactory.GetInstance().Log("Files sorted and ready to begin pre-processing", LogLevel.Info);
+        }
+
+        // We startup all the threads and collect them into a runners list
+        for (int i = 0; i < threads; i++)
+        {
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            {
+                LoggerFactory.GetInstance().Log("Creating pre-processing threads", LogLevel.Info);
+            }
+
+            Runners.Add(
+                Task.Factory.StartNew(
+                    () =>
+                    {
+                        while (_filesToProcess.TryTake(out var file, TimeSpan.FromMilliseconds(5000)))
+                        {
+                            try
+                            {
+                                var reader = IntakeReaderFactory.GetInstance();
+                                var processor = FileProcessorFactory.GetInstance();
+                                if (reader.Read(file, out var basicInfo))
+                                {
+                                    collector.Hold(processor.Process(basicInfo));
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
+                                {
+                                    LoggerFactory.GetInstance().Log(
+                                        $"Error occurred while processing file {file}\n{e.Message}\n{e.StackTrace}",
+                                        LogLevel.Error);
+                                }
+                            }
+                        }
+                    },
+                    TaskCreationOptions.LongRunning)
+            );
+        }
+
+        // Wait until all runners are done processing
+        while (!Runners.All(r => r.IsCompleted))
+        {
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            {
+                LoggerFactory.GetInstance().Log(
+                    $"One or more file processors are still processing files. Waiting {LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs}ms before checking again",
+                    LogLevel.Info);
+            }
+
+            Thread.Sleep(TimeSpan.FromMilliseconds(LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs));
+        }
+
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+        {
+            LoggerFactory.GetInstance().Log("Pre-processing finished", LogLevel.Info);
+        }
+
+        // Single writer instance to collect results
+        var writer = WriterFactory.GetInstance();
+        // Single collector instance to collect results
+        var dumpProcessor = DumpProcessorFactory.GetInstance();
+        writer.WriteAll(dumpProcessor.ProcessDumps(collector.Retrieve()));
+
+        // clear collector and datastorage as we process per map now
+        collector.Clear();
+        DataStorageFactory.GetInstance().Clear();
     }
 
     /// <summary>
@@ -294,10 +388,9 @@ public class QueuePipeline : IPipeline
                 while (_filesToRename.TryTake(out var file, TimeSpan.FromMilliseconds(5000)))
                 {
                     // Todo: make this better
-                    if (file.Contains("woods") || file.Contains("interchange") || file.Contains("factory4_day") || file.Contains("laboratory") ||
-                        file.Contains("bigmap") ||
-                        file.Contains("lighthouse") || file.Contains("rezervbase") || file.Contains("sandbox") || file.Contains("sandbox_high") ||
-                        file.Contains("shoreline") || file.Contains("tarkovstreets"))
+                    if (file.Contains("woods") || file.Contains("interchange") || file.Contains("factory4_day") || file.Contains("factory4_night") ||
+                        file.Contains("laboratory") || file.Contains("bigmap") || file.Contains("lighthouse") || file.Contains("rezervbase") || 
+                        file.Contains("sandbox") || file.Contains("sandbox_high") || file.Contains("shoreline") || file.Contains("tarkovstreets"))
                     {
                         continue;
                     }
@@ -322,7 +415,7 @@ public class QueuePipeline : IPipeline
             }, TaskCreationOptions.LongRunning));
         }
 
-        while (!Runners.All(r => r.IsCompleted))
+        while (!Renamers.All(r => r.IsCompleted))
         {
             if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
             {
