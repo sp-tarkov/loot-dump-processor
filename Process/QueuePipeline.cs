@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using LootDumpProcessor.Logger;
+using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Process.Collector;
 using LootDumpProcessor.Process.Processor;
 using LootDumpProcessor.Process.Processor.DumpProcessor;
@@ -9,6 +10,7 @@ using LootDumpProcessor.Process.Reader.Filters;
 using LootDumpProcessor.Process.Reader.Intake;
 using LootDumpProcessor.Process.Reader.PreProcess;
 using LootDumpProcessor.Process.Writer;
+using LootDumpProcessor.Serializers.Json;
 using LootDumpProcessor.Utils;
 
 namespace LootDumpProcessor.Process;
@@ -45,64 +47,8 @@ public class QueuePipeline : IPipeline
             LoggerFactory.GetInstance().Log("Gathering files to begin processing", LogLevel.Info);
         try
         {
-            // Gather all files, sort them by date descending and then add them into the processing queue
-            GatherFiles().OrderByDescending(f =>
-                {
-                    FileDateParser.TryParseFileDate(f, out var date);
-                    return date;
-                }
-            ).ToList().ForEach(f => _filesToProcess.Add(f));
-            
-            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
-                LoggerFactory.GetInstance().Log("Files sorted and ready to begin pre-processing", LogLevel.Info);
-            
-            // We startup all the threads and collect them into a runners list
-            for (int i = 0; i < threads; i++)
-            {
-                if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
-                    LoggerFactory.GetInstance().Log("Creating pre-processing threads", LogLevel.Info);
-                Runners.Add(
-                    Task.Factory.StartNew(
-                        () =>
-                        {
-                            while (_filesToProcess.TryTake(out var file, TimeSpan.FromMilliseconds(5000)))
-                            {
-                                try
-                                {
-                                    var reader = IntakeReaderFactory.GetInstance();
-                                    var processor = FileProcessorFactory.GetInstance();
-                                    if (reader.Read(file, out var basicInfo))
-                                        collector.Hold(processor.Process(basicInfo));
-                                }
-                                catch (Exception e)
-                                {
-                                    if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
-                                        LoggerFactory.GetInstance().Log(
-                                            $"Error occurred while processing file {file}\n{e.Message}\n{e.StackTrace}",
-                                            LogLevel.Error);
-                                }
-                            }
-                        },
-                        TaskCreationOptions.LongRunning)
-                );
-            }
-
-            // Wait until all runners are done processing
-            while (!Runners.All(r => r.IsCompleted))
-            {
-                if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
-                    LoggerFactory.GetInstance().Log(
-                        $"One or more file processors are still processing files. Waiting {LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs}ms before checking again",
-                        LogLevel.Info);
-                Thread.Sleep(TimeSpan.FromMilliseconds(LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs));
-            }
-            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
-                LoggerFactory.GetInstance().Log("Pre-processing finished", LogLevel.Info);
-            // Single writer instance to collect results
-            var writer = WriterFactory.GetInstance();
-            // Single collector instance to collect results
-            var dumpProcessor = DumpProcessorFactory.GetInstance();
-            writer.WriteAll(dumpProcessor.ProcessDumps(collector.Retrieve()));
+            FixFilesFromDumps(threads);
+            ProcessFilesFromDumps(threads, collector);
         }
         finally
         {
@@ -213,5 +159,141 @@ public class QueuePipeline : IPipeline
                 t => FileFilterFactory.GetInstance(t).GetExtension(),
                 FileFilterFactory.GetInstance
             );
+    }
+
+    private void ProcessFilesFromDumps(int threads, ICollector collector)
+    {
+        // Gather all files, sort them by date descending and then add them into the processing queue
+        GatherFiles().OrderByDescending(f =>
+            {
+                FileDateParser.TryParseFileDate(f, out var date);
+                return date;
+            }
+        ).ToList().ForEach(f => _filesToProcess.Add(f));
+
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            LoggerFactory.GetInstance().Log("Files sorted and ready to begin pre-processing", LogLevel.Info);
+
+        // We startup all the threads and collect them into a runners list
+        for (int i = 0; i < threads; i++)
+        {
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+                LoggerFactory.GetInstance().Log("Creating pre-processing threads", LogLevel.Info);
+            Runners.Add(
+                Task.Factory.StartNew(
+                    () =>
+                    {
+                        while (_filesToProcess.TryTake(out var file, TimeSpan.FromMilliseconds(5000)))
+                        {
+                            try
+                            {
+                                var reader = IntakeReaderFactory.GetInstance();
+                                var processor = FileProcessorFactory.GetInstance();
+                                if (reader.Read(file, out var basicInfo))
+                                    collector.Hold(processor.Process(basicInfo));
+                            }
+                            catch (Exception e)
+                            {
+                                if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
+                                    LoggerFactory.GetInstance().Log(
+                                        $"Error occurred while processing file {file}\n{e.Message}\n{e.StackTrace}",
+                                        LogLevel.Error);
+                            }
+                        }
+                    },
+                    TaskCreationOptions.LongRunning)
+            );
+        }
+
+        // Wait until all runners are done processing
+        while (!Runners.All(r => r.IsCompleted))
+        {
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+                LoggerFactory.GetInstance().Log(
+                    $"One or more file processors are still processing files. Waiting {LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs}ms before checking again",
+                    LogLevel.Info);
+            Thread.Sleep(TimeSpan.FromMilliseconds(LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs));
+        }
+
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            LoggerFactory.GetInstance().Log("Pre-processing finished", LogLevel.Info);
+        // Single writer instance to collect results
+        var writer = WriterFactory.GetInstance();
+        // Single collector instance to collect results
+        var dumpProcessor = DumpProcessorFactory.GetInstance();
+        writer.WriteAll(dumpProcessor.ProcessDumps(collector.Retrieve()));
+    }
+
+    private static readonly BlockingCollection<string> _queuedFiles = new();
+    private static readonly List<Task> _tasks = new();
+
+    private void FixFilesFromDumps(int threads)
+    {
+        var inputPath = LootDumpProcessorContext.GetConfig().ReaderConfig.DumpFilesLocation;
+
+        if (inputPath == null || inputPath.Count == 0)
+        {
+            throw new Exception("Reader dumpFilesLocations must be set to a valid value");
+        }
+
+        GetFileQueue(inputPath).ToList().ForEach(f => _queuedFiles.Add(f));
+
+        var jsonUtil = JsonSerializerFactory.GetInstance(JsonSerializerTypes.DotNet);
+
+        for (var i = 0; i < threads; i++)
+        {
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            {
+                LoggerFactory.GetInstance().Log("Creating file-processing threads", LogLevel.Info);
+            }
+
+            _tasks.Add(Task.Factory.StartNew(() =>
+            {
+                while (_queuedFiles.TryTake(out var file, TimeSpan.FromMilliseconds(5000)))
+                {
+                    // Todo: make this better
+                    if (file.Contains("woods") || file.Contains("interchange") || file.Contains("factory4_day") || file.Contains("laboratory") ||
+                        file.Contains("bigmap") ||
+                        file.Contains("lighthouse") || file.Contains("rezervbase") || file.Contains("sandbox") || file.Contains("sandbox_high") ||
+                        file.Contains("shoreline") || file.Contains("tarkovstreets"))
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        var data = File.ReadAllText(file);
+                        var fileData = jsonUtil.Deserialize<RootData>(data);
+                        var newpath = file.Replace("resp", $"{fileData.Data.LocationLoot.Id.ToLower()}--resp");
+                        File.Move(file, newpath);
+                    }
+                    catch (Exception e)
+                    {
+                        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
+                        {
+                            LoggerFactory.GetInstance().Log(
+                                $"Error occurred while processing file {file}\n{e.Message}\n{e.StackTrace}",
+                                LogLevel.Error);
+                        }
+                    }
+                }
+            }, TaskCreationOptions.LongRunning));
+        }
+
+        while (!_tasks.All(r => r.IsCompleted))
+        {
+            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+            {
+                LoggerFactory.GetInstance()
+                    .Log($"one or more files are being processed. Waiting {LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs} ms", LogLevel.Info);
+            }
+
+            Thread.Sleep(TimeSpan.FromMilliseconds(LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs));
+        }
+
+        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
+        {
+            LoggerFactory.GetInstance().Log("File-processing finished", LogLevel.Info);
+        }
     }
 }
