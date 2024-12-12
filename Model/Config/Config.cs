@@ -57,4 +57,8 @@ public class Config
     [JsonProperty("containerIgnoreList")]
     [JsonPropertyName("containerIgnoreList")]
     public Dictionary<string, string[]> ContainerIgnoreList { get; set; }
+    
+    [JsonProperty("mapsToProcess")]
+    [JsonPropertyName("mapsToProcess")]
+    public List<string> MapsToProcess { get; set; }
 }
