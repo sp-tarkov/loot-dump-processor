@@ -60,5 +60,19 @@
       "container_City_SW_04_DesignStuff_00002",
       "Lootable_00063"
     ]
-  }
+  },
+  "mapsToProcess": [
+    "bigmap",
+    "factory4_day",
+    "factory4_night",
+    "interchange",
+    "laboratory",
+    "lighthouse",
+    "rezervbase",
+    "sandbox",
+    "sandbox_high",
+    "shorline",
+    "tarkovstreets",
+    "woods"
+  ]
 }

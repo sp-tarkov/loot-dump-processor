@@ -26,9 +26,6 @@
     <None Update="Config\forced_static.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Config\map_directory_mapping.yaml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Config\config.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

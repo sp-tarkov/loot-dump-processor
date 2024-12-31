@@ -7,4 +7,5 @@ public interface IDataStorage
     bool Exists(IKey t);
     T GetItem<T>(IKey key) where T : IKeyable;
     List<T> GetAll<T>();
+    void Clear();
 }
