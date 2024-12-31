@@ -17,6 +17,11 @@ bigmap:
 - 664fce7a90294949fe2d81cb  # Item_barter_info_host_quest
 - 66b22630a6b4e5ec7c02cdb7  # item_quest_instruments
 #- 64bd1abff3a668f08805ce4f  # Secure Flash drive V4 REMOVED BY BSG
+- 675f7acc4076a741a3061566  # TerraGroup shipment report
+- 675f80d4fe1b59cf490d3527  # Box with upgraded tools
+- 675f7f224076a741a3061568  # Skier's wallet
+- 675f7b168d28a25ec7007dbb  # Delivery crew report
+- 67499d0eeca8acb2d2061639  # Incriminating letter
 
 woods:
 - 5938878586f7741b797c562f  # Case 0052
@@ -54,6 +59,8 @@ shoreline:
 - 666073159916667083033cb9  # Item_quest_tattered_diary
 - 66760b3deb51b08bd40c2b08  # item_barter_electr_hdd_NosQuests_quest
 - 6707d1f9571b50abc703b651  # True vaccine recipe (Halloween 2024)
+- 67499adbeca8acb2d2061634  # Cargo for Prapor
+- 67586bee39b1b82b0d0f9d06  # Special 40-degree fuel
 
 interchange:
 - 5ae9a18586f7746e381e16a3  # OLI cargo manifests
@@ -67,6 +74,7 @@ interchange:
 - 64e74a5ac2b4f829615ec336  # item_quest_clock_11 (Out of Time)
 - 667a8ef464eea5fdef0db135  # item_quest_gamemagazine
 - 671a406a6d315b526708f103  # Stolen weapon case
+- 67586bee39b1b82b0d0f9d06  # Special 40-degree fuel
 
 factory4_day:
 - 591093bb86f7747caa7bb2ee  # On the neck of the dead scav in the bunker (Postman Pat Part 2)
@@ -99,6 +107,7 @@ lighthouse:
 - 64e74a64aac4cd0a7264ecdf  # item_quest_clock_12 (Out of Time)
 - 661666458c2aa9cb1602503b  # Hard drive
 # - 64b91627dd13d43b9d01d6d1  # Toughbook reinforced laptop (Event quest) REMOVED BY BSG
+- 67586bee39b1b82b0d0f9d06  # Special 40-degree fuel
 
 rezervbase:
 - 60915994c49cf53e4772cc38  # Military documents 1 on the table inside bunker control room (Documents)
@@ -110,6 +119,9 @@ rezervbase:
 - 60c080eb991ac167ad1c3ad4  # MBT Integrated Navigation System
 - 6398a072e301557ae24cec92  # Original Lightkeeper Intelligence (Snatch)
 - 64e74a4baac4cd0a7264ecdd  # item_quest_clock_09 (Out of Time)
+- 67499b3eeca8acb2d2061636  # Lightkeeper's case
+- 67586bee39b1b82b0d0f9d06  # Special 40-degree fuel
+- 67499b9b909d2013670a5029  # KOSA UAV electronic jamming device
 
 laboratory:
 - 5eff135be0d3331e9d282b7b  # Flash drive marked with blue tape (TerraGroup employee)
