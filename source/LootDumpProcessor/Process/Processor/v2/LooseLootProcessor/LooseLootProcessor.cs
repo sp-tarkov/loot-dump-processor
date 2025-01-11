@@ -6,7 +6,6 @@ using LootDumpProcessor.Storage;
 using LootDumpProcessor.Storage.Collections;
 using LootDumpProcessor.Utils;
 using Microsoft.Extensions.Logging;
-using NumSharp;
 
 namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor
 {
@@ -61,7 +60,7 @@ namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor
         )
         {
             var config = LootDumpProcessorContext.GetConfig();
-            var spawnPointTolerance = config.ProcessorConfig.SpawnPointToleranceForForced / 100;
+            var spawnPointTolerance = config.ProcessorConfig.SpawnPointToleranceForForced / 100.0;
             var looseLootDistribution = new LooseLootRoot();
 
             var probabilities = new Dictionary<string, double>();
@@ -73,9 +72,9 @@ namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor
                 probabilities[itemId] = (double)count / mapCount;
             }
 
-            var spawnPointCount = looseLootCountsItem.MapSpawnpointCount.Select(Convert.ToDouble);
-            var initialMean = np.mean(np.array(spawnPointCount)).ToArray<double>().First();
-            var tolerancePercentage = config.ProcessorConfig.LooseLootCountTolerancePercentage / 100;
+            var spawnPointCount = looseLootCountsItem.MapSpawnpointCount.Select(Convert.ToDouble).ToList();
+            var initialMean = CalculateMean(spawnPointCount);
+            var tolerancePercentage = config.ProcessorConfig.LooseLootCountTolerancePercentage / 100.0;
             var highThreshold = initialMean * (1 + tolerancePercentage);
 
             looseLootCountsItem.MapSpawnpointCount = looseLootCountsItem.MapSpawnpointCount
@@ -84,8 +83,8 @@ namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor
 
             looseLootDistribution.SpawnPointCount = new SpawnPointCount
             {
-                Mean = np.mean(np.array(looseLootCountsItem.MapSpawnpointCount)),
-                Std = np.std(np.array(looseLootCountsItem.MapSpawnpointCount))
+                Mean = CalculateMean(looseLootCountsItem.MapSpawnpointCount.Select(Convert.ToDouble).ToList()),
+                Std = CalculateStandardDeviation(looseLootCountsItem.MapSpawnpointCount.Select(Convert.ToDouble).ToList())
             };
             looseLootDistribution.SpawnPointsForced = new List<SpawnPointsForced>();
             looseLootDistribution.SpawnPoints = new List<SpawnPoint>();
@@ -226,6 +225,22 @@ namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor
             }
 
             return looseLootDistribution;
+        }
+
+        private double CalculateMean(IReadOnlyList<double> numbers)
+        {
+            if (!numbers.Any()) return 0;
+
+            return numbers.Average();
+        }
+
+        private double CalculateStandardDeviation(IReadOnlyList<double> numbers)
+        {
+            if (numbers.Count == 0) return 0;
+
+            var mean = CalculateMean(numbers);
+            var variance = numbers.Sum(num => Math.Pow(num - mean, 2)) / numbers.Count;
+            return Math.Sqrt(variance);
         }
     }
 }
