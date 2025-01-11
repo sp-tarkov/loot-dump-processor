@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using LootDumpProcessor.Process;
 using LootDumpProcessor.Process.Processor.DumpProcessor;
 using LootDumpProcessor.Process.Processor.FileProcessor;
