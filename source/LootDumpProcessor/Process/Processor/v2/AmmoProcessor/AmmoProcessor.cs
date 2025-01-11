@@ -4,9 +4,12 @@ using Microsoft.Extensions.Logging;
 
 namespace LootDumpProcessor.Process.Processor.v2.AmmoProcessor;
 
-public class AmmoProcessor(ILogger<AmmoProcessor> logger) : IAmmoProcessor
+public class AmmoProcessor(ILogger<AmmoProcessor> logger, ITarkovItemsProvider tarkovItemsProvider) : IAmmoProcessor
 {
     private readonly ILogger<AmmoProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+    private readonly ITarkovItemsProvider _tarkovItemsProvider =
+        tarkovItemsProvider ?? throw new ArgumentNullException(nameof(tarkovItemsProvider));
 
     public IReadOnlyDictionary<string, List<AmmoDistribution>> CreateAmmoDistribution(
         string mapId,
@@ -14,7 +17,7 @@ public class AmmoProcessor(ILogger<AmmoProcessor> logger) : IAmmoProcessor
     {
         var ammoTemplates = containers
             .SelectMany(container => container.Items)
-            .Where(item => LootDumpProcessorContext.GetTarkovItems().IsBaseClass(item.Tpl, BaseClasses.Ammo))
+            .Where(item => _tarkovItemsProvider.IsBaseClass(item.Tpl, BaseClasses.Ammo))
             .Select(item => item.Tpl)
             .ToList();
 
@@ -22,7 +25,7 @@ public class AmmoProcessor(ILogger<AmmoProcessor> logger) : IAmmoProcessor
             .GroupBy(tpl => tpl)
             .Select(group => new CaliberTemplateCount
             {
-                Caliber = LootDumpProcessorContext.GetTarkovItems().AmmoCaliber(group.Key),
+                Caliber = _tarkovItemsProvider.AmmoCaliber(group.Key),
                 Template = group.Key,
                 Count = group.Count()
             })

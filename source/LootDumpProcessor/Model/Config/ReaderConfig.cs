@@ -22,15 +22,7 @@ public class ReaderConfig
     [JsonPropertyName("thresholdDate")]
     public string? ThresholdDate { get; set; }
 
-    [JsonProperty("acceptedFileExtensions")]
-    [JsonPropertyName("acceptedFileExtensions")]
-    public List<string> AcceptedFileExtensions { get; set; } = new();
-
     [JsonProperty("processSubFolders")]
     [JsonPropertyName("processSubFolders")]
     public bool ProcessSubFolders { get; set; }
-    
-    [JsonProperty("fileFilters")]
-    [JsonPropertyName("fileFilters")]
-    public List<FileFilterTypes>? FileFilters { get; set; }
 }

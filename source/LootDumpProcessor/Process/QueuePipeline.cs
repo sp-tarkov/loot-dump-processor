@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using LootDumpProcessor.Logger;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Process.Collector;
 using LootDumpProcessor.Process.Processor.DumpProcessor;
@@ -11,10 +10,15 @@ using LootDumpProcessor.Process.Writer;
 using LootDumpProcessor.Serializers.Json;
 using LootDumpProcessor.Storage;
 using LootDumpProcessor.Utils;
+using Microsoft.Extensions.Logging;
 
 namespace LootDumpProcessor.Process;
 
-public class QueuePipeline(IFileProcessor fileProcessor, IDumpProcessor dumpProcessor) : IPipeline
+public class QueuePipeline(
+    IFileProcessor fileProcessor, IDumpProcessor dumpProcessor, ILogger<QueuePipeline> logger,
+    IPreProcessReader preProcessReader, IFileFilter fileFilter, IIntakeReader intakeReader
+)
+    : IPipeline
 {
     private readonly IFileProcessor _fileProcessor =
         fileProcessor ?? throw new ArgumentNullException(nameof(fileProcessor));
@@ -22,24 +26,21 @@ public class QueuePipeline(IFileProcessor fileProcessor, IDumpProcessor dumpProc
     private readonly IDumpProcessor _dumpProcessor =
         dumpProcessor ?? throw new ArgumentNullException(nameof(dumpProcessor));
 
+    private readonly ILogger<QueuePipeline> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+    private readonly IPreProcessReader _preProcessReader =
+        preProcessReader ?? throw new ArgumentNullException(nameof(preProcessReader));
+
+    private readonly IFileFilter _fileFilter = fileFilter ?? throw new ArgumentNullException(nameof(fileFilter));
+
+    private readonly IIntakeReader
+        _intakeReader = intakeReader ?? throw new ArgumentNullException(nameof(intakeReader));
+
     private readonly List<string> _filesToRename = new();
     private readonly BlockingCollection<string> _filesToProcess = new();
 
     private readonly List<string> _mapNames = LootDumpProcessorContext.GetConfig().MapsToProcess;
 
-    private static readonly Dictionary<string, IPreProcessReader> _preProcessReaders;
-
-    static QueuePipeline()
-    {
-        _preProcessReaders = LootDumpProcessorContext.GetConfig()
-            .ReaderConfig
-            .PreProcessorConfig
-            ?.PreProcessors
-            ?.ToDictionary(
-                t => PreProcessReaderFactory.GetInstance(t).GetHandleExtension().ToLower(),
-                PreProcessReaderFactory.GetInstance
-            ) ?? new Dictionary<string, IPreProcessReader>();
-    }
 
     public async Task DoProcess()
     {
@@ -47,10 +48,7 @@ public class QueuePipeline(IFileProcessor fileProcessor, IDumpProcessor dumpProc
         var collector = CollectorFactory.GetInstance();
         collector.Setup();
 
-        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
-        {
-            LoggerFactory.GetInstance().Log("Gathering files to begin processing", LogLevel.Info);
-        }
+        _logger.LogInformation("Gathering files to begin processing");
 
         try
         {
@@ -62,11 +60,7 @@ public class QueuePipeline(IFileProcessor fileProcessor, IDumpProcessor dumpProc
         }
         finally
         {
-            // use dispose on the preprocessreaders to eliminate any temporary files generated
-            foreach (var (_, value) in _preProcessReaders)
-            {
-                value.Dispose();
-            }
+            _preProcessReader.Dispose();
         }
     }
 
@@ -95,36 +89,30 @@ public class QueuePipeline(IFileProcessor fileProcessor, IDumpProcessor dumpProc
             throw new Exception("No files matched accepted extension types in configs");
         }
 
-        var fileFilters = GetFileFilters() ?? new Dictionary<string, IFileFilter>();
-
         while (queuedFilesToProcess.TryDequeue(out var file))
         {
             var extensionFull = Path.GetExtension(file);
             if (extensionFull.Length > 1)
             {
-                var extension = extensionFull[1..].ToLower();
-                // if there is a preprocessor, call it and preprocess the file, then add them to the queue
-                if (_preProcessReaders.TryGetValue(extension, out var preProcessor))
+                // if the preprocessor found something new to process or generated new files, add them to the queue
+                if (extensionFull == "7z" &&
+                    _preProcessReader.TryPreProcess(file, out var outputFiles, out var outputDirectories))
                 {
-                    // if the preprocessor found something new to process or generated new files, add them to the queue
-                    if (preProcessor.TryPreProcess(file, out var outputFiles, out var outputDirectories))
-                    {
-                        // all new directories need to be processed as well
-                        GetFileQueue(outputDirectories).ToList().ForEach(queuedFilesToProcess.Enqueue);
-                        // all output files need to be queued as well
-                        outputFiles.ForEach(queuedFilesToProcess.Enqueue);
-                    }
+                    // all new directories need to be processed as well
+                    GetFileQueue(outputDirectories).ToList().ForEach(queuedFilesToProcess.Enqueue);
+                    // all output files need to be queued as well
+                    outputFiles.ForEach(queuedFilesToProcess.Enqueue);
                 }
+
                 else
                 {
                     // if there is no preprocessor for the file, means its ready to filter or accept
-                    if (fileFilters.TryGetValue(extension, out var filter))
+
+                    if (_fileFilter.Accept(file))
                     {
-                        if (filter.Accept(file))
-                        {
-                            gatheredFiles.Add(file);
-                        }
+                        gatheredFiles.Add(file);
                     }
+
                     else
                     {
                         gatheredFiles.Add(file);
@@ -134,6 +122,7 @@ public class QueuePipeline(IFileProcessor fileProcessor, IDumpProcessor dumpProc
             else
             {
                 // Handle invalid extension
+                _logger.LogWarning("File '{File}' has an invalid extension.", file);
             }
         }
 
@@ -145,11 +134,6 @@ public class QueuePipeline(IFileProcessor fileProcessor, IDumpProcessor dumpProc
         var queuedPathsToProcess = new Queue<string>();
         var queuedFilesToProcess = new Queue<string>();
 
-        // Accepted file extensions on raw files
-        var acceptedFileExtension = LootDumpProcessorContext.GetConfig()
-            .ReaderConfig
-            .AcceptedFileExtensions
-            .Select(ex => ex.ToLower());
         inputPath.ForEach(p => queuedPathsToProcess.Enqueue(p));
 
         while (queuedPathsToProcess.TryDequeue(out var path))
@@ -173,25 +157,11 @@ public class QueuePipeline(IFileProcessor fileProcessor, IDumpProcessor dumpProc
 
             foreach (var file in files)
             {
-                if (acceptedFileExtension.Contains(Path.GetExtension(file)[1..].ToLower()))
-                {
-                    queuedFilesToProcess.Enqueue(file);
-                }
+                queuedFilesToProcess.Enqueue(file);
             }
         }
 
         return queuedFilesToProcess;
-    }
-
-    private Dictionary<string, IFileFilter>? GetFileFilters()
-    {
-        return LootDumpProcessorContext.GetConfig()
-            .ReaderConfig
-            .FileFilters
-            ?.ToDictionary(
-                t => FileFilterFactory.GetInstance(t).GetExtension(),
-                FileFilterFactory.GetInstance
-            );
     }
 
     private void ProcessFilesFromDumpsPerMap(ICollector collector, string mapName)
@@ -204,36 +174,24 @@ public class QueuePipeline(IFileProcessor fileProcessor, IDumpProcessor dumpProc
             }
         ).ToList().ForEach(f => _filesToProcess.Add(f));
 
-        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
-        {
-            LoggerFactory.GetInstance().Log("Files sorted and ready to begin pre-processing", LogLevel.Info);
-        }
+        _logger.LogInformation("Files sorted and ready to begin pre-processing");
 
         Parallel.ForEach(_filesToProcess, file =>
         {
             try
             {
-                var reader = IntakeReaderFactory.GetInstance();
-                if (reader.Read(file, out var basicInfo))
+                if (_intakeReader.Read(file, out var basicInfo))
                 {
                     collector.Hold(_fileProcessor.Process(basicInfo));
                 }
             }
             catch (Exception e)
             {
-                if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
-                {
-                    LoggerFactory.GetInstance().Log(
-                        $"Error occurred while processing file {file}\n{e.Message}\n{e.StackTrace}",
-                        LogLevel.Error);
-                }
+                _logger.LogError(e, "Error occurred while processing file {File}", file);
             }
         });
 
-        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
-        {
-            LoggerFactory.GetInstance().Log("Pre-processing finished", LogLevel.Info);
-        }
+        _logger.LogInformation("Pre-processing finished");
 
         // Single writer instance to collect results
         var writer = WriterFactory.GetInstance();
@@ -246,7 +204,7 @@ public class QueuePipeline(IFileProcessor fileProcessor, IDumpProcessor dumpProc
     }
 
     /// <summary>
-    /// Adds map name to file if they dont have it already.
+    /// Adds map name to file if they don't have it already.
     /// </summary>
     /// <param name="threads">Number of threads to use</param>
     private async Task FixFilesFromDumps()
@@ -275,18 +233,10 @@ public class QueuePipeline(IFileProcessor fileProcessor, IDumpProcessor dumpProc
             }
             catch (Exception e)
             {
-                if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
-                {
-                    LoggerFactory.GetInstance().Log(
-                        $"Error occurred while processing file {file}\n{e.Message}\n{e.StackTrace}",
-                        LogLevel.Error);
-                }
+                _logger.LogError(e, "Error occurred while processing file {File}", file);
             }
         });
 
-        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
-        {
-            LoggerFactory.GetInstance().Log("File-processing finished", LogLevel.Info);
-        }
+        _logger.LogInformation("File-processing finished");
     }
 }

@@ -1,81 +1,84 @@
 using System.Collections.Concurrent;
-using LootDumpProcessor.Logger;
+using System.Text.Json;
+using LootDumpProcessor;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Processing;
-using LootDumpProcessor.Serializers.Json;
+using LootDumpProcessor.Process.Reader.Intake;
 using LootDumpProcessor.Utils;
+using Microsoft.Extensions.Logging;
 
-namespace LootDumpProcessor.Process.Reader.Intake;
-
-public class JsonFileIntakeReader : IIntakeReader
+public class JsonFileIntakeReader(ILogger<JsonFileIntakeReader> logger) : IIntakeReader
 {
-    private static readonly IJsonSerializer _jsonSerializer = JsonSerializerFactory.GetInstance();
+    private readonly ILogger<JsonFileIntakeReader> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-    private static readonly HashSet<string>? _ignoredLocations =
-        LootDumpProcessorContext.GetConfig().ReaderConfig.IntakeReaderConfig?.IgnoredDumpLocations.ToHashSet();
+    private readonly HashSet<string>? _ignoredLocations = LootDumpProcessorContext.GetConfig()
+        .ReaderConfig.IntakeReaderConfig?.IgnoredDumpLocations.ToHashSet();
 
-    private static readonly ConcurrentDictionary<string, int> _totalMapDumpsCounter = new();
-    
+    private readonly ConcurrentDictionary<string, int> _totalMapDumpsCounter = new();
+
     public bool Read(string file, out BasicInfo basicInfo)
     {
-        var fileData = File.ReadAllText(file);
+        basicInfo = null;
+        string? fileData;
 
-        if (fileData == null)
+        try
         {
-            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
-                LoggerFactory.GetInstance().Log($"Couldnt parse date from file: {file}", LogLevel.Error);
-
-            basicInfo = null;
+            fileData = File.ReadAllText(file);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to read file: {File}", file);
             return false;
         }
 
-        // If the file format changes it may screw up this date parser
-        if (!FileDateParser.TryParseFileDate(file, out var date))
+        if (string.IsNullOrWhiteSpace(fileData))
         {
-            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Error))
-                LoggerFactory.GetInstance().Log($"Couldnt parse date from file: {file}", LogLevel.Error);
+            _logger.LogError("Could not parse data from file: {File}", file);
+            return false;
         }
 
-        var fi = _jsonSerializer.Deserialize<RootData>(fileData);
+        // If the file format changes, it may affect the date parser
+        if (!FileDateParser.TryParseFileDate(file, out var date))
+        {
+            _logger.LogError("Could not parse date from file: {File}", file);
+        }
+
+        var fi = JsonSerializer.Deserialize<RootData>(fileData);
         if (fi?.Data?.LocationLoot?.Name != null && (!_ignoredLocations?.Contains(fi.Data.LocationLoot.Name) ?? true))
         {
-            if (!_totalMapDumpsCounter.TryGetValue(fi.Data.LocationLoot.Name, out var counter))
-            {
-                counter = 0;
-                _totalMapDumpsCounter[fi.Data.LocationLoot.Name] = counter;
-            }
+            var mapName = fi.Data.LocationLoot.Name;
+            var mapId = fi.Data.LocationLoot.Id.ToLower();
 
-            if (counter < (LootDumpProcessorContext.GetConfig().ReaderConfig.IntakeReaderConfig?.MaxDumpsPerMap ?? 1500))
+            var counter = _totalMapDumpsCounter.AddOrUpdate(mapName, 0, (_, current) => current);
+
+            var maxDumpsPerMap = LootDumpProcessorContext.GetConfig()
+                .ReaderConfig.IntakeReaderConfig?.MaxDumpsPerMap ?? 1500;
+
+            if (counter < maxDumpsPerMap)
             {
                 basicInfo = new BasicInfo
                 {
-                    Map = fi.Data.LocationLoot.Id.ToLower(),
+                    Map = mapId,
                     FileHash = ProcessorUtil.HashFile(fileData),
                     Data = fi,
                     Date = date ?? DateTime.MinValue,
                     FileName = file
                 };
 
-                _totalMapDumpsCounter[fi.Data.LocationLoot.Name] += 1;
+                _totalMapDumpsCounter[mapName] += 1;
 
-                if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
-                    LoggerFactory.GetInstance().Log($"File {file} fully read, returning data", LogLevel.Debug);
-
+                _logger.LogDebug("File {File} fully read, returning data", file);
                 return true;
             }
 
             // Map dump limit reached, exit
-            if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
-                LoggerFactory.GetInstance().Log($"Ignoring file {file} as the file cap for map {fi.Data.LocationLoot.Id} has been reached", LogLevel.Debug);
-
-            basicInfo = null;
+            _logger.LogDebug("Ignoring file {File} as the file cap for map {MapId} has been reached", file, mapId);
             return false;
         }
 
-        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Warning))
-            LoggerFactory.GetInstance().Log($"File {file} was not eligible for dump data, it did not contain a location name or it was on ignored locations config", LogLevel.Warning);
-        
-        basicInfo = null;
+        _logger.LogWarning(
+            "File {File} was not eligible for dump data; it did not contain a location name or it was on the ignored locations config",
+            file);
         return false;
     }
 }

@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using LootDumpProcessor.Logger;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model.Config;
@@ -8,7 +8,7 @@ public class LoggerConfig
 {
     [JsonProperty("logLevel")]
     [JsonPropertyName("logLevel")]
-    public LogLevel LogLevel { get; set; } = LogLevel.Info;
+    public LogLevel LogLevel { get; set; }
     
     [JsonProperty("queueLoggerPoolingTimeoutMs")]
     [JsonPropertyName("queueLoggerPoolingTimeoutMs")]

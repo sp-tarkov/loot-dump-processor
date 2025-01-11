@@ -20,7 +20,7 @@ public static class LootDumpProcessorContext
     private static readonly object _forcedItemsLock = new();
     private static Dictionary<string, HashSet<string>>? _forcedLoose;
     private static readonly object _forcedLooseLock = new();
-    private static TarkovItems? _tarkovItems;
+    private static TarkovItemsProvider? _tarkovItems;
     private static readonly object _tarkovItemsLock = new();
 
     public static Config GetConfig()
@@ -52,25 +52,6 @@ public static class LootDumpProcessorContext
         }
 
         return _forcedStatic;
-    }
-
-    /// <summary>
-    /// Not Used
-    /// </summary>
-    /// <returns></returns>
-    public static Dictionary<string, MapDirectoryMapping> GetDirectoryMappings()
-    {
-        lock (_mapDirectoryMappingsLock)
-        {
-            if (_mapDirectoryMappings == null)
-            {
-                _mapDirectoryMappings = YamlSerializerFactory.GetInstance()
-                    .Deserialize<Dictionary<string, MapDirectoryMapping>>(
-                        File.ReadAllText("./Config/map_directory_mapping.yaml"));
-            }
-        }
-
-        return _mapDirectoryMappings;
     }
 
     public static HashSet<string> GetStaticWeaponIds()
@@ -111,20 +92,5 @@ public static class LootDumpProcessorContext
         }
 
         return _forcedLoose;
-    }
-
-    public static TarkovItems GetTarkovItems()
-    {
-        lock (_tarkovItemsLock)
-        {
-            if (_tarkovItems == null)
-            {
-                _tarkovItems = new TarkovItems(
-                    $"{GetConfig().ServerLocation}/project/assets/database/templates/items.json"
-                );
-            }
-        }
-
-        return _tarkovItems;
     }
 }

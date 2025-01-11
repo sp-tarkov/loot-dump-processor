@@ -6,10 +6,6 @@ namespace LootDumpProcessor.Model.Config;
 
 public class IntakeReaderConfig
 {
-    [JsonProperty("readerType")]
-    [JsonPropertyName("readerType")]
-    public IntakeReaderTypes IntakeReaderType { get; set; } = IntakeReaderTypes.Json;
-    
     [JsonProperty("maxDumpsPerMap")]
     [JsonPropertyName("maxDumpsPerMap")]
     public int MaxDumpsPerMap { get; set; } = 1500;

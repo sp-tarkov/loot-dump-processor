@@ -1,35 +1,15 @@
 using System.Text.Json.Serialization;
-using LootDumpProcessor.Model.Processing;
-using LootDumpProcessor.Utils;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model;
 
-public class ComposedKey
+public class ComposedKey(string key, Item? firstItem)
 {
-    [JsonProperty("key")]
-    [JsonPropertyName("key")]
-    public string Key { get; init; }
+    [JsonProperty("key")] [JsonPropertyName("key")] public string Key { get; init; } = key;
 
     [Newtonsoft.Json.JsonIgnore]
     [System.Text.Json.Serialization.JsonIgnore]
-    public Item? FirstItem { get; }
-
-    public ComposedKey(Template template) : this(template.Items)
-    {
-    }
-    
-    public ComposedKey(List<Item>? items)
-    {
-        Key = items?.Select(i => i.Tpl)
-            .Where(i => !string.IsNullOrEmpty(i) &&
-                        !LootDumpProcessorContext.GetTarkovItems().IsBaseClass(i, BaseClasses.Ammo))
-            .Cast<string>()
-            .Select(i => (double)i.GetHashCode())
-            .Sum()
-            .ToString() ?? KeyGenerator.GetNextKey();
-        FirstItem = items?[0];
-    }
+    public Item? FirstItem { get; } = firstItem;
 
     public override bool Equals(object? obj)
     {

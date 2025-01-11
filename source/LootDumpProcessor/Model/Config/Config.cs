@@ -8,7 +8,7 @@ public class Config
 {
     [JsonProperty("serverLocation")]
     [JsonPropertyName("serverLocation")]
-    public string? ServerLocation { get; set; }
+    public string ServerLocation { get; set; } = string.Empty;
 
     [JsonProperty("threads")]
     [JsonPropertyName("threads")]

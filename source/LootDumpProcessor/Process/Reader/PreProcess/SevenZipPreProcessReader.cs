@@ -1,10 +1,16 @@
-using LootDumpProcessor.Logger;
+using LootDumpProcessor.Process.Reader.PreProcess;
 using SevenZip;
-
-namespace LootDumpProcessor.Process.Reader.PreProcess;
+using Microsoft.Extensions.Logging;
 
 public class SevenZipPreProcessReader : AbstractPreProcessReader
 {
+    private readonly ILogger<SevenZipPreProcessReader> _logger;
+
+    public SevenZipPreProcessReader(ILogger<SevenZipPreProcessReader> logger) : base(logger)
+    {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
     public override string GetHandleExtension() => "7z";
 
     static SevenZipPreProcessReader()
@@ -14,29 +20,32 @@ public class SevenZipPreProcessReader : AbstractPreProcessReader
 
     public override bool TryPreProcess(string file, out List<string> files, out List<string> directories)
     {
+        files = new List<string>();
+        directories = new List<string>();
+
         var fileRaw = Path.GetFileNameWithoutExtension(file);
-        // SevenZip library doesnt like forward slashes for some reason
+        // SevenZip library doesn't handle forward slashes properly
         var outPath = $"{_tempFolder}\\{fileRaw}".Replace("/", "\\");
-        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
-            LoggerFactory.GetInstance().Log(
-                $"Unzipping {file} into temp path {outPath}, this may take a while...",
-                LogLevel.Info);
+
+        _logger.LogInformation("Unzipping {File} into temp path {OutPath}, this may take a while...", file, outPath);
+
         var extractor = new SevenZipExtractor(file);
-        // Only log process on debug mode
-        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
+
+        // Log progress in debug mode
+        extractor.Extracting += (_, args) =>
         {
-            extractor.Extracting += (_, args) =>
+            if (args.PercentDone % 10 == 0)
             {
-                if (args.PercentDone % 10 == 0)
-                    LoggerFactory.GetInstance().Log($"Unzip progress: {args.PercentDone}%", LogLevel.Debug);
-            };
-        }
+                _logger.LogDebug("Unzip progress: {PercentDone}%", args.PercentDone);
+            }
+        };
+
         extractor.ExtractArchive(outPath);
-        if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
-            LoggerFactory.GetInstance().Log($"Finished unzipping {file} into temp path {outPath}", LogLevel.Info);
+        _logger.LogInformation("Finished unzipping {File} into temp path {OutPath}", file, outPath);
 
         files = Directory.GetFiles(outPath).ToList();
         directories = Directory.GetDirectories(outPath).ToList();
+
         return true;
     }
 }

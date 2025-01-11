@@ -9,11 +9,23 @@ using Microsoft.Extensions.Logging;
 
 namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor
 {
-    public class LooseLootProcessor(ILogger<LooseLootProcessor> logger, IDataStorage dataStorage)
+    public class LooseLootProcessor(
+        ILogger<LooseLootProcessor> logger, IDataStorage dataStorage, ITarkovItemsProvider tarkovItemsProvider,
+        IComposedKeyGenerator composedKeyGenerator
+    )
         : ILooseLootProcessor
     {
-        private readonly ILogger<LooseLootProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        private readonly IDataStorage _dataStorage = dataStorage ?? throw new ArgumentNullException(nameof(dataStorage));
+        private readonly ILogger<LooseLootProcessor>
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+        private readonly IDataStorage
+            _dataStorage = dataStorage ?? throw new ArgumentNullException(nameof(dataStorage));
+
+        private readonly ITarkovItemsProvider _tarkovItemsProvider =
+            tarkovItemsProvider ?? throw new ArgumentNullException(nameof(tarkovItemsProvider));
+
+        private readonly IComposedKeyGenerator _composedKeyGenerator =
+            composedKeyGenerator ?? throw new ArgumentNullException(nameof(composedKeyGenerator));
 
         public PreProcessedLooseLoot PreProcessLooseLoot(List<Template> looseLoot)
         {
@@ -21,11 +33,11 @@ namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor
             {
                 Counts = new Dictionary<string, int>()
             };
-            
+
             var itemPropertiesDictionary = new SubdivisionedKeyableDictionary<string, List<Template>>();
             preProcessedLoot.ItemProperties = (AbstractKey)itemPropertiesDictionary.GetKey();
             preProcessedLoot.MapSpawnpointCount = looseLoot.Count;
-            
+
             var uniqueLootIds = new Dictionary<string, object>();
 
             // Rounding rotation to prevent duplicate spawnpoints due to slight variations
@@ -35,9 +47,10 @@ namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor
                 if (!uniqueLootIds.ContainsKey(sanitizedId))
                 {
                     uniqueLootIds[sanitizedId] = template.Id;
-                    preProcessedLoot.Counts[sanitizedId] = preProcessedLoot.Counts.TryGetValue(sanitizedId, out var count)
-                        ? count + 1
-                        : 1;
+                    preProcessedLoot.Counts[sanitizedId] =
+                        preProcessedLoot.Counts.TryGetValue(sanitizedId, out var count)
+                            ? count + 1
+                            : 1;
                 }
 
                 if (!itemPropertiesDictionary.TryGetValue(sanitizedId, out var templates))
@@ -84,12 +97,14 @@ namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor
             looseLootDistribution.SpawnPointCount = new SpawnPointCount
             {
                 Mean = CalculateMean(looseLootCountsItem.MapSpawnpointCount.Select(Convert.ToDouble).ToList()),
-                Std = CalculateStandardDeviation(looseLootCountsItem.MapSpawnpointCount.Select(Convert.ToDouble).ToList())
+                Std = CalculateStandardDeviation(looseLootCountsItem.MapSpawnpointCount.Select(Convert.ToDouble)
+                    .ToList())
             };
             looseLootDistribution.SpawnPointsForced = new List<SpawnPointsForced>();
             looseLootDistribution.SpawnPoints = new List<SpawnPoint>();
 
-            var itemProperties = _dataStorage.GetItem<FlatKeyableDictionary<string, IKey>>(looseLootCountsItem.ItemProperties);
+            var itemProperties =
+                _dataStorage.GetItem<FlatKeyableDictionary<string, IKey>>(looseLootCountsItem.ItemProperties);
             foreach (var (spawnPoint, itemListKey) in itemProperties)
             {
                 var itemCounts = new Dictionary<ComposedKey, int>();
@@ -97,7 +112,7 @@ namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor
 
                 foreach (var template in savedTemplates)
                 {
-                    var composedKey = new ComposedKey(template);
+                    var composedKey = _composedKeyGenerator.Generate(template.Items);
                     if (!itemCounts.TryAdd(composedKey, 1))
                         itemCounts[composedKey]++;
                 }
@@ -122,8 +137,9 @@ namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor
                 }).ToList();
 
                 if (itemDistributions.Count == 1 &&
-                    (LootDumpProcessorContext.GetTarkovItems().IsQuestItem(itemDistributions[0].ComposedKey?.FirstItem?.Tpl) ||
-                     LootDumpProcessorContext.GetForcedLooseItems()[mapId].Contains(itemDistributions[0].ComposedKey?.FirstItem?.Tpl)))
+                    (_tarkovItemsProvider.IsQuestItem(itemDistributions[0].ComposedKey?.FirstItem?.Tpl) ||
+                     LootDumpProcessorContext.GetForcedLooseItems()[mapId]
+                         .Contains(itemDistributions[0].ComposedKey?.FirstItem?.Tpl)))
                 {
                     var forcedSpawnPoint = new SpawnPointsForced
                     {
@@ -162,7 +178,7 @@ namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor
                     templateCopy.Items = new List<Item>();
 
                     var groupedByKey = spawnPoints
-                        .GroupBy(t => new ComposedKey(t))
+                        .GroupBy(t => _composedKeyGenerator.Generate(t.Items))
                         .ToDictionary(g => g.Key, g => g.ToList());
 
                     foreach (var distribution in itemDistributions)
@@ -198,8 +214,10 @@ namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor
                 .OrderBy(x => x.Template.Id)
                 .ToList();
 
-            var configuredForcedTemplates = new HashSet<string>(LootDumpProcessorContext.GetForcedLooseItems()[mapId].Select(item => item));
-            var foundForcedTemplates = new HashSet<string>(looseLootDistribution.SpawnPointsForced.Select(fp => fp.Template.Items[0].Tpl));
+            var configuredForcedTemplates =
+                new HashSet<string>(LootDumpProcessorContext.GetForcedLooseItems()[mapId].Select(item => item));
+            var foundForcedTemplates =
+                new HashSet<string>(looseLootDistribution.SpawnPointsForced.Select(fp => fp.Template.Items[0].Tpl));
 
             foreach (var expectedTpl in configuredForcedTemplates)
             {
