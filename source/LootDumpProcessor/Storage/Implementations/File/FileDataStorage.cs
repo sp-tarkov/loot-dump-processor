@@ -11,20 +11,12 @@ public class FileDataStorage : IDataStorage
         StoreHandlerFactory.GetInstance(t.GetKey().GetKeyType()).Store(t);
     }
 
-    public bool Exists(IKey t)
-    {
-        return StoreHandlerFactory.GetInstance(t.GetKeyType()).Exists(t);
-    }
+    public bool Exists(IKey t) => StoreHandlerFactory.GetInstance(t.GetKeyType()).Exists(t);
 
-    public T GetItem<T>(IKey key) where T : IKeyable
-    {
-        return StoreHandlerFactory.GetInstance(key.GetKeyType()).Retrieve<T>(key);
-    }
+    public T GetItem<T>(IKey key) where T : IKeyable =>
+        StoreHandlerFactory.GetInstance(key.GetKeyType()).Retrieve<T>(key);
 
-    public List<T> GetAll<T>()
-    {
-        throw new NotImplementedException();
-    }
+    public List<T> GetAll<T>() => throw new NotImplementedException();
 
     public void Clear()
     {

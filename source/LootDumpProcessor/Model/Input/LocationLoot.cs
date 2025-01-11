@@ -1,384 +1,193 @@
 ﻿using System.Text.Json.Serialization;
-using Newtonsoft.Json;
 
-namespace LootDumpProcessor.Model.Input
+
+namespace LootDumpProcessor.Model.Input;
+
+public class LocationLoot
 {
-    public class LocationLoot
-    {
-        [JsonProperty("Enabled", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Enabled")]
-        public bool? Enabled { get; set; }
-
-        [JsonProperty("EnableCoop", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("EnableCoop")]
-        public bool? EnableCoop { get; set; }
-
-        [JsonProperty("ForceOnlineRaidInPVE", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("ForceOnlineRaidInPVE")]
-        public bool? ForceOnlineRaidInPVE { get; set; }
-
-        [JsonProperty("Locked", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Locked")]
-        public bool? Locked { get; set; }
-
-        [JsonProperty("Insurance", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Insurance")]
-        public bool? Insurance { get; set; }
-
-        [JsonProperty("SafeLocation", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("SafeLocation")]
-        public bool? SafeLocation { get; set; }
-
-        [JsonProperty("Name", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Name")]
-        public string? Name { get; set; }
-
-        [JsonProperty("Description", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Description")]
-        public string? Description { get; set; }
-
-        [JsonProperty("Scene", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Scene")]
-        public Scene? Scene { get; set; }
-
-        [JsonProperty("Area", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Area")]
-        public float? Area { get; set; }
-
-        [JsonProperty("RequiredPlayerLevelMin", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("RequiredPlayerLevelMin")]
-        public int? RequiredPlayerLevelMin { get; set; }
-
-        [JsonProperty("RequiredPlayerLevelMax", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("RequiredPlayerLevelMax")]
-        public int? RequiredPlayerLevelMax { get; set; }
-
-        [JsonProperty("PmcMaxPlayersInGroup", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("PmcMaxPlayersInGroup")]
-        public int? PmcMaxPlayersInGroup { get; set; }
-
-        [JsonProperty("ScavMaxPlayersInGroup", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("ScavMaxPlayersInGroup")]
-        public int? ScavMaxPlayersInGroup { get; set; }
-
-        [JsonProperty("MinPlayers", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("MinPlayers")]
-        public int? MinPlayers { get; set; }
-
-        [JsonProperty("MaxPlayers", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("MaxPlayers")]
-        public int? MaxPlayers { get; set; }
-
-        [JsonProperty("MaxCoopGroup", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("MaxCoopGroup")]
-        public int? MaxCoopGroup { get; set; }
-
-        [JsonProperty("exit_count", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("exit_count")]
-        public int? ExitCount { get; set; }
-
-        [JsonProperty("exit_access_time", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("exit_access_time")]
-        public int? ExitAccessTime { get; set; }
-
-        [JsonProperty("exit_time", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("exit_time")]
-        public int? ExitTime { get; set; }
-
-        [JsonProperty("Preview", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Preview")]
-        public Preview? Preview { get; set; }
-
-        [JsonProperty("IconX", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("IconX")]
-        public int? IconX { get; set; }
-
-        [JsonProperty("IconY", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("IconY")]
-        public int? IconY { get; set; }
-
-        [JsonProperty("filter_ex", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("filter_ex")]
-        public List<object>? FilterEx { get; set; }
-
-        [JsonProperty("waves", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("waves")]
-        public List<object>? Waves { get; set; }
-
-        [JsonProperty("limits", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("limits")]
-        public List<object>? Limits { get; set; }
-
-        [JsonProperty("AveragePlayTime", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("AveragePlayTime")]
-        public int? AveragePlayTime { get; set; }
-
-        [JsonProperty("AveragePlayerLevel", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("AveragePlayerLevel")]
-        public int? AveragePlayerLevel { get; set; }
-
-        [JsonProperty("EscapeTimeLimit", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("EscapeTimeLimit")]
-        public int? EscapeTimeLimit { get; set; }
-
-        [JsonProperty("EscapeTimeLimitPVE", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("EscapeTimeLimitPVE")]
-        public int? EscapeTimeLimitPVE { get; set; }
-
-        [JsonProperty("EscapeTimeLimitCoop", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("EscapeTimeLimitCoop")]
-        public int? EscapeTimeLimitCoop { get; set; }
-
-        [JsonProperty("Rules", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Rules")]
-        public string? Rules { get; set; }
-
-        [JsonProperty("IsSecret", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("IsSecret")]
-        public bool? IsSecret { get; set; }
-
-        [JsonProperty("doors", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("doors")]
-        public List<object>? Doors { get; set; }
-
-        [JsonProperty("tmp_location_field_remove_me", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("tmp_location_field_remove_me")]
-        public int? TmpLocationFieldRemoveMe { get; set; }
-
-        [JsonProperty("MinDistToExitPoint", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("MinDistToExitPoint")]
-        public int? MinDistToExitPoint { get; set; }
-
-        [JsonProperty("MaxDistToFreePoint", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("MaxDistToFreePoint")]
-        public int? MaxDistToFreePoint { get; set; }
-
-        [JsonProperty("MinDistToFreePoint", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("MinDistToFreePoint")]
-        public int? MinDistToFreePoint { get; set; }
-
-        [JsonProperty("MaxBotPerZone", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("MaxBotPerZone")]
-        public int? MaxBotPerZone { get; set; }
-
-        [JsonProperty("OpenZones", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("OpenZones")]
-        public string? OpenZones { get; set; }
-
-        [JsonProperty("OcculsionCullingEnabled", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("OcculsionCullingEnabled")]
-        public bool? OcculsionCullingEnabled { get; set; }
-
-        [JsonProperty("GlobalLootChanceModifier", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("GlobalLootChanceModifier")]
-        public float? GlobalLootChanceModifier { get; set; }
-
-        [JsonProperty("GlobalLootChanceModifierPvE", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("GlobalLootChanceModifierPvE")]
-        public float? GlobalLootChanceModifierPvE { get; set; }
-
-        [JsonProperty("OldSpawn", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("OldSpawn")]
-        public bool? OldSpawn { get; set; }
-
-        [JsonProperty("OfflineOldSpawn", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("OfflineOldSpawn")]
-        public bool? OfflineOldSpawn { get; set; }
-
-        [JsonProperty("NewSpawn", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("NewSpawn")]
-        public bool? NewSpawn { get; set; }
-
-        [JsonProperty("OfflineNewSpawn", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("OfflineNewSpawn")]
-        public bool? OfflineNewSpawn { get; set; }
-
-        [JsonProperty("BotMax", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotMax")]
-        public int? BotMax { get; set; }
-
-        [JsonProperty("BotMaxPvE", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotMaxPvE")]
-        public int? BotMaxPvE { get; set; }
-
-        [JsonProperty("BotStart", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotStart")]
-        public int? BotStart { get; set; }
-
-        [JsonProperty("BotStartPlayer", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotStartPlayer")]
-        public int? BotStartPlayer { get; set; }
-
-        [JsonProperty("BotStop", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotStop")]
-        public int? BotStop { get; set; }
-
-        [JsonProperty("BotMaxTimePlayer", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotMaxTimePlayer")]
-        public int? BotMaxTimePlayer { get; set; }
-
-        [JsonProperty("BotSpawnTimeOnMin", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotSpawnTimeOnMin")]
-        public int? BotSpawnTimeOnMin { get; set; }
-
-        [JsonProperty("BotSpawnTimeOnMax", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotSpawnTimeOnMax")]
-        public int? BotSpawnTimeOnMax { get; set; }
-
-        [JsonProperty("BotSpawnTimeOffMin", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotSpawnTimeOffMin")]
-        public int? BotSpawnTimeOffMin { get; set; }
-
-        [JsonProperty("BotSpawnTimeOffMax", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotSpawnTimeOffMax")]
-        public int? BotSpawnTimeOffMax { get; set; }
-
-        [JsonProperty("BotMaxPlayer", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotMaxPlayer")]
-        public int? BotMaxPlayer { get; set; }
-
-        [JsonProperty("BotEasy", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotEasy")]
-        public int? BotEasy { get; set; }
-
-        [JsonProperty("BotNormal", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotNormal")]
-        public int? BotNormal { get; set; }
-
-        [JsonProperty("BotHard", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotHard")]
-        public int? BotHard { get; set; }
-
-        [JsonProperty("BotImpossible", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotImpossible")]
-        public int? BotImpossible { get; set; }
-
-        [JsonProperty("BotAssault", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotAssault")]
-        public int? BotAssault { get; set; }
-
-        [JsonProperty("BotMarksman", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotMarksman")]
-        public int? BotMarksman { get; set; }
-
-        [JsonProperty("DisabledScavExits", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("DisabledScavExits")]
-        public string? DisabledScavExits { get; set; }
-
-        [JsonProperty("MinPlayerLvlAccessKeys", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("MinPlayerLvlAccessKeys")]
-        public int? MinPlayerLvlAccessKeys { get; set; }
-
-        [JsonProperty("AccessKeys", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("AccessKeys")]
-        public List<object>? AccessKeys { get; set; }
-
-        [JsonProperty("UnixDateTime", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("UnixDateTime")]
-        public int? UnixDateTime { get; set; }
-
-        [JsonProperty("users_gather_seconds", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("users_gather_seconds")]
-        public int? UsersGatherSeconds { get; set; }
-
-        [JsonProperty("users_spawn_seconds_n", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("users_spawn_seconds_n")]
-        public int? UsersSpawnSecondsN { get; set; }
-
-        [JsonProperty("users_spawn_seconds_n2", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("users_spawn_seconds_n2")]
-        public int? UsersSpawnSecondsN2 { get; set; }
-
-        [JsonProperty("users_summon_seconds", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("users_summon_seconds")]
-        public int? UsersSummonSeconds { get; set; }
-
-        [JsonProperty("sav_summon_seconds", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("sav_summon_seconds")]
-        public int? SavSummonSeconds { get; set; }
-
-        [JsonProperty("matching_min_seconds", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("matching_min_seconds")]
-        public int? MatchingMinSeconds { get; set; }
-
-        [JsonProperty("GenerateLocalLootCache", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("GenerateLocalLootCache")]
-        public bool? GenerateLocalLootCache { get; set; }
-
-        [JsonProperty("PlayersRequestCount", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("PlayersRequestCount")]
-        public int? PlayersRequestCount { get; set; }
-
-        [JsonProperty("NonWaveGroupScenario", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("NonWaveGroupScenario")]
-        public NonWaveGroupScenario? NonWaveGroupScenario { get; set; }
-
-        [JsonProperty("BotSpawnCountStep", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotSpawnCountStep")]
-        public int? BotSpawnCountStep { get; set; }
-
-        [JsonProperty("BotSpawnPeriodCheck", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotSpawnPeriodCheck")]
-        public int? BotSpawnPeriodCheck { get; set; }
-
-        [JsonProperty("GlobalContainerChanceModifier", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("GlobalContainerChanceModifier")]
-        public float? GlobalContainerChanceModifier { get; set; }
-
-        [JsonProperty("MinMaxBots", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("MinMaxBots")]
-        public List<object>? MinMaxBots { get; set; }
-
-        [JsonProperty("BotLocationModifier", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BotLocationModifier")]
-        public BotLocationModifier? BotLocationModifier { get; set; }
-
-        [JsonProperty("Exits", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Exits")]
-        public List<Exit>? Exits { get; set; }
-
-        [JsonProperty("DisabledForScav", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("DisabledForScav")]
-        public bool? DisabledForScav { get; set; }
-
-        [JsonProperty("BossLocationSpawn", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("BossLocationSpawn")]
-        public List<object>? BossLocationSpawn { get; set; }
-
-        [JsonProperty("SpawnPointParams", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("SpawnPointParams")]
-        public List<SpawnPointParam>? SpawnPointParams { get; set; }
-
-        [JsonProperty("MaxItemCountInLocation", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("MaxItemCountInLocation")]
-        public List<object>? MaxItemCountInLocation { get; set; }
-
-        [JsonProperty("AirdropParameters", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("AirdropParameters")]
-        public List<AirdropParameter>? AirdropParameters { get; set; }
-
-        [JsonProperty("MatchMakerMinPlayersByWaitTime", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("MatchMakerMinPlayersByWaitTime")]
-        public List<MatchMakerMinPlayersByWaitTime>? MatchMakerMinPlayersByWaitTime { get; set; }
-
-        [JsonProperty("Transits", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Transits")]
-        public List<Transit>? Transits { get; set; }
-
-        [JsonProperty("Id", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Id")]
-        public required string Id { get; set; }
-
-        [JsonProperty("_Id", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("_Id")]
-        public string? Id0 { get; set; }
-
-        [JsonProperty("Loot")]
-        [JsonPropertyName("Loot")]
-        public required List<Template> Loot { get; set; }
-
-        [JsonProperty("Banners", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Banners")]
-        public List<Banner>? Banners { get; set; }
-    }
+    public bool? Enabled { get; set; }
+    public bool? EnableCoop { get; set; }
+    public bool? ForceOnlineRaidInPVE { get; set; }
+    public bool? Locked { get; set; }
+    public bool? Insurance { get; set; }
+    public bool? SafeLocation { get; set; }
+    public string? Name { get; set; }
+    public string? Description { get; set; }
+    public Scene? Scene { get; set; }
+    public float? Area { get; set; }
+    public int? RequiredPlayerLevelMin { get; set; }
+    public int? RequiredPlayerLevelMax { get; set; }
+    public int? PmcMaxPlayersInGroup { get; set; }
+    public int? ScavMaxPlayersInGroup { get; set; }
+    public int? MinPlayers { get; set; }
+    public int? MaxPlayers { get; set; }
+    public int? MaxCoopGroup { get; set; }
+    public int? ExitCount { get; set; }
+    public int? ExitAccessTime { get; set; }
+    public int? ExitTime { get; set; }
+    public Preview? Preview { get; set; }
+    public int? IconX { get; set; }
+    public int? IconY { get; set; }
+    public List<object>? FilterEx { get; set; }
+    public List<object>? Waves { get; set; }
+    public List<object>? Limits { get; set; }
+    public int? AveragePlayTime { get; set; }
+    public int? AveragePlayerLevel { get; set; }
+    public int? EscapeTimeLimit { get; set; }
+    public int? EscapeTimeLimitPVE { get; set; }
+    public int? EscapeTimeLimitCoop { get; set; }
+    public string? Rules { get; set; }
+    public bool? IsSecret { get; set; }
+    public List<object>? Doors { get; set; }
+    [JsonPropertyName("tmp_location_field_remove_me")] public int? TmpLocationFieldRemoveMe { get; set; }
+    public int? MinDistToExitPoint { get; set; }
+    public int? MaxDistToFreePoint { get; set; }
+    public int? MinDistToFreePoint { get; set; }
+    public int? MaxBotPerZone { get; set; }
+    public string? OpenZones { get; set; }
+    public bool? OcculsionCullingEnabled { get; set; }
+    public float? GlobalLootChanceModifier { get; set; }
+    public float? GlobalLootChanceModifierPvE { get; set; }
+    public bool? OldSpawn { get; set; }
+    public bool? OfflineOldSpawn { get; set; }
+    public bool? NewSpawn { get; set; }
+    public bool? OfflineNewSpawn { get; set; }
+    public int? BotMax { get; set; }
+
+
+    public int? BotMaxPvE { get; set; }
+
+
+    public int? BotStart { get; set; }
+
+
+    public int? BotStartPlayer { get; set; }
+
+
+    public int? BotStop { get; set; }
+
+
+    public int? BotMaxTimePlayer { get; set; }
+
+
+    public int? BotSpawnTimeOnMin { get; set; }
+
+
+    public int? BotSpawnTimeOnMax { get; set; }
+
+
+    public int? BotSpawnTimeOffMin { get; set; }
+
+
+    public int? BotSpawnTimeOffMax { get; set; }
+
+
+    public int? BotMaxPlayer { get; set; }
+
+
+    public int? BotEasy { get; set; }
+
+
+    public int? BotNormal { get; set; }
+
+
+    public int? BotHard { get; set; }
+
+
+    public int? BotImpossible { get; set; }
+
+
+    public int? BotAssault { get; set; }
+
+
+    public int? BotMarksman { get; set; }
+
+
+    public string? DisabledScavExits { get; set; }
+
+
+    public int? MinPlayerLvlAccessKeys { get; set; }
+
+    public List<object>? AccessKeys { get; set; }
+
+
+    public int? UnixDateTime { get; set; }
+
+
+    [JsonPropertyName("users_gather_seconds")] public int? UsersGatherSeconds { get; set; }
+
+
+    [JsonPropertyName("users_spawn_seconds_n")] public int? UsersSpawnSecondsN { get; set; }
+
+
+    [JsonPropertyName("users_spawn_seconds_n2")] public int? UsersSpawnSecondsN2 { get; set; }
+
+
+    [JsonPropertyName("users_summon_seconds")] public int? UsersSummonSeconds { get; set; }
+
+
+    [JsonPropertyName("sav_summon_seconds")] public int? SavSummonSeconds { get; set; }
+
+
+    [JsonPropertyName("matching_min_seconds")] public int? MatchingMinSeconds { get; set; }
+
+
+    public bool? GenerateLocalLootCache { get; set; }
+
+
+    public int? PlayersRequestCount { get; set; }
+
+
+    public NonWaveGroupScenario? NonWaveGroupScenario { get; set; }
+
+
+    public int? BotSpawnCountStep { get; set; }
+
+
+    public int? BotSpawnPeriodCheck { get; set; }
+
+
+    public float? GlobalContainerChanceModifier { get; set; }
+
+
+    public List<object>? MinMaxBots { get; set; }
+
+
+    public BotLocationModifier? BotLocationModifier { get; set; }
+
+
+    public List<Exit>? Exits { get; set; }
+
+
+    public bool? DisabledForScav { get; set; }
+
+
+    public List<object>? BossLocationSpawn { get; set; }
+
+
+    public List<SpawnPointParam>? SpawnPointParams { get; set; }
+
+
+    public List<object>? MaxItemCountInLocation { get; set; }
+
+
+    public List<AirdropParameter>? AirdropParameters { get; set; }
+
+
+    public List<MatchMakerMinPlayersByWaitTime>? MatchMakerMinPlayersByWaitTime { get; set; }
+
+
+    public List<Transit>? Transits { get; set; }
+
+
+    public required string Id { get; set; }
+
+
+    [JsonPropertyName("_Id")] public string? Id0 { get; set; }
+
+
+    public required List<Template> Loot { get; set; }
+
+
+    public List<Banner>? Banners { get; set; }
 }

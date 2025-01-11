@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text.Json;
 using LootDumpProcessor;
 using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Input;
@@ -27,13 +28,21 @@ public class MultithreadSteppedDumpProcessor(
 )
     : IDumpProcessor
 {
-    private readonly IStaticLootProcessor _staticLootProcessor = staticLootProcessor ?? throw new ArgumentNullException(nameof(staticLootProcessor));
-    private readonly IStaticContainersProcessor _staticContainersProcessor = staticContainersProcessor ?? throw new ArgumentNullException(nameof(staticContainersProcessor));
-    private readonly IAmmoProcessor _ammoProcessor = ammoProcessor ?? throw new ArgumentNullException(nameof(ammoProcessor));
-    private readonly ILooseLootProcessor _looseLootProcessor = looseLootProcessor ?? throw new ArgumentNullException(nameof(looseLootProcessor));
-    private readonly ILogger<MultithreadSteppedDumpProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IStaticLootProcessor _staticLootProcessor =
+        staticLootProcessor ?? throw new ArgumentNullException(nameof(staticLootProcessor));
 
-    private static readonly IJsonSerializer _jsonSerializer = JsonSerializerFactory.GetInstance();
+    private readonly IStaticContainersProcessor _staticContainersProcessor =
+        staticContainersProcessor ?? throw new ArgumentNullException(nameof(staticContainersProcessor));
+
+    private readonly IAmmoProcessor _ammoProcessor =
+        ammoProcessor ?? throw new ArgumentNullException(nameof(ammoProcessor));
+
+    private readonly ILooseLootProcessor _looseLootProcessor =
+        looseLootProcessor ?? throw new ArgumentNullException(nameof(looseLootProcessor));
+
+    private readonly ILogger<MultithreadSteppedDumpProcessor> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
+
     private static readonly IDataStorage _dataStorage = DataStorageFactory.GetInstance();
 
     public Dictionary<OutputFileType, object> ProcessDumps(List<PartialData> dumps)
@@ -77,7 +86,7 @@ public class MultithreadSteppedDumpProcessor(
         _logger.LogInformation("Processing ammo distribution");
 
         var staticAmmo = new ConcurrentDictionary<string, IReadOnlyDictionary<string, List<AmmoDistribution>>>();
-        Parallel.ForEach(dumpProcessData.ContainerCounts.Keys, parallelOptions: parallelOptions, mapId =>
+        Parallel.ForEach(dumpProcessData.ContainerCounts.Keys, parallelOptions, mapId =>
         {
             var preProcessedStaticLoots = dumpProcessData.ContainerCounts[mapId];
             var ammoDistribution = _ammoProcessor.CreateAmmoDistribution(mapId, preProcessedStaticLoots);
@@ -88,7 +97,7 @@ public class MultithreadSteppedDumpProcessor(
         _logger.LogInformation("Processing static loot distribution");
 
         var staticLoot = new ConcurrentDictionary<string, IReadOnlyDictionary<string, StaticItemDistribution>>();
-        Parallel.ForEach(dumpProcessData.ContainerCounts.Keys, parallelOptions: parallelOptions, mapId =>
+        Parallel.ForEach(dumpProcessData.ContainerCounts.Keys, parallelOptions, mapId =>
         {
             var preProcessedStaticLoots = dumpProcessData.ContainerCounts[mapId];
             var staticLootDistribution =
@@ -100,7 +109,7 @@ public class MultithreadSteppedDumpProcessor(
         _logger.LogInformation("Processing loose loot distribution");
 
         var looseLoot = new ConcurrentDictionary<string, LooseLootRoot>();
-        Parallel.ForEach(dumpProcessData.MapCounts.Keys, parallelOptions: parallelOptions, mapId =>
+        Parallel.ForEach(dumpProcessData.MapCounts.Keys, parallelOptions, mapId =>
         {
             var mapCount = dumpProcessData.MapCounts[mapId];
             var looseLootCount = dumpProcessData.LooseLootCounts[mapId];
@@ -126,7 +135,7 @@ public class MultithreadSteppedDumpProcessor(
         _logger.LogDebug("Processing static data for file {FileName}", partialData.BasicInfo.FileName);
 
         var fileContent = await File.ReadAllTextAsync(partialData.BasicInfo.FileName);
-        var dataDump = _jsonSerializer.Deserialize<RootData>(fileContent);
+        var dataDump = JsonSerializer.Deserialize<RootData>(fileContent, JsonSerializerSettings.Default);
 
         if (dataDump == null)
         {
@@ -160,16 +169,14 @@ public class MultithreadSteppedDumpProcessor(
             mapStaticLoot.StaticForced.AddRange(newStaticForced);
         }
 
-        if (!mapStaticContainersAggregated.TryGetValue(mapId, out ConcurrentDictionary<Template, int> mapAggregatedDataDict))
+        if (!mapStaticContainersAggregated.TryGetValue(mapId,
+                out ConcurrentDictionary<Template, int> mapAggregatedDataDict))
         {
             mapAggregatedDataDict = new ConcurrentDictionary<Template, int>();
             mapStaticContainersAggregated.TryAdd(mapId, mapAggregatedDataDict);
         }
 
-        if (!DumpWasMadeAfterConfigThresholdDate(partialData))
-        {
-            return;
-        }
+        if (!DumpWasMadeAfterConfigThresholdDate(partialData)) return;
 
         IncrementMapCounterDictionaryValue(mapDumpCounter, mapId);
 
@@ -178,41 +185,29 @@ public class MultithreadSteppedDumpProcessor(
         foreach (var dynamicStaticContainer in _staticContainersProcessor.CreateDynamicStaticContainers(
                      dataDump))
         {
-            if (containerIgnoreListExists && ignoreListForMap.Contains(dynamicStaticContainer.Id))
-            {
-                continue;
-            }
+            if (containerIgnoreListExists && ignoreListForMap.Contains(dynamicStaticContainer.Id)) continue;
 
             if (!mapAggregatedDataDict.TryAdd(dynamicStaticContainer, 1))
-            {
                 mapAggregatedDataDict[dynamicStaticContainer] += 1;
-            }
         }
 
         GCHandler.Collect();
     }
 
-    private static bool DumpWasMadeAfterConfigThresholdDate(PartialData dataDump)
-    {
-        return FileDateParser.TryParseFileDate(dataDump.BasicInfo.FileName, out var fileDate) &&
-               fileDate.HasValue &&
-               fileDate.Value > LootDumpProcessorContext.GetConfig().DumpProcessorConfig
-                   .SpawnContainerChanceIncludeAfterDate;
-    }
+    private static bool DumpWasMadeAfterConfigThresholdDate(PartialData dataDump) =>
+        FileDateParser.TryParseFileDate(dataDump.BasicInfo.FileName, out var fileDate) &&
+        fileDate.HasValue &&
+        fileDate.Value > LootDumpProcessorContext.GetConfig().DumpProcessorConfig
+            .SpawnContainerChanceIncludeAfterDate;
 
     private static void IncrementMapCounterDictionaryValue(IDictionary<string, int> mapDumpCounter, string mapName)
     {
-        if (!mapDumpCounter.TryAdd(mapName, 1))
-        {
-            mapDumpCounter[mapName] += 1;
-        }
+        if (!mapDumpCounter.TryAdd(mapName, 1)) mapDumpCounter[mapName] += 1;
     }
 
     private static double GetStaticContainerProbability(string mapName, KeyValuePair<Template, int> td,
-        IReadOnlyDictionary<string, int> mapDumpCounter)
-    {
-        return Math.Round((double)((decimal)td.Value / (decimal)mapDumpCounter[mapName]), 2);
-    }
+        IReadOnlyDictionary<string, int> mapDumpCounter) =>
+        Math.Round((double)((decimal)td.Value / (decimal)mapDumpCounter[mapName]), 2);
 
     private DumpProcessData GetDumpProcessData(List<PartialData> dumps)
     {
@@ -224,7 +219,8 @@ public class MultithreadSteppedDumpProcessor(
             {
                 var mapName = tuple.Key;
                 var partialFileMetaData = tuple.ToList();
-                _logger.LogInformation("Processing map {MapName}, total dump data to process: {Count}", mapName, partialFileMetaData.Count);
+                _logger.LogInformation("Processing map {MapName}, total dump data to process: {Count}", mapName,
+                    partialFileMetaData.Count);
                 dumpProcessData.MapCounts[mapName] = partialFileMetaData.Count;
 
                 var lockObjectContainerCounts = new object();
@@ -245,10 +241,7 @@ public class MultithreadSteppedDumpProcessor(
 
                 BlockingCollection<PartialData> _partialDataToProcess = new();
 
-                foreach (var partialData in partialFileMetaData)
-                {
-                    _partialDataToProcess.Add(partialData);
-                }
+                foreach (var partialData in partialFileMetaData) _partialDataToProcess.Add(partialData);
 
                 partialFileMetaData = null;
                 tuple = null;
@@ -267,10 +260,7 @@ public class MultithreadSteppedDumpProcessor(
                             looseLootCounts);
                     });
 
-                foreach (var (_, value) in dictionaryItemProperties)
-                {
-                    _dataStorage.Store(value);
-                }
+                foreach (var (_, value) in dictionaryItemProperties) _dataStorage.Store(value);
 
                 _dataStorage.Store(dictionaryCounts);
                 dictionaryCounts = null;
@@ -301,14 +291,9 @@ public class MultithreadSteppedDumpProcessor(
             lock (lockObjectContainerCounts)
             {
                 if (!dumpProcessData.ContainerCounts.ContainsKey(mapName))
-                {
                     dumpProcessData.ContainerCounts.Add(mapName,
                         dumpData.Containers.ToList());
-                }
-                else
-                {
-                    dumpProcessData.ContainerCounts[mapName].AddRange(dumpData.Containers);
-                }
+                else dumpProcessData.ContainerCounts[mapName].AddRange(dumpData.Containers);
             }
 
             var loadedDictionary =

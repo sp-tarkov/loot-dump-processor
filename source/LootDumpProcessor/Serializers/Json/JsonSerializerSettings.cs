@@ -1,12 +1,12 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using LootDumpProcessor.Serializers.Json.Converters;
 
 namespace LootDumpProcessor.Serializers.Json;
 
-public class NetJsonSerializer : IJsonSerializer
+public static class JsonSerializerSettings
 {
-    private static JsonSerializerOptions _serializeOptions = new()
+    public static readonly JsonSerializerOptions Default = new(JsonSerializerDefaults.Web)
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals,
@@ -18,14 +18,4 @@ public class NetJsonSerializer : IJsonSerializer
         },
         WriteIndented = true
     };
-
-    public string Serialize<T>(T obj)
-    {
-        return JsonSerializer.Serialize(obj, _serializeOptions);
-    }
-
-    public T? Deserialize<T>(string obj)
-    {
-        return JsonSerializer.Deserialize<T>(obj, _serializeOptions);
-    }
 }

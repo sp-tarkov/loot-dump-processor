@@ -11,7 +11,9 @@ public class StaticContainersProcessor : IStaticContainersProcessor
     private readonly ILogger<StaticContainersProcessor> _logger;
 
     public StaticContainersProcessor(ILogger<StaticContainersProcessor> logger)
-        => _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
     public MapStaticLoot CreateStaticWeaponsAndForcedContainers(RootData rawMapDump)
     {

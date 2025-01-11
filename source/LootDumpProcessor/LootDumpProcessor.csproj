@@ -14,7 +14,6 @@
         <PackageReference Include="7z.Libs" Version="21.7.0"/>
         <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.0"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.2"/>
         <PackageReference Include="SevenZipSharp.Interop" Version="19.1.0"/>
         <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0"/>
         <PackageReference Include="YamlDotNet" Version="13.0.0"/>

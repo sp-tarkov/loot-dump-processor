@@ -12,10 +12,8 @@ public static class DataStorageFactory
     /**
      * Requires LootDumpProcessorContext to be initialized before using
      */
-    public static IDataStorage GetInstance()
-    {
-        return GetInstance(LootDumpProcessorContext.GetConfig().DataStorageConfig.DataStorageType);
-    }
+    public static IDataStorage GetInstance() =>
+        GetInstance(LootDumpProcessorContext.GetConfig().DataStorageConfig.DataStorageType);
 
     public static IDataStorage GetInstance(DataStorageTypes type)
     {

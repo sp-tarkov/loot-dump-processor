@@ -19,10 +19,7 @@ public class HashSetCollector : ICollector
         }
     }
 
-    public List<PartialData> Retrieve()
-    {
-        return processedDumps.ToList();
-    }
+    public List<PartialData> Retrieve() => processedDumps.ToList();
 
     public void Clear()
     {

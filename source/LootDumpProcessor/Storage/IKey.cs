@@ -12,6 +12,7 @@ public enum KeyType
      * Meant to be used as "single table" storage style
      */
     Unique,
+
     /**
      * Meant to be used as "relational table" storage style
      */

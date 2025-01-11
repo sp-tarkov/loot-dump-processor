@@ -1,12 +1,6 @@
-﻿using System.Text.Json.Serialization;
-using Newtonsoft.Json;
+﻿namespace LootDumpProcessor.Model.Input;
 
-namespace LootDumpProcessor.Model.Input
+public class ItemCost
 {
-    public class ItemCost
-    {
-        [JsonProperty("Count", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Count")]
-        public int? Count { get; set; }
-    }
+    public int? Count { get; set; }
 }

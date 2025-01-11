@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Text.Json;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Process.Collector;
 using LootDumpProcessor.Process.Processor.DumpProcessor;
@@ -55,10 +56,7 @@ public class QueuePipeline(
         try
         {
             await FixFilesFromDumps();
-            foreach (var mapName in _mapNames)
-            {
-                ProcessFilesFromDumpsPerMap(collector, mapName);
-            }
+            foreach (var mapName in _mapNames) ProcessFilesFromDumpsPerMap(collector, mapName);
         }
         finally
         {
@@ -74,9 +72,7 @@ public class QueuePipeline(
         var inputPath = LootDumpProcessorContext.GetConfig().ReaderConfig.DumpFilesLocation;
 
         if (inputPath == null || inputPath.Count == 0)
-        {
             throw new Exception("Reader dumpFilesLocations must be set to a valid value");
-        }
 
         // We gather up all files into a queue
         var queuedFilesToProcess = GetFileQueue(inputPath);
@@ -89,9 +85,7 @@ public class QueuePipeline(
         var gatheredFiles = new List<string>();
 
         if (queuedFilesToProcess.Count == 0)
-        {
             throw new Exception("No files matched accepted extension types in configs");
-        }
 
         while (queuedFilesToProcess.TryDequeue(out var file))
         {
@@ -112,15 +106,9 @@ public class QueuePipeline(
                 {
                     // if there is no preprocessor for the file, means its ready to filter or accept
 
-                    if (_fileFilter.Accept(file))
-                    {
-                        gatheredFiles.Add(file);
-                    }
+                    if (_fileFilter.Accept(file)) gatheredFiles.Add(file);
 
-                    else
-                    {
-                        gatheredFiles.Add(file);
-                    }
+                    else gatheredFiles.Add(file);
                 }
             }
             else
@@ -143,26 +131,16 @@ public class QueuePipeline(
         while (queuedPathsToProcess.TryDequeue(out var path))
         {
             // Check the input file to be sure its going to have data on it.
-            if (!Directory.Exists(path))
-            {
-                throw new Exception($"Input directory \"{path}\" could not be found");
-            }
+            if (!Directory.Exists(path)) throw new Exception($"Input directory \"{path}\" could not be found");
 
             // If we should process subfolder, queue them up as well
             if (LootDumpProcessorContext.GetConfig().ReaderConfig.ProcessSubFolders)
-            {
                 foreach (var directory in Directory.GetDirectories(path))
-                {
                     queuedPathsToProcess.Enqueue(directory);
-                }
-            }
 
             var files = Directory.GetFiles(path);
 
-            foreach (var file in files)
-            {
-                queuedFilesToProcess.Enqueue(file);
-            }
+            foreach (var file in files) queuedFilesToProcess.Enqueue(file);
         }
 
         return queuedFilesToProcess;
@@ -184,10 +162,10 @@ public class QueuePipeline(
         {
             try
             {
-                if (_intakeReader.Read(file, out var basicInfo))
-                {
-                    collector.Hold(_fileProcessor.Process(basicInfo));
-                }
+                if (!_intakeReader.Read(file, out var basicInfo)) return;
+
+                var partialData = _fileProcessor.Process(basicInfo);
+                collector.Hold(partialData);
             }
             catch (Exception e)
             {
@@ -215,13 +193,9 @@ public class QueuePipeline(
         var inputPath = LootDumpProcessorContext.GetConfig().ReaderConfig.DumpFilesLocation;
 
         if (inputPath == null || inputPath.Count == 0)
-        {
             throw new Exception("Reader dumpFilesLocations must be set to a valid value");
-        }
 
         GetFileQueue(inputPath).ToList().ForEach(f => _filesToRename.Add(f));
-
-        var jsonUtil = JsonSerializerFactory.GetInstance(JsonSerializerTypes.DotNet);
 
         await Parallel.ForEachAsync(_filesToRename, async (file, cancellationToken) =>
         {
@@ -230,7 +204,7 @@ public class QueuePipeline(
             try
             {
                 var data = await File.ReadAllTextAsync(file, cancellationToken);
-                var fileData = jsonUtil.Deserialize<RootData>(data);
+                var fileData = JsonSerializer.Deserialize<RootData>(data, JsonSerializerSettings.Default);
                 var newPath = file.Replace("resp", $"{fileData.Data.LocationLoot.Id.ToLower()}--resp");
                 File.Move(file, newPath);
             }

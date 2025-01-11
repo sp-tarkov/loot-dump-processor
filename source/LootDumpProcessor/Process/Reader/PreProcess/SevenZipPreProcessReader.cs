@@ -34,10 +34,7 @@ public class SevenZipPreProcessReader : AbstractPreProcessReader
         // Log progress in debug mode
         extractor.Extracting += (_, args) =>
         {
-            if (args.PercentDone % 10 == 0)
-            {
-                _logger.LogDebug("Unzip progress: {PercentDone}%", args.PercentDone);
-            }
+            if (args.PercentDone % 10 == 0) _logger.LogDebug("Unzip progress: {PercentDone}%", args.PercentDone);
         };
 
         extractor.ExtractArchive(outPath);

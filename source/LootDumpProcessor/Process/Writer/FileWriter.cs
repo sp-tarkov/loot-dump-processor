@@ -1,3 +1,4 @@
+using System.Text.Json;
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.LooseLoot;
 using LootDumpProcessor.Model.Output.StaticContainer;
@@ -7,7 +8,6 @@ namespace LootDumpProcessor.Process.Writer;
 
 public class FileWriter : IWriter
 {
-    private static readonly IJsonSerializer _jsonSerializer = JsonSerializerFactory.GetInstance();
     private static readonly string _outputPath;
 
     static FileWriter()
@@ -16,20 +16,14 @@ public class FileWriter : IWriter
         if (string.IsNullOrEmpty(path))
             throw new Exception("Output directory must be set in WriterConfigs");
 
-        if (!Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
+        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 
         _outputPath = path;
     }
 
     public void WriteAll(Dictionary<OutputFileType, object> dumpData)
     {
-        foreach (var (key, value) in dumpData)
-        {
-            Write(key, value);
-        }
+        foreach (var (key, value) in dumpData) Write(key, value);
     }
 
     public void Write(
@@ -48,7 +42,7 @@ public class FileWriter : IWriter
                     if (!Directory.Exists($@"{_outputPath}\locations\{key}"))
                         Directory.CreateDirectory($@"{_outputPath}\locations\{key}");
                     File.WriteAllText($@"{_outputPath}\locations\{key}\looseLoot.json",
-                        _jsonSerializer.Serialize(value));
+                        JsonSerializer.Serialize(value, JsonSerializerSettings.Default));
                 }
 
                 break;
@@ -56,21 +50,22 @@ public class FileWriter : IWriter
                 var staticContainer = (IReadOnlyDictionary<string, MapStaticLoot>)data;
                 foreach (var (key, value) in staticContainer)
                 {
-                        if (!Directory.Exists($@"{_outputPath}\locations\{key}"))
-                            Directory.CreateDirectory($@"{_outputPath}\locations\{key}");
-                        File.WriteAllText($@"{_outputPath}\locations\{key}\staticContainers.json",
-                            _jsonSerializer.Serialize(value));
+                    if (!Directory.Exists($@"{_outputPath}\locations\{key}"))
+                        Directory.CreateDirectory($@"{_outputPath}\locations\{key}");
+                    File.WriteAllText($@"{_outputPath}\locations\{key}\staticContainers.json",
+                        JsonSerializer.Serialize(value, JsonSerializerSettings.Default));
                 }
 
                 break;
             case OutputFileType.StaticLoot:
-                var staticLootData = (IReadOnlyDictionary<string, IReadOnlyDictionary<string, StaticItemDistribution>>)data;
+                var staticLootData =
+                    (IReadOnlyDictionary<string, IReadOnlyDictionary<string, StaticItemDistribution>>)data;
                 foreach (var (key, value) in staticLootData)
                 {
                     if (!Directory.Exists($@"{_outputPath}\locations\{key}"))
                         Directory.CreateDirectory($@"{_outputPath}\locations\{key}");
                     File.WriteAllText($@"{_outputPath}\locations\{key}\staticLoot.json",
-                        _jsonSerializer.Serialize(value));
+                        JsonSerializer.Serialize(value, JsonSerializerSettings.Default));
                 }
 
                 break;
@@ -81,7 +76,7 @@ public class FileWriter : IWriter
                     if (!Directory.Exists($@"{_outputPath}\locations\{key}"))
                         Directory.CreateDirectory($@"{_outputPath}\locations\{key}");
                     File.WriteAllText($@"{_outputPath}\locations\{key}\staticAmmo.json",
-                        _jsonSerializer.Serialize(value));
+                        JsonSerializer.Serialize(value, JsonSerializerSettings.Default));
                 }
 
                 break;

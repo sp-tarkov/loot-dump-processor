@@ -1,15 +1,13 @@
 using System.Text.Json.Serialization;
 using LootDumpProcessor.Storage;
 using LootDumpProcessor.Utils;
-using Newtonsoft.Json;
+
 
 namespace LootDumpProcessor.Model.Processing;
 
 public class LooseLootCounts : IKeyable
 {
-    [JsonProperty("__id__")]
-    [JsonPropertyName("__id__")]
-    public string __ID { get; set; } = KeyGenerator.GetNextKey();
+    [JsonPropertyName("__id__")] public string __ID { get; set; } = KeyGenerator.GetNextKey();
 
     public IKey Counts { get; set; }
 

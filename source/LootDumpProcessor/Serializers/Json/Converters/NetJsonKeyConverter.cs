@@ -8,7 +8,7 @@ public class NetJsonKeyConverter : JsonConverter<IKey?>
 {
     public override IKey? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        Dictionary<string, string> values = new Dictionary<string, string>();
+        Dictionary<string, string> values = new();
         while (reader.Read())
         {
             var property = reader.GetString() ?? "";
@@ -21,15 +21,10 @@ public class NetJsonKeyConverter : JsonConverter<IKey?>
 
         reader.Read();
 
-        if (!values.TryGetValue("type", out var type))
-        {
-            throw new Exception("Key type was missing from json definition");
-        }
+        if (!values.TryGetValue("type", out var type)) throw new Exception("Key type was missing from json definition");
 
         if (!values.TryGetValue("serializedKey", out var serializedKey))
-        {
             throw new Exception("Key serializedKey was missing from json definition");
-        }
 
         AbstractKey key = Enum.Parse<KeyType>(type) switch
         {

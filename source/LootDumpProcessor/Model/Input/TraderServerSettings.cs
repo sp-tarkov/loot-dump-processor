@@ -1,12 +1,6 @@
-﻿using System.Text.Json.Serialization;
-using Newtonsoft.Json;
+﻿namespace LootDumpProcessor.Model.Input;
 
-namespace LootDumpProcessor.Model.Input
+public class TraderServerSettings
 {
-    public class TraderServerSettings
-    {
-        [JsonProperty("TraderServices", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("TraderServices")]
-        public TraderServices? TraderServices { get; set; }
-    }
+    public TraderServices? TraderServices { get; set; }
 }

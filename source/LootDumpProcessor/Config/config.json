@@ -1,47 +1,32 @@
 {
-  "serverLocation": "E:\\spt\\Server",
-  "threads": 10,
-  "threadPoolingTimeoutMs": 1000,
-  "jsonSerializer": "DotNet",
+  "serverLocation": "M:\\Development\\spt\\server",
   "manualGarbageCollectionCalls": false,
   "dumpProcessorConfig": {
     "spawnContainerChanceIncludeAfterDate": "2023-08-10 00:00:01"
   },
   "dataStorageConfig": {
     "dataStorageType": "Memory",
-    "fileDataStorageTempLocation": "E:\\spt\\dumps\\cache"
-  },
-  "loggerConfig": {
-    "logLevel": "Info",
-    "queueLoggerPoolingTimeoutMs": 500
+    "fileDataStorageTempLocation": "M:\\Development\\spt\\dumps\\cache"
   },
   "readerConfig": {
     "preProcessorConfig": {
       "preProcessors": [
         "SevenZip"
       ],
-      "preProcessorTempFolder": "E:\\spt\\dumps\\temp",
+      "preProcessorTempFolder": "M:\\Development\\spt\\dumps\\temp",
       "cleanupTempFolderAfterProcess": true
     },
     "intakeReaderConfig": {
       "maxDumpsPerMap": 5000,
-      "readerType": "Json",
       "ignoredDumpLocations": [
         "Hideout"
       ]
     },
     "dumpFilesLocation": [
-      "E:\\spt\\dumps\\input"
+      "M:\\Development\\spt\\input"
     ],
     "thresholdDate": "2023-01-08",
-    "acceptedFileExtensions": [
-      "json",
-      "7z"
-    ],
-    "processSubFolders": true,
-    "fileFilters": [
-      "JsonDump"
-    ]
+    "processSubFolders": true
   },
   "processorConfig": {
     "spawnPointToleranceForForced": 99.5,
@@ -50,10 +35,10 @@
   "collectorConfig": {
     "collectorType": "Dump",
     "maxEntitiesBeforeDumping": 1000,
-      "dumpLocation": "C:\\Users\\USER\\SPT\\tmp"
+    "dumpLocation": "M:\\Development\\spt\\dumps\\tmp"
   },
   "writerConfig": {
-    "outputLocation": "E:\\spt\\dumps\\output"
+    "outputLocation": "M:\\Development\\spt\\dumps\\output"
   },
   "containerIgnoreList": {
     "tarkovstreets": [
@@ -71,7 +56,7 @@
     "rezervbase",
     "sandbox",
     "sandbox_high",
-    "shorline",
+    "shoreline",
     "tarkovstreets",
     "woods"
   ]

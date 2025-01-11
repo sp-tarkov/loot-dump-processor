@@ -22,10 +22,10 @@ public static class Program
         RegisterServices(services);
 
         await using var serviceProvider = services.BuildServiceProvider();
-        
+
         // Setup Data storage
         DataStorageFactory.GetInstance().Setup();
-        
+
         // startup the pipeline
         var pipeline = serviceProvider.GetRequiredService<IPipeline>();
         await pipeline.Execute();
@@ -34,7 +34,7 @@ public static class Program
     private static void RegisterServices(ServiceCollection services)
     {
         services.AddLogging(configure => configure.AddConsole());
-        
+
         services.AddTransient<IStaticLootProcessor, StaticLootProcessor>();
         services.AddTransient<IStaticContainersProcessor, StaticContainersProcessor>();
         services.AddTransient<IAmmoProcessor, AmmoProcessor>();

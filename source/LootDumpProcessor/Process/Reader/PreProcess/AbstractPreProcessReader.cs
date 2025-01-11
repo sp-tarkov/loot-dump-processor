@@ -19,10 +19,7 @@ public abstract class AbstractPreProcessReader : IPreProcessReader
         }
 
         // Cleanup the temp directory before starting the process
-        if (Directory.Exists(tempFolder))
-        {
-            Directory.Delete(tempFolder, true);
-        }
+        if (Directory.Exists(tempFolder)) Directory.Delete(tempFolder, true);
 
         Directory.CreateDirectory(tempFolder);
 

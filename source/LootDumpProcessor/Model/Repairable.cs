@@ -1,25 +1,15 @@
-using System.Text.Json.Serialization;
-using Newtonsoft.Json;
+namespace LootDumpProcessor.Model;
 
-namespace LootDumpProcessor.Model
+public class Repairable : ICloneable
 {
-    public class Repairable : ICloneable
+    public int? Durability { get; set; }
+
+
+    public int? MaxDurability { get; set; }
+
+    public object Clone() => new Repairable
     {
-        [JsonProperty("Durability", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Durability")]
-        public int? Durability { get; set; }
-
-        [JsonProperty("MaxDurability", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("MaxDurability")]
-        public int? MaxDurability { get; set; }
-
-        public object Clone()
-        {
-            return new Repairable
-            {
-                Durability = Durability,
-                MaxDurability = MaxDurability
-            };
-        }
-    }
+        Durability = Durability,
+        MaxDurability = MaxDurability
+    };
 }

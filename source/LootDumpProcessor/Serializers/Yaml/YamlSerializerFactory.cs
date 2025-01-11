@@ -6,10 +6,7 @@ public static class YamlSerializerFactory
 
     public static IYamlSerializer GetInstance()
     {
-        if (_instance == null)
-        {
-            _instance = new YamlDotNetYamlSerializer();
-        }
+        if (_instance == null) _instance = new YamlDotNetYamlSerializer();
 
         return _instance;
     }

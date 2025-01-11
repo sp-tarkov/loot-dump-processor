@@ -3,6 +3,7 @@ namespace LootDumpProcessor.Process.Collector;
 public static class CollectorFactory
 {
     private static ICollector? _collector;
+
     public static ICollector GetInstance()
     {
         if (_collector == null)

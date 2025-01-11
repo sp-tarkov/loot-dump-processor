@@ -29,24 +29,15 @@ public class MemoryDataStorage : IDataStorage
     {
         lock (_cacheObjectLock)
         {
-            if (CachedObjects.TryGetValue(GetLookupKey(key), out var value))
-            {
-                return (T)value;
-            }
+            if (CachedObjects.TryGetValue(GetLookupKey(key), out var value)) return (T)value;
         }
 
         return default;
     }
 
-    public List<T> GetAll<T>()
-    {
-        throw new NotImplementedException();
-    }
+    public List<T> GetAll<T>() => throw new NotImplementedException();
 
-    private string GetLookupKey(IKey key)
-    {
-        return string.Join("-", key.GetLookupIndex());
-    }
+    private string GetLookupKey(IKey key) => string.Join("-", key.GetLookupIndex());
 
     public void Clear()
     {

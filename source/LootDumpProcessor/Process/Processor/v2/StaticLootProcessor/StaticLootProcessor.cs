@@ -77,7 +77,8 @@ public class StaticLootProcessor(ILogger<StaticLootProcessor> logger) : IStaticL
         return staticLootDistribution;
     }
 
-    private static IReadOnlyList<int> GetItemCountsInContainers(IReadOnlyList<PreProcessedStaticLoot> selectedContainers)
+    private static IReadOnlyList<int> GetItemCountsInContainers(
+        IReadOnlyList<PreProcessedStaticLoot> selectedContainers)
     {
         return selectedContainers
             .Select(container => container.Items.Count(item => item.ParentId == container.ContainerId))
@@ -90,13 +91,9 @@ public class StaticLootProcessor(ILogger<StaticLootProcessor> logger) : IStaticL
         var itemHitCounts = new Dictionary<string, int>();
 
         foreach (var container in selectedContainers)
-        {
-            foreach (var item in container.Items.Where(item => item.ParentId == container.ContainerId))
-            {
-                if (!itemHitCounts.TryAdd(item.Tpl, 1))
-                    itemHitCounts[item.Tpl]++;
-            }
-        }
+        foreach (var item in container.Items.Where(item => item.ParentId == container.ContainerId))
+            if (!itemHitCounts.TryAdd(item.Tpl, 1))
+                itemHitCounts[item.Tpl]++;
 
         return itemHitCounts.Select(kv => new StaticDistribution
         {

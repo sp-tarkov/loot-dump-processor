@@ -7,8 +7,5 @@ public class YamlDataStorageFileSerializer : IDataStorageFileSerializer
 {
     public string GetExtension() => ".yaml";
 
-    public ISerializer GetSerializer()
-    {
-        return YamlSerializerFactory.GetInstance();
-    }
+    public ISerializer GetSerializer() => YamlSerializerFactory.GetInstance();
 }

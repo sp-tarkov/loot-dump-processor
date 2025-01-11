@@ -14,8 +14,5 @@ public class PartialData
         return false;
     }
 
-    public override int GetHashCode()
-    {
-        return BasicInfo.GetHashCode();
-    }
+    public override int GetHashCode() => BasicInfo.GetHashCode();
 }

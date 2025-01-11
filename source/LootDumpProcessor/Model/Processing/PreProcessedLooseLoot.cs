@@ -7,14 +7,10 @@ public class PreProcessedLooseLoot : IKeyable
 {
     public Dictionary<string, int> Counts { get; set; }
 
-    [Newtonsoft.Json.JsonConverter(typeof(NewtonsoftJsonKeyConverter))]
     [System.Text.Json.Serialization.JsonConverter(typeof(NetJsonKeyConverter))]
     public IKey ItemProperties { get; set; }
 
     public int MapSpawnpointCount { get; set; }
 
-    public IKey GetKey()
-    {
-        throw new NotImplementedException();
-    }
+    public IKey GetKey() => throw new NotImplementedException();
 }

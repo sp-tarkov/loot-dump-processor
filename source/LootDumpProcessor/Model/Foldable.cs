@@ -1,20 +1,11 @@
-using System.Text.Json.Serialization;
-using Newtonsoft.Json;
+namespace LootDumpProcessor.Model;
 
-namespace LootDumpProcessor.Model
+public class Foldable : ICloneable
 {
-    public class Foldable : ICloneable
-    {
-        [JsonProperty("Folded", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Folded")]
-        public bool? Folded { get; set; }
+    public bool? Folded { get; set; }
 
-        public object Clone()
-        {
-            return new Foldable
-            {
-                Folded = Folded
-            };
-        }
-    }
+    public object Clone() => new Foldable
+    {
+        Folded = Folded
+    };
 }

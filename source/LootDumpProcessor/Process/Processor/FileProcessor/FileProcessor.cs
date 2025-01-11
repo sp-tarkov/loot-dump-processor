@@ -17,12 +17,12 @@ public class FileProcessor : IFileProcessor
         ILooseLootProcessor looseLootProcessor,
         ILogger<FileProcessor> logger)
     {
-        _staticLootProcessor = staticLootProcessor 
-            ?? throw new ArgumentNullException(nameof(staticLootProcessor));
-        _looseLootProcessor = looseLootProcessor 
-            ?? throw new ArgumentNullException(nameof(looseLootProcessor));
-        _logger = logger 
-            ?? throw new ArgumentNullException(nameof(logger));
+        _staticLootProcessor = staticLootProcessor
+                               ?? throw new ArgumentNullException(nameof(staticLootProcessor));
+        _looseLootProcessor = looseLootProcessor
+                              ?? throw new ArgumentNullException(nameof(looseLootProcessor));
+        _logger = logger
+                  ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public PartialData Process(BasicInfo parsedData)
@@ -33,10 +33,8 @@ public class FileProcessor : IFileProcessor
         var staticLoot = new List<Template>();
 
         foreach (var item in parsedData.Data.Data.LocationLoot.Loot)
-        {
             if (item.IsContainer ?? false) staticLoot.Add(item);
             else looseLoot.Add(item);
-        }
 
         parsedData.Data = null;
 

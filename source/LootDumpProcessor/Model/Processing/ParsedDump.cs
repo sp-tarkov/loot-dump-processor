@@ -17,15 +17,14 @@ public class ParsedDump : IKeyable
         return false;
     }
 
-    public override int GetHashCode()
-    {
-        return BasicInfo.GetHashCode();
-    }
+    public override int GetHashCode() => BasicInfo.GetHashCode();
 
     public IKey GetKey()
     {
         var sanitizedHash = _hashRegex.Replace(BasicInfo.FileHash, "");
         return new SubdivisionedUniqueKey(new[]
-            { "parsedDumps", BasicInfo.Map, $"{BasicInfo.FileName.Split("\\").Last().Replace(".", "")}-{sanitizedHash}" });
+        {
+            "parsedDumps", BasicInfo.Map, $"{BasicInfo.FileName.Split("\\").Last().Replace(".", "")}-{sanitizedHash}"
+        });
     }
 }

@@ -1,30 +1,19 @@
-using System.Text.Json.Serialization;
-using Newtonsoft.Json;
+namespace LootDumpProcessor.Model;
 
-namespace LootDumpProcessor.Model
+public class Vector3 : ICloneable
 {
-    public class Vector3 : ICloneable
+    public float? X { get; set; }
+
+
+    public float? Y { get; set; }
+
+
+    public float? Z { get; set; }
+
+    public object Clone() => new Vector3
     {
-        [JsonProperty("x", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("x")]
-        public float? X { get; set; }
-
-        [JsonProperty("y", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("y")]
-        public float? Y { get; set; }
-
-        [JsonProperty("z", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("z")]
-        public float? Z { get; set; }
-
-        public object Clone()
-        {
-            return new Vector3
-            {
-                X = X,
-                Y = Y,
-                Z = Z
-            };
-        }
-    }
+        X = X,
+        Y = Y,
+        Z = Z
+    };
 }

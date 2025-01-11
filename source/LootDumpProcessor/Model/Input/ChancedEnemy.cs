@@ -1,16 +1,7 @@
-﻿using System.Text.Json.Serialization;
-using Newtonsoft.Json;
+﻿namespace LootDumpProcessor.Model.Input;
 
-namespace LootDumpProcessor.Model.Input
+public class ChancedEnemy
 {
-    public class ChancedEnemy
-    {
-        [JsonProperty("EnemyChance", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("EnemyChance")]
-        public int? EnemyChance { get; set; }
-
-        [JsonProperty("Role", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonPropertyName("Role")]
-        public string? Role { get; set; }
-    }
+    public int? EnemyChance { get; set; }
+    public string? Role { get; set; }
 }
