@@ -105,14 +105,12 @@ public class MultithreadSteppedDumpProcessor(
                         }
                         else
                         {
-                            // .Item1 = map name
-                            // .Item2 = force/weapon static arrays
                             var mapStaticContainers =
                                 _staticContainersProcessor.CreateStaticWeaponsAndForcedContainers(dataDump);
 
-                            var newStaticWeapons = mapStaticContainers.Item2.StaticWeapons.Where(x =>
+                            var newStaticWeapons = mapStaticContainers.StaticWeapons.Where(x =>
                                 !mapStaticLoot.StaticWeapons.Exists(y => y.Id == x.Id));
-                            var newStaticForced = mapStaticContainers.Item2.StaticForced.Where(x =>
+                            var newStaticForced = mapStaticContainers.StaticForced.Where(x =>
                                 !mapStaticLoot.StaticForced.Exists(y => y.ContainerId == x.ContainerId));
 
                             mapStaticLoot.StaticWeapons.AddRange(newStaticWeapons);

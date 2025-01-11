@@ -3,15 +3,17 @@ using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Utils;
 using Microsoft.Extensions.Logging;
+using LootDumpProcessor;
+using LootDumpProcessor.Process.Processor.v2.StaticContainersProcessor;
 
-namespace LootDumpProcessor.Process.Processor.v2.StaticContainersProcessor;
-
-public class StaticContainersProcessor(ILogger<StaticContainersProcessor> logger)
-    : IStaticContainersProcessor
+public class StaticContainersProcessor : IStaticContainersProcessor
 {
-    private readonly ILogger<StaticContainersProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<StaticContainersProcessor> _logger;
 
-    public (string, MapStaticLoot) CreateStaticWeaponsAndForcedContainers(RootData rawMapDump)
+    public StaticContainersProcessor(ILogger<StaticContainersProcessor> logger)
+        => _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+    public MapStaticLoot CreateStaticWeaponsAndForcedContainers(RootData rawMapDump)
     {
         var locationLoot = rawMapDump.Data.LocationLoot;
         var mapId = locationLoot.Id.ToLower();
@@ -30,10 +32,11 @@ public class StaticContainersProcessor(ILogger<StaticContainersProcessor> logger
                 continue;
             }
 
-            var firstItemTpl = lootPosition.Items[0].Tpl;
+            var firstItemTpl = lootPosition.Items.First().Tpl;
 
-            if (!LootDumpProcessorContext.GetStaticWeaponIds().Contains(firstItemTpl)) continue;
-            
+            if (!LootDumpProcessorContext.GetStaticWeaponIds().Contains(firstItemTpl))
+                continue;
+
             var copiedLoot = ProcessorUtil.Copy(lootPosition);
             staticWeapons.Add(copiedLoot);
             _logger.LogDebug("Added static weapon with ID {WeaponId} to Map {MapId}.", copiedLoot.Id, mapId);
@@ -50,7 +53,7 @@ public class StaticContainersProcessor(ILogger<StaticContainersProcessor> logger
         };
 
         _logger.LogInformation("Created static weapons and forced containers for Map {MapId}.", mapId);
-        return (mapId, mapStaticLoot);
+        return mapStaticLoot;
     }
 
     public IReadOnlyList<Template> CreateDynamicStaticContainers(RootData rawMapDump)
@@ -62,14 +65,14 @@ public class StaticContainersProcessor(ILogger<StaticContainersProcessor> logger
 
         foreach (var container in dynamicContainers)
         {
-            if (container.Items == null || container.Items.Count == 0)
+            if (container.Items == null || !container.Items.Any())
             {
                 _logger.LogWarning("Dynamic container with ID {ContainerId} has no items.", container.Id);
                 continue;
             }
 
             var firstItem = container.Items.First();
-            container.Items = [firstItem];
+            container.Items = new List<Item> { firstItem };
             _logger.LogDebug("Retained only the first item in dynamic container with ID {ContainerId}.", container.Id);
         }
 
