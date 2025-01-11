@@ -39,7 +39,7 @@ public static class LootDumpProcessorContext
         lock (_forcedStaticLock)
         {
             if (_forcedStatic == null)
-                _forcedStatic = YamlSerializerFactory.GetInstance()
+                _forcedStatic = Yaml.Deserializer
                     .Deserialize<ForcedStatic>(File.ReadAllText("./Config/forced_static.yaml"));
         }
 
@@ -71,7 +71,7 @@ public static class LootDumpProcessorContext
         lock (_forcedLooseLock)
         {
             if (_forcedLoose == null)
-                _forcedLoose = YamlSerializerFactory.GetInstance().Deserialize<Dictionary<string, HashSet<string>>>(
+                _forcedLoose = Yaml.Deserializer.Deserialize<Dictionary<string, HashSet<string>>>(
                     File.ReadAllText("./Config/forced_loose.yaml"));
         }
 
