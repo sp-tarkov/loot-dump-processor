@@ -5,27 +5,27 @@ namespace LootDumpProcessor.Storage.Implementations.File.Handlers;
 
 public abstract class AbstractStoreHandler : IStoreHandler
 {
-    public void Store<T>(T obj, bool failIfDuplicate = true) where T : IKeyable
+    public void Store<TEntity>(TEntity entity, bool failIfDuplicate = true) where TEntity : IKeyable
     {
-        var locationWithFile = GetLocation(obj.GetKey());
+        var locationWithFile = GetLocation(entity.GetKey());
         if (System.IO.File.Exists(locationWithFile) && failIfDuplicate)
             throw new Exception($"Attempted to save duplicated object into data storage: {locationWithFile}");
 
-        System.IO.File.WriteAllText(locationWithFile, JsonSerializer.Serialize(obj, JsonSerializerSettings.Default));
+        System.IO.File.WriteAllText(locationWithFile, JsonSerializer.Serialize(entity, JsonSerializerSettings.Default));
     }
 
-    public T? Retrieve<T>(IKey obj) where T : IKeyable
+    public TEntity? Retrieve<TEntity>(IKey key) where TEntity : IKeyable
     {
-        var locationWithFile = GetLocation(obj);
+        var locationWithFile = GetLocation(key);
         if (!System.IO.File.Exists(locationWithFile)) return default;
 
-        return JsonSerializer.Deserialize<T>(System.IO.File.ReadAllText(locationWithFile),
+        return JsonSerializer.Deserialize<TEntity>(System.IO.File.ReadAllText(locationWithFile),
             JsonSerializerSettings.Default);
     }
 
-    public bool Exists(IKey obj)
+    public bool Exists(IKey key)
     {
-        var locationWithFile = GetLocation(obj);
+        var locationWithFile = GetLocation(key);
         return System.IO.File.Exists(locationWithFile);
     }
 

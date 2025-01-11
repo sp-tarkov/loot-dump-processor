@@ -2,9 +2,8 @@ namespace LootDumpProcessor.Storage;
 
 public interface IDataStorage
 {
-    void Setup();
-    void Store<T>(T t) where T : IKeyable;
-    bool Exists(IKey t);
-    T GetItem<T>(IKey key) where T : IKeyable;
+    void Store<TEntity>(TEntity entity) where TEntity : IKeyable;
+    TEntity? GetItem<TEntity>(IKey key) where TEntity : IKeyable;
+    bool Exists(IKey key);
     void Clear();
 }

@@ -2,7 +2,7 @@ namespace LootDumpProcessor.Storage.Implementations.File;
 
 public interface IStoreHandler
 {
-    void Store<T>(T obj, bool failIfDuplicate = true) where T : IKeyable;
-    T? Retrieve<T>(IKey obj) where T : IKeyable;
-    bool Exists(IKey obj);
+    void Store<TEntity>(TEntity entity, bool failIfDuplicate = true) where TEntity : IKeyable;
+    TEntity? Retrieve<TEntity>(IKey key) where TEntity : IKeyable;
+    bool Exists(IKey key);
 }

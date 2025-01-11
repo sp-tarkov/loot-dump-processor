@@ -22,9 +22,6 @@ public static class Program
 
         await using var serviceProvider = services.BuildServiceProvider();
 
-        // Setup Data storage
-        DataStorageFactory.GetInstance().Setup();
-
         // startup the pipeline
         var pipeline = serviceProvider.GetRequiredService<IPipeline>();
         await pipeline.Execute();

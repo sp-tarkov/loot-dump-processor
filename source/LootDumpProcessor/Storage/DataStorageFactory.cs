@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using LootDumpProcessor.Storage.Implementations.File;
 using LootDumpProcessor.Storage.Implementations.Memory;
 
@@ -5,9 +6,7 @@ namespace LootDumpProcessor.Storage;
 
 public static class DataStorageFactory
 {
-    private static readonly Dictionary<DataStorageTypes, IDataStorage> _dataStorage = new();
-
-    private static object lockObject = new();
+    private static readonly ConcurrentDictionary<DataStorageTypes, IDataStorage> DataStorage = new();
 
     /**
      * Requires LootDumpProcessorContext to be initialized before using
@@ -15,23 +14,18 @@ public static class DataStorageFactory
     public static IDataStorage GetInstance() =>
         GetInstance(LootDumpProcessorContext.GetConfig().DataStorageConfig.DataStorageType);
 
-    public static IDataStorage GetInstance(DataStorageTypes type)
+    private static IDataStorage GetInstance(DataStorageTypes type)
     {
-        IDataStorage dataStorage;
-        lock (lockObject)
+        if (DataStorage.TryGetValue(type, out var dataStorage)) return dataStorage;
+        
+        dataStorage = type switch
         {
-            if (!_dataStorage.TryGetValue(type, out dataStorage))
-            {
-                dataStorage = type switch
-                {
-                    DataStorageTypes.File => new FileDataStorage(),
-                    DataStorageTypes.Memory => new MemoryDataStorage(),
-                    _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-                };
+            DataStorageTypes.File => new FileDataStorage(),
+            DataStorageTypes.Memory => new MemoryDataStorage(),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
 
-                _dataStorage.Add(type, dataStorage);
-            }
-        }
+        DataStorage.TryAdd(type, dataStorage);
 
         return dataStorage;
     }

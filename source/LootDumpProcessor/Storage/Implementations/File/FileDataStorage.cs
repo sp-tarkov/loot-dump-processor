@@ -2,19 +2,14 @@ namespace LootDumpProcessor.Storage.Implementations.File;
 
 public class FileDataStorage : IDataStorage
 {
-    public void Setup()
+    public void Store<TEntity>(TEntity entity) where TEntity : IKeyable
     {
+        StoreHandlerFactory.GetInstance(entity.GetKey().GetKeyType()).Store(entity);
     }
 
-    public void Store<T>(T t) where T : IKeyable
-    {
-        StoreHandlerFactory.GetInstance(t.GetKey().GetKeyType()).Store(t);
-    }
+    public bool Exists(IKey key) => StoreHandlerFactory.GetInstance(key.GetKeyType()).Exists(key);
 
-    public bool Exists(IKey t) => StoreHandlerFactory.GetInstance(t.GetKeyType()).Exists(t);
-
-    public T GetItem<T>(IKey key) where T : IKeyable =>
-        StoreHandlerFactory.GetInstance(key.GetKeyType()).Retrieve<T>(key);
+    public T GetItem<T>(IKey key) where T : IKeyable => StoreHandlerFactory.GetInstance(key.GetKeyType()).Retrieve<T>(key);
 
     public void Clear()
     {
