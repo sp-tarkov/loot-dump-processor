@@ -7,7 +7,6 @@ using LootDumpProcessor.Process.Processor.DumpProcessor;
 using LootDumpProcessor.Process.Processor.FileProcessor;
 using LootDumpProcessor.Process.Reader.Filters;
 using LootDumpProcessor.Process.Reader.Intake;
-using LootDumpProcessor.Process.Reader.PreProcess;
 using LootDumpProcessor.Process.Writer;
 using LootDumpProcessor.Serializers.Json;
 using LootDumpProcessor.Storage;
@@ -17,8 +16,8 @@ using Microsoft.Extensions.Logging;
 namespace LootDumpProcessor.Process;
 
 public class QueuePipeline(
-    IFileProcessor fileProcessor, IDumpProcessor dumpProcessor, ILogger<QueuePipeline> logger,
-    IPreProcessReader preProcessReader, IFileFilter fileFilter, IIntakeReader intakeReader
+    IFileProcessor fileProcessor, IDumpProcessor dumpProcessor, ILogger<QueuePipeline> logger, IFileFilter fileFilter,
+    IIntakeReader intakeReader
 )
     : IPipeline
 {
@@ -29,9 +28,6 @@ public class QueuePipeline(
         dumpProcessor ?? throw new ArgumentNullException(nameof(dumpProcessor));
 
     private readonly ILogger<QueuePipeline> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-    private readonly IPreProcessReader _preProcessReader =
-        preProcessReader ?? throw new ArgumentNullException(nameof(preProcessReader));
 
     private readonly IFileFilter _fileFilter = fileFilter ?? throw new ArgumentNullException(nameof(fileFilter));
 
@@ -60,7 +56,6 @@ public class QueuePipeline(
         }
         finally
         {
-            _preProcessReader.Dispose();
             stopwatch.Stop();
             _logger.LogInformation("Dumps processed in {@Time}", stopwatch.Elapsed);
         }
@@ -92,24 +87,9 @@ public class QueuePipeline(
             var extensionFull = Path.GetExtension(file);
             if (extensionFull.Length > 1)
             {
-                // if the preprocessor found something new to process or generated new files, add them to the queue
-                if (extensionFull == "7z" &&
-                    _preProcessReader.TryPreProcess(file, out var outputFiles, out var outputDirectories))
-                {
-                    // all new directories need to be processed as well
-                    GetFileQueue(outputDirectories).ToList().ForEach(queuedFilesToProcess.Enqueue);
-                    // all output files need to be queued as well
-                    outputFiles.ForEach(queuedFilesToProcess.Enqueue);
-                }
+                if (_fileFilter.Accept(file)) gatheredFiles.Add(file);
 
-                else
-                {
-                    // if there is no preprocessor for the file, means its ready to filter or accept
-
-                    if (_fileFilter.Accept(file)) gatheredFiles.Add(file);
-
-                    else gatheredFiles.Add(file);
-                }
+                else gatheredFiles.Add(file);
             }
             else
             {

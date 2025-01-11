@@ -9,13 +9,6 @@
     "fileDataStorageTempLocation": "M:\\Development\\spt\\dumps\\cache"
   },
   "readerConfig": {
-    "preProcessorConfig": {
-      "preProcessors": [
-        "SevenZip"
-      ],
-      "preProcessorTempFolder": "M:\\Development\\spt\\dumps\\temp",
-      "cleanupTempFolderAfterProcess": true
-    },
     "intakeReaderConfig": {
       "maxDumpsPerMap": 5000,
       "ignoredDumpLocations": [

@@ -7,7 +7,6 @@ using LootDumpProcessor.Process.Processor.v2.StaticContainersProcessor;
 using LootDumpProcessor.Process.Processor.v2.StaticLootProcessor;
 using LootDumpProcessor.Process.Reader.Filters;
 using LootDumpProcessor.Process.Reader.Intake;
-using LootDumpProcessor.Process.Reader.PreProcess;
 using LootDumpProcessor.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -46,7 +45,6 @@ public static class Program
 
         services.AddTransient<IIntakeReader, JsonFileIntakeReader>();
         services.AddTransient<IFileFilter, JsonDumpFileFilter>();
-        services.AddTransient<IPreProcessReader, SevenZipPreProcessReader>();
         services.AddTransient<IFileProcessor, FileProcessor>();
         services.AddTransient<IDumpProcessor, MultithreadSteppedDumpProcessor>();
         services.AddTransient<IPipeline, QueuePipeline>();
