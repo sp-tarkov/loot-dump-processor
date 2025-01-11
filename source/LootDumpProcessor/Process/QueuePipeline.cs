@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Process.Collector;
 using LootDumpProcessor.Process.Processor.DumpProcessor;
@@ -42,8 +43,9 @@ public class QueuePipeline(
     private readonly List<string> _mapNames = LootDumpProcessorContext.GetConfig().MapsToProcess;
 
 
-    public async Task DoProcess()
+    public async Task Execute()
     {
+        var stopwatch = Stopwatch.StartNew();
         // Single collector instance to collect results
         var collector = CollectorFactory.GetInstance();
         collector.Setup();
@@ -61,6 +63,8 @@ public class QueuePipeline(
         finally
         {
             _preProcessReader.Dispose();
+            stopwatch.Stop();
+            _logger.LogInformation("Dumps processed in {@Time}", stopwatch.Elapsed);
         }
     }
 
@@ -206,7 +210,6 @@ public class QueuePipeline(
     /// <summary>
     /// Adds map name to file if they don't have it already.
     /// </summary>
-    /// <param name="threads">Number of threads to use</param>
     private async Task FixFilesFromDumps()
     {
         var inputPath = LootDumpProcessorContext.GetConfig().ReaderConfig.DumpFilesLocation;

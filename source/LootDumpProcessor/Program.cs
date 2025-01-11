@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using LootDumpProcessor.Process;
 using LootDumpProcessor.Process.Processor.DumpProcessor;
 using LootDumpProcessor.Process.Processor.FileProcessor;
@@ -19,8 +20,22 @@ public static class Program
     public static async Task Main()
     {
         var services = new ServiceCollection();
+        RegisterServices(services);
+
+        await using var serviceProvider = services.BuildServiceProvider();
         
+        // Setup Data storage
+        DataStorageFactory.GetInstance().Setup();
+        
+        // startup the pipeline
+        var pipeline = serviceProvider.GetRequiredService<IPipeline>();
+        await pipeline.Execute();
+    }
+
+    private static void RegisterServices(ServiceCollection services)
+    {
         services.AddLogging(configure => configure.AddConsole());
+        
         services.AddTransient<IStaticLootProcessor, StaticLootProcessor>();
         services.AddTransient<IStaticContainersProcessor, StaticContainersProcessor>();
         services.AddTransient<IAmmoProcessor, AmmoProcessor>();
@@ -36,16 +51,5 @@ public static class Program
         services.AddTransient<IFileProcessor, FileProcessor>();
         services.AddTransient<IDumpProcessor, MultithreadSteppedDumpProcessor>();
         services.AddTransient<IPipeline, QueuePipeline>();
-
-        await using var serviceProvider = services.BuildServiceProvider();
-        
-        // Bootstrap the config before anything else, its required by the whole application to work
-        LootDumpProcessorContext.GetConfig();
-        // Setup Data storage
-        DataStorageFactory.GetInstance().Setup();
-        // startup the pipeline
-        var pipeline = serviceProvider.GetRequiredService<IPipeline>();
-        await pipeline.Execute();
-        Thread.Sleep(10000);
     }
 }
