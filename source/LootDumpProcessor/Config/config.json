@@ -1,0 +1,56 @@
+{
+  "serverLocation": "M:\\Development\\spt\\server",
+  "manualGarbageCollectionCalls": false,
+  "dumpProcessorConfig": {
+    "spawnContainerChanceIncludeAfterDate": "2023-08-10 00:00:01"
+  },
+  "dataStorageConfig": {
+    "dataStorageType": "Memory",
+    "fileDataStorageTempLocation": "M:\\Development\\spt\\dumps\\cache"
+  },
+  "readerConfig": {
+    "intakeReaderConfig": {
+      "maxDumpsPerMap": 5000,
+      "ignoredDumpLocations": [
+        "Hideout"
+      ]
+    },
+    "dumpFilesLocation": [
+      "M:\\Development\\spt\\input"
+    ],
+    "thresholdDate": "2023-01-08",
+    "processSubFolders": true
+  },
+  "processorConfig": {
+    "spawnPointToleranceForForced": 99.5,
+    "looseLootCountTolerancePercentage": 75
+  },
+  "collectorConfig": {
+    "collectorType": "Dump",
+    "maxEntitiesBeforeDumping": 1000,
+    "dumpLocation": "M:\\Development\\spt\\dumps\\tmp"
+  },
+  "writerConfig": {
+    "outputLocation": "M:\\Development\\spt\\dumps\\output"
+  },
+  "containerIgnoreList": {
+    "tarkovstreets": [
+      "container_City_SW_04_DesignStuff_00002",
+      "Lootable_00063"
+    ]
+  },
+  "mapsToProcess": [
+    "bigmap",
+    "factory4_day",
+    "factory4_night",
+    "interchange",
+    "laboratory",
+    "lighthouse",
+    "rezervbase",
+    "sandbox",
+    "sandbox_high",
+    "shoreline",
+    "tarkovstreets",
+    "woods"
+  ]
+}
