@@ -1,48 +1,8 @@
 ﻿namespace LootDumpProcessor.Model.Input;
 
-public class MapSettings
-{
-    public string? MapID { get; set; }
-
-
-    public float? ChanceSpawn { get; set; }
-
-
-    public Vector3? SpawnPeriod { get; set; }
-
-
-    public float? MoveSpeed { get; set; }
-
-
-    public float? ReadyToDepartureTime { get; set; }
-
-
-    public float? CheckTurnDistanceTime { get; set; }
-
-
-    public float? TurnCheckSensitivity { get; set; }
-
-
-    public float? DecreaseSpeedOnTurnLimit { get; set; }
-
-
-    public float? EndSplineDecelerationDistance { get; set; }
-
-
-    public float? AccelerationSpeed { get; set; }
-
-
-    public float? DecelerationSpeed { get; set; }
-
-
-    public Vector3? PauseDurationRange { get; set; }
-
-
-    public float? BodySwingReturnSpeed { get; set; }
-
-
-    public float? BodySwingDamping { get; set; }
-
-
-    public float? BodySwingIntensity { get; set; }
-}
+public readonly record struct MapSettings(
+    string MapId, float ChanceSpawn, Vector3 SpawnPeriod, float MoveSpeed, float ReadyToDepartureTime,
+    float CheckTurnDistanceTime, float TurnCheckSensitivity, float DecreaseSpeedOnTurnLimit,
+    float EndSplineDecelerationDistance, float AccelerationSpeed, float DecelerationSpeed, Vector3 PauseDurationRange,
+    float BodySwingReturnSpeed, float BodySwingDamping, float BodySwingIntensity
+);

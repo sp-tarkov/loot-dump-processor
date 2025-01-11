@@ -3,8 +3,8 @@ using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Utils;
 using Microsoft.Extensions.Logging;
-using LootDumpProcessor;
-using LootDumpProcessor.Process.Processor.v2.StaticContainersProcessor;
+
+namespace LootDumpProcessor.Process.Processor.v2.StaticContainersProcessor;
 
 public class StaticContainersProcessor : IStaticContainersProcessor
 {

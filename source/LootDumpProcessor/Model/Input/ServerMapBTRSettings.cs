@@ -1,12 +1,3 @@
 ﻿namespace LootDumpProcessor.Model.Input;
 
-public class ServerMapBTRSettings
-{
-    public MapSettings? Develop { get; set; }
-
-
-    public MapSettings? TarkovStreets { get; set; }
-
-
-    public MapSettings? Woods { get; set; }
-}
+public readonly record struct ServerMapBTRSettings(MapSettings Develop, MapSettings TarkovStreets, MapSettings Woods);

@@ -1,6 +1,3 @@
 ﻿namespace LootDumpProcessor.Model.Input;
 
-public class ServiceItemCost
-{
-    public Dictionary<string, ItemCost>? Costs { get; set; }
-}
+public readonly record struct ServiceItemCost(IReadOnlyDictionary<string, ItemCost> Costs);

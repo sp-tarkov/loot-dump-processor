@@ -1,14 +1,11 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
-using LootDumpProcessor;
 using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.LooseLoot;
 using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Model.Processing;
-using LootDumpProcessor.Process;
-using LootDumpProcessor.Process.Processor.DumpProcessor;
 using LootDumpProcessor.Process.Processor.v2.AmmoProcessor;
 using LootDumpProcessor.Process.Processor.v2.LooseLootProcessor;
 using LootDumpProcessor.Process.Processor.v2.StaticContainersProcessor;
@@ -18,6 +15,8 @@ using LootDumpProcessor.Storage;
 using LootDumpProcessor.Storage.Collections;
 using LootDumpProcessor.Utils;
 using Microsoft.Extensions.Logging;
+
+namespace LootDumpProcessor.Process.Processor.DumpProcessor;
 
 public class MultithreadSteppedDumpProcessor(
     IStaticLootProcessor staticLootProcessor,

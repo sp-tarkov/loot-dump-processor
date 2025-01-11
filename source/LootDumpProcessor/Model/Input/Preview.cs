@@ -1,9 +1,3 @@
 ﻿namespace LootDumpProcessor.Model.Input;
 
-public class Preview
-{
-    public string? Path { get; set; }
-
-
-    public string? Rcid { get; set; }
-}
+public readonly record struct Preview(string? Path, string? Rcid);

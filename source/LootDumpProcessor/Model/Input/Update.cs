@@ -1,6 +1,3 @@
 ﻿namespace LootDumpProcessor.Model.Input;
 
-public class Update
-{
-    public int? StackObjectsCount { get; set; }
-}
+public readonly record struct Update(int StackObjectsCount);

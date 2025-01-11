@@ -1,7 +1,6 @@
 ﻿namespace LootDumpProcessor.Model.Input;
 
-public class Banner
-{
-    public string? Id { get; set; }
-    public Pic? Pic { get; set; }
-}
+public readonly record struct Banner(
+    string Id,
+    Pic Pic
+);

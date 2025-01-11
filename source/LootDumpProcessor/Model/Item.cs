@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using LootDumpProcessor.Utils;
 
 
 namespace LootDumpProcessor.Model;
@@ -39,6 +38,6 @@ public class Item : ICloneable
         ParentId = ParentId,
         SlotId = SlotId,
         Location = Location,
-        Upd = ProcessorUtil.Copy(Upd)
+        Upd = Upd
     };
 }

@@ -1,12 +1,12 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
-using LootDumpProcessor;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Processing;
-using LootDumpProcessor.Process.Reader.Intake;
 using LootDumpProcessor.Serializers.Json;
 using LootDumpProcessor.Utils;
 using Microsoft.Extensions.Logging;
+
+namespace LootDumpProcessor.Process.Reader.Intake;
 
 public class JsonFileIntakeReader(ILogger<JsonFileIntakeReader> logger) : IIntakeReader
 {
@@ -43,7 +43,7 @@ public class JsonFileIntakeReader(ILogger<JsonFileIntakeReader> logger) : IIntak
             _logger.LogError("Could not parse date from file: {File}", file);
 
         var fi = JsonSerializer.Deserialize<RootData>(fileData, JsonSerializerSettings.Default);
-        if (fi?.Data?.LocationLoot?.Name != null && (!_ignoredLocations?.Contains(fi.Data.LocationLoot.Name) ?? true))
+        if (fi?.Data.LocationLoot.Name != null && (!_ignoredLocations?.Contains(fi.Data.LocationLoot.Name) ?? true))
         {
             var mapName = fi.Data.LocationLoot.Name;
             var mapId = fi.Data.LocationLoot.Id.ToLower();

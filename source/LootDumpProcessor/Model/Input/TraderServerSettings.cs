@@ -1,6 +1,3 @@
 ﻿namespace LootDumpProcessor.Model.Input;
 
-public class TraderServerSettings
-{
-    public TraderServices? TraderServices { get; set; }
-}
+public readonly record struct TraderServerSettings(TraderServices? TraderServices);

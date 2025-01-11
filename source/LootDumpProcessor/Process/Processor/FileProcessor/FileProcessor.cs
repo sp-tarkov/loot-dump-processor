@@ -1,10 +1,11 @@
 using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Processing;
-using LootDumpProcessor.Process.Processor.FileProcessor;
 using LootDumpProcessor.Process.Processor.v2.LooseLootProcessor;
 using LootDumpProcessor.Process.Processor.v2.StaticLootProcessor;
 using LootDumpProcessor.Storage;
 using Microsoft.Extensions.Logging;
+
+namespace LootDumpProcessor.Process.Processor.FileProcessor;
 
 public class FileProcessor : IFileProcessor
 {

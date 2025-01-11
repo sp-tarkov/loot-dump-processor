@@ -1,7 +1,6 @@
 ﻿namespace LootDumpProcessor.Model.Input;
 
-public class ChancedEnemy
-{
-    public int? EnemyChance { get; set; }
-    public string? Role { get; set; }
-}
+public readonly record struct ChancedEnemy(
+    int EnemyChance,
+    string Role
+);
