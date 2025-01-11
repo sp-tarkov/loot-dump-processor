@@ -8,7 +8,7 @@ public class ParsedDump : IKeyable
     private static readonly Regex _hashRegex = new("([^a-zA-Z0-9])");
     public BasicInfo BasicInfo { get; set; }
     public PreProcessedLooseLoot LooseLoot { get; set; }
-    public List<PreProcessedStaticLoot> Containers { get; set; }
+    public IReadOnlyList<PreProcessedStaticLoot> Containers { get; set; }
 
     public override bool Equals(object? obj)
     {

@@ -15,7 +15,8 @@ public class NetJsonSerializer : IJsonSerializer
             new NetJsonKeyConverter(),
             new JsonStringEnumConverter(),
             new NetDateTimeConverter()
-        }
+        },
+        WriteIndented = true
     };
 
     public string Serialize<T>(T obj)

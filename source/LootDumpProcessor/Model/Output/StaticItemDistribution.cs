@@ -7,10 +7,10 @@ namespace LootDumpProcessor.Model.Output
     {
         [JsonProperty("itemcountDistribution", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("itemcountDistribution")]
-        public List<ItemCountDistribution>? ItemCountDistribution { get; set; }
+        public IReadOnlyList<ItemCountDistribution>? ItemCountDistribution { get; set; }
 
         [JsonProperty("itemDistribution", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("itemDistribution")]
-        public List<StaticDistribution>? ItemDistribution { get; set; }
+        public IReadOnlyList<StaticDistribution>? ItemDistribution { get; set; }
     }
 }

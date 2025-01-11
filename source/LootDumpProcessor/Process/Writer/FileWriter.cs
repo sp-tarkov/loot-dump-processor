@@ -66,7 +66,7 @@ public class FileWriter : IWriter
 
                 break;
             case OutputFileType.StaticLoot:
-                var staticLootData = (Dictionary<string, Dictionary<string, StaticItemDistribution>>)data;
+                var staticLootData = (IReadOnlyDictionary<string, IReadOnlyDictionary<string, StaticItemDistribution>>)data;
                 foreach (var (key, value) in staticLootData)
                 {
                     if (!Directory.Exists($@"{_outputPath}\locations\{key}"))
@@ -77,7 +77,7 @@ public class FileWriter : IWriter
 
                 break;
             case OutputFileType.StaticAmmo:
-                var staticAmmo = (Dictionary<string, Dictionary<string, List<AmmoDistribution>>>)data;
+                var staticAmmo = (IReadOnlyDictionary<string, IReadOnlyDictionary<string, List<AmmoDistribution>>>)data;
                 foreach (var (key, value) in staticAmmo)
                 {
                     if (!Directory.Exists($@"{_outputPath}\locations\{key}"))

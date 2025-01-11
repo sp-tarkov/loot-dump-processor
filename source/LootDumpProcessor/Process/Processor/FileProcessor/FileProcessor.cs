@@ -1,12 +1,15 @@
 using LootDumpProcessor.Logger;
 using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Processing;
+using LootDumpProcessor.Process.Processor.v2.StaticLootProcessor;
 using LootDumpProcessor.Storage;
 
 namespace LootDumpProcessor.Process.Processor.FileProcessor;
 
-public class FileProcessor : IFileProcessor
+public class FileProcessor(IStaticLootProcessor staticLootProcessor) : IFileProcessor
 {
+    private readonly IStaticLootProcessor _staticLootProcessor = staticLootProcessor ?? throw new ArgumentNullException(nameof(staticLootProcessor));
+
     public PartialData Process(BasicInfo parsedData)
     {
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
@@ -43,10 +46,11 @@ public class FileProcessor : IFileProcessor
                     $"Cached not found for {string.Join("/", dumpData.GetKey().GetLookupIndex())} processing.",
                     LogLevel.Debug
                 );
-            dumpData.Containers = StaticLootProcessor.PreProcessStaticLoot(staticLoot);
+            dumpData.Containers = _staticLootProcessor.PreProcessStaticLoot(staticLoot);
             dumpData.LooseLoot = LooseLootProcessor.PreProcessLooseLoot(looseLoot);
             DataStorageFactory.GetInstance().Store(dumpData);
         }
+
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
             LoggerFactory.GetInstance().Log($"File {parsedData.FileName} finished processing!", LogLevel.Debug);
         return data;

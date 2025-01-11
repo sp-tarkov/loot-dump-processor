@@ -16,8 +16,14 @@ using LootDumpProcessor.Utils;
 
 namespace LootDumpProcessor.Process;
 
-public class QueuePipeline : IPipeline
+public class QueuePipeline(IFileProcessor fileProcessor, IDumpProcessor dumpProcessor) : IPipeline
 {
+    private readonly IFileProcessor _fileProcessor =
+        fileProcessor ?? throw new ArgumentNullException(nameof(fileProcessor));
+
+    private readonly IDumpProcessor _dumpProcessor =
+        dumpProcessor ?? throw new ArgumentNullException(nameof(dumpProcessor));
+
     private static readonly BlockingCollection<string> _filesToRename = new();
     private static readonly BlockingCollection<string> _filesToProcess = new();
     private static readonly List<Task> Runners = new();
@@ -227,10 +233,9 @@ public class QueuePipeline : IPipeline
                             try
                             {
                                 var reader = IntakeReaderFactory.GetInstance();
-                                var processor = FileProcessorFactory.GetInstance();
                                 if (reader.Read(file, out var basicInfo))
                                 {
-                                    collector.Hold(processor.Process(basicInfo));
+                                    collector.Hold(_fileProcessor.Process(basicInfo));
                                 }
                             }
                             catch (Exception e)
@@ -269,8 +274,7 @@ public class QueuePipeline : IPipeline
         // Single writer instance to collect results
         var writer = WriterFactory.GetInstance();
         // Single collector instance to collect results
-        var dumpProcessor = DumpProcessorFactory.GetInstance();
-        writer.WriteAll(dumpProcessor.ProcessDumps(collector.Retrieve()));
+        writer.WriteAll(_dumpProcessor.ProcessDumps(collector.Retrieve()));
     }
 
     private void ProcessFilesFromDumpsPerMap(int threads, ICollector collector, string mapName)
@@ -305,10 +309,9 @@ public class QueuePipeline : IPipeline
                             try
                             {
                                 var reader = IntakeReaderFactory.GetInstance();
-                                var processor = FileProcessorFactory.GetInstance();
                                 if (reader.Read(file, out var basicInfo))
                                 {
-                                    collector.Hold(processor.Process(basicInfo));
+                                    collector.Hold(_fileProcessor.Process(basicInfo));
                                 }
                             }
                             catch (Exception e)
@@ -347,8 +350,7 @@ public class QueuePipeline : IPipeline
         // Single writer instance to collect results
         var writer = WriterFactory.GetInstance();
         // Single collector instance to collect results
-        var dumpProcessor = DumpProcessorFactory.GetInstance();
-        writer.WriteAll(dumpProcessor.ProcessDumps(collector.Retrieve()));
+        writer.WriteAll(_dumpProcessor.ProcessDumps(collector.Retrieve()));
 
         // clear collector and datastorage as we process per map now
         collector.Clear();
@@ -413,7 +415,9 @@ public class QueuePipeline : IPipeline
             if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
             {
                 LoggerFactory.GetInstance()
-                    .Log($"one or more files are being processed. Waiting {LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs} ms", LogLevel.Info);
+                    .Log(
+                        $"one or more files are being processed. Waiting {LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs} ms",
+                        LogLevel.Info);
             }
 
             Thread.Sleep(TimeSpan.FromMilliseconds(LootDumpProcessorContext.GetConfig().ThreadPoolingTimeoutMs));
