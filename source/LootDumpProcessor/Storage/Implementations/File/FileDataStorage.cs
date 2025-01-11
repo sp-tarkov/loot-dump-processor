@@ -16,8 +16,6 @@ public class FileDataStorage : IDataStorage
     public T GetItem<T>(IKey key) where T : IKeyable =>
         StoreHandlerFactory.GetInstance(key.GetKeyType()).Retrieve<T>(key);
 
-    public List<T> GetAll<T>() => throw new NotImplementedException();
-
     public void Clear()
     {
         // leaving empty so this the File version can still be used it needed

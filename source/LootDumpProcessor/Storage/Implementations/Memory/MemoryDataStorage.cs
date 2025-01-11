@@ -35,8 +35,6 @@ public class MemoryDataStorage : IDataStorage
         return default;
     }
 
-    public List<T> GetAll<T>() => throw new NotImplementedException();
-
     private string GetLookupKey(IKey key) => string.Join("-", key.GetLookupIndex());
 
     public void Clear()

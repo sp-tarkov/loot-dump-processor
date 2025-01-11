@@ -29,8 +29,6 @@ public abstract class AbstractStoreHandler : IStoreHandler
         return System.IO.File.Exists(locationWithFile);
     }
 
-    public abstract List<T> RetrieveAll<T>() where T : IKeyable;
-
     protected abstract string GetLocation(IKey key);
 
     protected virtual string GetBaseLocation()
