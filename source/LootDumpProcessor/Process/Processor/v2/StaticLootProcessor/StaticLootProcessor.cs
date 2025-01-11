@@ -1,6 +1,5 @@
 ﻿using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Output;
-using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Model.Processing;
 using Microsoft.Extensions.Logging;
 
@@ -43,48 +42,39 @@ public class StaticLootProcessor(ILogger<StaticLootProcessor> logger) : IStaticL
         return nonWeaponContainers;
     }
 
-    public IReadOnlyDictionary<string, IReadOnlyDictionary<string, StaticItemDistribution>>
-        CreateStaticLootDistribution(
-            IReadOnlyDictionary<string, List<PreProcessedStaticLoot>> containerCounts,
-            IReadOnlyDictionary<string, MapStaticLoot> staticContainers)
+    public IReadOnlyDictionary<string, StaticItemDistribution> CreateStaticLootDistribution(
+        string mapName,
+        IReadOnlyList<PreProcessedStaticLoot> containers)
     {
-        var allMapsStaticLootDistribution =
-            new Dictionary<string, IReadOnlyDictionary<string, StaticItemDistribution>>();
+        var staticLootDistribution = new Dictionary<string, StaticItemDistribution>();
+        var uniqueContainerTypes = containers.Select(container => container.Type).Distinct();
 
-        foreach (var (mapName, containers) in containerCounts)
+        foreach (var containerType in uniqueContainerTypes)
         {
-            var staticLootDistribution = new Dictionary<string, StaticItemDistribution>();
-            var uniqueContainerTypes = containers.Select(container => container.Type).Distinct();
+            var selectedContainers = containers.Where(container => container.Type == containerType).ToArray();
+            var itemCounts = GetItemCountsInContainers(selectedContainers);
+            var itemDistribution = GenerateItemDistribution(selectedContainers);
 
-            foreach (var containerType in uniqueContainerTypes)
+            staticLootDistribution[containerType] = new StaticItemDistribution
             {
-                var selectedContainers = containers.Where(container => container.Type == containerType).ToArray();
-                var itemCounts = GetItemCountsInContainers(selectedContainers);
-                var itemDistribution = GenerateItemDistribution(selectedContainers);
+                ItemCountDistribution = itemCounts
+                    .GroupBy(count => count)
+                    .Select(group => new ItemCountDistribution
+                    {
+                        Count = group.Key,
+                        RelativeProbability = group.Count()
+                    })
+                    .ToList(),
+                ItemDistribution = itemDistribution
+            };
 
-                staticLootDistribution[containerType] = new StaticItemDistribution
-                {
-                    ItemCountDistribution = itemCounts
-                        .GroupBy(count => count)
-                        .Select(group => new ItemCountDistribution
-                        {
-                            Count = group.Key,
-                            RelativeProbability = group.Count()
-                        })
-                        .ToList(),
-                    ItemDistribution = itemDistribution
-                };
-
-                _logger.LogDebug(
-                    "Processed static loot distribution for ContainerType {ContainerType} in Map {MapName}.",
-                    containerType, mapName);
-            }
-
-            allMapsStaticLootDistribution[mapName] = staticLootDistribution;
-            _logger.LogInformation("Created static loot distribution for Map {MapName}.", mapName);
+            _logger.LogDebug(
+                "Processed static loot distribution for ContainerType `{ContainerType}` in Map `{MapName}`.",
+                containerType, mapName);
         }
 
-        return allMapsStaticLootDistribution;
+        _logger.LogInformation("Created static loot distribution for Map `{MapName}`.", mapName);
+        return staticLootDistribution;
     }
 
     private static IReadOnlyList<int> GetItemCountsInContainers(IReadOnlyList<PreProcessedStaticLoot> selectedContainers)
@@ -112,6 +102,6 @@ public class StaticLootProcessor(ILogger<StaticLootProcessor> logger) : IStaticL
         {
             Tpl = kv.Key,
             RelativeProbability = kv.Value
-        }).ToArray();
+        }).ToList();
     }
 }

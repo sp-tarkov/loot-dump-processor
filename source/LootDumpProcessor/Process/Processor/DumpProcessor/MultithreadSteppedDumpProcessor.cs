@@ -191,9 +191,9 @@ public class MultithreadSteppedDumpProcessor(
         output.Add(OutputFileType.StaticContainer, staticContainers);
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
             LoggerFactory.GetInstance().Log("Processing ammo distribution", LogLevel.Info);
-        
+
         var staticAmmo = new ConcurrentDictionary<string, IReadOnlyDictionary<string, List<AmmoDistribution>>>();
-        Parallel.ForEach(dumpProcessData.ContainerCounts.Keys, (mapId) =>
+        Parallel.ForEach(dumpProcessData.ContainerCounts.Keys, mapId =>
         {
             var preProcessedStaticLoots = dumpProcessData.ContainerCounts[mapId];
             var ammoDistribution = _ammoProcessor.CreateAmmoDistribution(mapId, preProcessedStaticLoots);
@@ -207,10 +207,19 @@ public class MultithreadSteppedDumpProcessor(
 
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
             LoggerFactory.GetInstance().Log("Processing static loot distribution", LogLevel.Info);
+
+        var staticLoot = new ConcurrentDictionary<string, IReadOnlyDictionary<string, StaticItemDistribution>>();
+        Parallel.ForEach(dumpProcessData.ContainerCounts.Keys, mapId =>
+        {
+            var preProcessedStaticLoots = dumpProcessData.ContainerCounts[mapId];
+            var staticLootDistribution =
+                _staticLootProcessor.CreateStaticLootDistribution(mapId, preProcessedStaticLoots);
+            staticLoot[mapId] = staticLootDistribution;
+        });
         // Static loot distribution
         output.Add(
             OutputFileType.StaticLoot,
-            _staticLootProcessor.CreateStaticLootDistribution(dumpProcessData.ContainerCounts, staticContainers)
+            staticLoot
         );
 
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
