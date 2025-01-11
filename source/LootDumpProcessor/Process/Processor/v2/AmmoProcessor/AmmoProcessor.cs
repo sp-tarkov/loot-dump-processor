@@ -2,55 +2,46 @@
 using LootDumpProcessor.Model.Processing;
 using Microsoft.Extensions.Logging;
 
-namespace LootDumpProcessor.Process.Processor.v2.AmmoProcessor
+namespace LootDumpProcessor.Process.Processor.v2.AmmoProcessor;
+
+public class AmmoProcessor(ILogger<AmmoProcessor> logger) : IAmmoProcessor
 {
-    public class AmmoProcessor(ILogger<AmmoProcessor> logger) : IAmmoProcessor
+    private readonly ILogger<AmmoProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+    public IReadOnlyDictionary<string, List<AmmoDistribution>> CreateAmmoDistribution(
+        string mapId,
+        List<PreProcessedStaticLoot> containers)
     {
-        private readonly ILogger<AmmoProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        var ammoTemplates = containers
+            .SelectMany(container => container.Items)
+            .Where(item => LootDumpProcessorContext.GetTarkovItems().IsBaseClass(item.Tpl, BaseClasses.Ammo))
+            .Select(item => item.Tpl)
+            .ToList();
 
-        public IReadOnlyDictionary<string, IReadOnlyDictionary<string, List<AmmoDistribution>>> CreateAmmoDistribution(
-            IReadOnlyDictionary<string, List<PreProcessedStaticLoot>> containerCounts)
-        {
-            var allMapsAmmoDistribution = new Dictionary<string, IReadOnlyDictionary<string, List<AmmoDistribution>>>();
-
-            foreach (var mapEntry in containerCounts)
+        var caliberTemplateCounts = ammoTemplates
+            .GroupBy(tpl => tpl)
+            .Select(group => new CaliberTemplateCount
             {
-                var mapId = mapEntry.Key;
-                var containers = mapEntry.Value;
+                Caliber = LootDumpProcessorContext.GetTarkovItems().AmmoCaliber(group.Key),
+                Template = group.Key,
+                Count = group.Count()
+            })
+            .OrderBy(ctc => ctc.Caliber)
+            .ToList();
 
-                var ammoTemplates = containers
-                    .SelectMany(container => container.Items)
-                    .Where(item => LootDumpProcessorContext.GetTarkovItems().IsBaseClass(item.Tpl, BaseClasses.Ammo))
-                    .Select(item => item.Tpl)
-                    .ToList();
+        var ammoDistribution = caliberTemplateCounts
+            .GroupBy(ctc => ctc.Caliber)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Select(ctc => new AmmoDistribution
+                {
+                    Tpl = ctc.Template,
+                    RelativeProbability = ctc.Count
+                }).ToList()
+            );
 
-                var caliberTemplateCounts = ammoTemplates
-                    .GroupBy(tpl => tpl)
-                    .Select(group => new CaliberTemplateCount
-                    {
-                        Caliber = LootDumpProcessorContext.GetTarkovItems().AmmoCaliber(group.Key),
-                        Template = group.Key,
-                        Count = group.Count()
-                    })
-                    .OrderBy(ctc => ctc.Caliber)
-                    .ToList();
+        _logger.LogInformation("Created ammo distribution for Map {MapId}.", mapId);
 
-                var ammoDistribution = caliberTemplateCounts
-                    .GroupBy(ctc => ctc.Caliber)
-                    .ToDictionary(
-                        group => group.Key,
-                        group => group.Select(ctc => new AmmoDistribution
-                        {
-                            Tpl = ctc.Template,
-                            RelativeProbability = ctc.Count
-                        }).ToList()
-                    );
-
-                allMapsAmmoDistribution[mapId] = ammoDistribution;
-                _logger.LogInformation("Created ammo distribution for Map {MapId}.", mapId);
-            }
-
-            return allMapsAmmoDistribution;
-        }
+        return ammoDistribution;
     }
 }

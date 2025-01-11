@@ -5,6 +5,7 @@ namespace LootDumpProcessor.Process.Processor.v2.AmmoProcessor;
 
 public interface IAmmoProcessor
 {
-    IReadOnlyDictionary<string, IReadOnlyDictionary<string, List<AmmoDistribution>>> CreateAmmoDistribution(
-        IReadOnlyDictionary<string, List<PreProcessedStaticLoot>> containerCounts);
+    IReadOnlyDictionary<string, List<AmmoDistribution>> CreateAmmoDistribution(
+        string mapId,
+        List<PreProcessedStaticLoot> containers);
 }

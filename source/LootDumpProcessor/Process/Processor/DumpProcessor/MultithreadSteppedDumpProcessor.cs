@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using LootDumpProcessor.Logger;
 using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Input;
+using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Model.Processing;
 using LootDumpProcessor.Process.Processor.v2.AmmoProcessor;
@@ -190,10 +191,18 @@ public class MultithreadSteppedDumpProcessor(
         output.Add(OutputFileType.StaticContainer, staticContainers);
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
             LoggerFactory.GetInstance().Log("Processing ammo distribution", LogLevel.Info);
+        
+        var staticAmmo = new ConcurrentDictionary<string, IReadOnlyDictionary<string, List<AmmoDistribution>>>();
+        Parallel.ForEach(dumpProcessData.ContainerCounts.Keys, (mapId) =>
+        {
+            var preProcessedStaticLoots = dumpProcessData.ContainerCounts[mapId];
+            var ammoDistribution = _ammoProcessor.CreateAmmoDistribution(mapId, preProcessedStaticLoots);
+            staticAmmo[mapId] = ammoDistribution;
+        });
         // Ammo distribution
         output.Add(
             OutputFileType.StaticAmmo,
-            _ammoProcessor.CreateAmmoDistribution(dumpProcessData.ContainerCounts)
+            staticAmmo
         );
 
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
