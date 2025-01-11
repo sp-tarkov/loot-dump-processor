@@ -1,14 +1,20 @@
 using LootDumpProcessor.Logger;
 using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Processing;
+using LootDumpProcessor.Process.Processor.v2.LooseLootProcessor;
 using LootDumpProcessor.Process.Processor.v2.StaticLootProcessor;
 using LootDumpProcessor.Storage;
 
 namespace LootDumpProcessor.Process.Processor.FileProcessor;
 
-public class FileProcessor(IStaticLootProcessor staticLootProcessor) : IFileProcessor
+public class FileProcessor(IStaticLootProcessor staticLootProcessor, ILooseLootProcessor looseLootProcessor)
+    : IFileProcessor
 {
-    private readonly IStaticLootProcessor _staticLootProcessor = staticLootProcessor ?? throw new ArgumentNullException(nameof(staticLootProcessor));
+    private readonly IStaticLootProcessor _staticLootProcessor =
+        staticLootProcessor ?? throw new ArgumentNullException(nameof(staticLootProcessor));
+
+    private readonly ILooseLootProcessor _looseLootProcessor =
+        looseLootProcessor ?? throw new ArgumentNullException(nameof(looseLootProcessor));
 
     public PartialData Process(BasicInfo parsedData)
     {
@@ -47,7 +53,7 @@ public class FileProcessor(IStaticLootProcessor staticLootProcessor) : IFileProc
                     LogLevel.Debug
                 );
             dumpData.Containers = _staticLootProcessor.PreProcessStaticLoot(staticLoot);
-            dumpData.LooseLoot = LooseLootProcessor.PreProcessLooseLoot(looseLoot);
+            dumpData.LooseLoot = _looseLootProcessor.PreProcessLooseLoot(looseLoot);
             DataStorageFactory.GetInstance().Store(dumpData);
         }
 

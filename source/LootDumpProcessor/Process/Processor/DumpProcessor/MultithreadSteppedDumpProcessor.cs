@@ -5,6 +5,7 @@ using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Model.Processing;
 using LootDumpProcessor.Process.Processor.v2.AmmoProcessor;
+using LootDumpProcessor.Process.Processor.v2.LooseLootProcessor;
 using LootDumpProcessor.Process.Processor.v2.StaticContainersProcessor;
 using LootDumpProcessor.Process.Processor.v2.StaticLootProcessor;
 using LootDumpProcessor.Serializers.Json;
@@ -16,7 +17,7 @@ namespace LootDumpProcessor.Process.Processor.DumpProcessor;
 
 public class MultithreadSteppedDumpProcessor(
     IStaticLootProcessor staticLootProcessor, IStaticContainersProcessor staticContainersProcessor,
-    IAmmoProcessor ammoProcessor
+    IAmmoProcessor ammoProcessor, ILooseLootProcessor looseLootProcessor
 ) : IDumpProcessor
 {
     private readonly IStaticLootProcessor _staticLootProcessor =
@@ -27,6 +28,9 @@ public class MultithreadSteppedDumpProcessor(
 
     private readonly IAmmoProcessor _ammoProcessor =
         ammoProcessor ?? throw new ArgumentNullException(nameof(ammoProcessor));
+
+    private readonly ILooseLootProcessor _looseLootProcessor =
+        looseLootProcessor ?? throw new ArgumentNullException(nameof(looseLootProcessor));
 
     private static IJsonSerializer _jsonSerializer = JsonSerializerFactory.GetInstance();
 
@@ -203,7 +207,7 @@ public class MultithreadSteppedDumpProcessor(
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
             LoggerFactory.GetInstance().Log("Processing loose loot distribution", LogLevel.Info);
         // Loose loot distribution
-        var looseLootDistribution = LooseLootProcessor.CreateLooseLootDistribution(
+        var looseLootDistribution = _looseLootProcessor.CreateLooseLootDistribution(
             dumpProcessData.MapCounts,
             dumpProcessData.LooseLootCounts
         );

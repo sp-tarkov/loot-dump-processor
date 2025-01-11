@@ -2,6 +2,7 @@ using LootDumpProcessor.Process;
 using LootDumpProcessor.Process.Processor.DumpProcessor;
 using LootDumpProcessor.Process.Processor.FileProcessor;
 using LootDumpProcessor.Process.Processor.v2.AmmoProcessor;
+using LootDumpProcessor.Process.Processor.v2.LooseLootProcessor;
 using LootDumpProcessor.Process.Processor.v2.StaticContainersProcessor;
 using LootDumpProcessor.Process.Processor.v2.StaticLootProcessor;
 using LootDumpProcessor.Storage;
@@ -21,8 +22,10 @@ public static class Program
         services.AddTransient<IStaticLootProcessor, StaticLootProcessor>();
         services.AddTransient<IStaticContainersProcessor, StaticContainersProcessor>();
         services.AddTransient<IAmmoProcessor, AmmoProcessor>();
-        services.AddTransient<StaticLootProcessor>();
+        services.AddTransient<ILooseLootProcessor, LooseLootProcessor>();
 
+        services.AddSingleton<IDataStorage>(_ => DataStorageFactory.GetInstance());
+        
         services.AddTransient<IFileProcessor, FileProcessor>();
         services.AddTransient<IDumpProcessor, MultithreadSteppedDumpProcessor>();
         services.AddTransient<IPipeline, QueuePipeline>();
