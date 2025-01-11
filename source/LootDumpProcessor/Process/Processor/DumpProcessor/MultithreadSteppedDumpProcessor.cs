@@ -24,7 +24,7 @@ public class MultithreadSteppedDumpProcessor(
     IStaticContainersProcessor staticContainersProcessor,
     IAmmoProcessor ammoProcessor,
     ILooseLootProcessor looseLootProcessor,
-    ILogger<MultithreadSteppedDumpProcessor> logger
+    ILogger<MultithreadSteppedDumpProcessor> logger, IKeyGenerator keyGenerator
 )
     : IDumpProcessor
 {
@@ -42,6 +42,9 @@ public class MultithreadSteppedDumpProcessor(
 
     private readonly ILogger<MultithreadSteppedDumpProcessor> _logger =
         logger ?? throw new ArgumentNullException(nameof(logger));
+
+    private readonly IKeyGenerator
+        _keyGenerator = keyGenerator ?? throw new ArgumentNullException(nameof(keyGenerator));
 
     private static readonly IDataStorage _dataStorage = DataStorageFactory.GetInstance();
 
@@ -225,17 +228,17 @@ public class MultithreadSteppedDumpProcessor(
 
                 var lockObjectContainerCounts = new object();
                 var lockObjectCounts = new object();
-                var looseLootCounts = new LooseLootCounts();
 
                 var lockObjectDictionaryCounts = new object();
-                var dictionaryCounts = new FlatKeyableDictionary<string, int>();
-                looseLootCounts.Counts = dictionaryCounts.GetKey();
+                var dictionaryCounts = new FlatKeyableDictionary<string, int>(_keyGenerator.Generate());
 
                 var lockObjectDictionaryItemProperties = new object();
-                var dictionaryItemProperties = new FlatKeyableDictionary<string, FlatKeyableList<Template>>();
+                var dictionaryItemProperties =
+                    new FlatKeyableDictionary<string, FlatKeyableList<Template>>(_keyGenerator.Generate());
 
-                var actualDictionaryItemProperties = new FlatKeyableDictionary<string, IKey>();
-                looseLootCounts.ItemProperties = actualDictionaryItemProperties.GetKey();
+                var actualDictionaryItemProperties = new FlatKeyableDictionary<string, IKey>(_keyGenerator.Generate());
+                var looseLootCounts = new LooseLootCounts(_keyGenerator.Generate(), dictionaryCounts.GetKey(),
+                    actualDictionaryItemProperties.GetKey());
 
                 dumpProcessData.LooseLootCounts.Add(mapName, looseLootCounts.GetKey());
 
@@ -316,7 +319,7 @@ public class MultithreadSteppedDumpProcessor(
                 {
                     if (!dictionaryItemProperties.TryGetValue(uniqueKey, out var values))
                     {
-                        values = new FlatKeyableList<Template>();
+                        values = new FlatKeyableList<Template>(_keyGenerator.Generate());
                         dictionaryItemProperties.Add(uniqueKey, values);
                         actualDictionaryItemProperties.Add(uniqueKey, values.GetKey());
                     }

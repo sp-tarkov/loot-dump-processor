@@ -1,22 +1,24 @@
 using System.Text.Json.Serialization;
 using LootDumpProcessor.Storage;
-using LootDumpProcessor.Utils;
 
 
 namespace LootDumpProcessor.Model.Processing;
 
 public class LooseLootCounts : IKeyable
 {
-    [JsonPropertyName("__id__")] public string __ID { get; set; } = KeyGenerator.GetNextKey();
+    [JsonPropertyName("__id__")] private string Id { get; set; }
 
     public IKey Counts { get; set; }
-
-    // public IKey Items { get; set; }
     public IKey ItemProperties { get; set; }
     public List<int> MapSpawnpointCount { get; set; } = new();
 
-    public IKey GetKey()
+    public LooseLootCounts(string id, IKey counts, IKey itemProperties)
     {
-        return new FlatUniqueKey(new[] { __ID });
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        Id = id;
+        Counts = counts ?? throw new ArgumentNullException(nameof(counts));
+        ItemProperties = itemProperties ?? throw new ArgumentNullException(nameof(itemProperties));
     }
+
+    public IKey GetKey() => new FlatUniqueKey([Id]);
 }

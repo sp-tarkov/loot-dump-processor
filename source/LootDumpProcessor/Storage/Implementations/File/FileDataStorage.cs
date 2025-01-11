@@ -9,7 +9,8 @@ public class FileDataStorage : IDataStorage
 
     public bool Exists(IKey key) => StoreHandlerFactory.GetInstance(key.GetKeyType()).Exists(key);
 
-    public T GetItem<T>(IKey key) where T : IKeyable => StoreHandlerFactory.GetInstance(key.GetKeyType()).Retrieve<T>(key);
+    public T GetItem<T>(IKey key) where T : IKeyable =>
+        StoreHandlerFactory.GetInstance(key.GetKeyType()).Retrieve<T>(key);
 
     public void Clear()
     {

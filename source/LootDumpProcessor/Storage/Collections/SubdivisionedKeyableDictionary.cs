@@ -1,11 +1,16 @@
 using System.Text.Json.Serialization;
-using LootDumpProcessor.Utils;
 
 namespace LootDumpProcessor.Storage.Collections;
 
 public class SubdivisionedKeyableDictionary<K, V> : Dictionary<K, V>, IKeyable
 {
-    [JsonPropertyName("__id__")] public string __ID { get; set; } = KeyGenerator.GetNextKey();
+    public SubdivisionedKeyableDictionary(string id)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        Id = id;
+    }
+
+    [JsonPropertyName("__id__")] private string Id { get; set; }
 
     public string? Extras
     {
@@ -24,10 +29,10 @@ public class SubdivisionedKeyableDictionary<K, V> : Dictionary<K, V>, IKeyable
                 "dictionaries"
             };
             subdivisions.AddRange(ExtraSubdivisions);
-            subdivisions.Add(__ID);
+            subdivisions.Add(Id);
             return new SubdivisionedUniqueKey(subdivisions.ToArray());
         }
 
-        return new SubdivisionedUniqueKey(["dictionaries", __ID]);
+        return new SubdivisionedUniqueKey(["dictionaries", Id]);
     }
 }

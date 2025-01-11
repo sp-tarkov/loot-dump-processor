@@ -38,6 +38,7 @@ public static class Program
 
         services.AddSingleton<ITarkovItemsProvider, TarkovItemsProvider>();
         services.AddSingleton<IDataStorage>(_ => DataStorageFactory.GetInstance());
+        services.AddSingleton<IKeyGenerator, NumericKeyGenerator>();
         services.AddTransient<IComposedKeyGenerator, ComposedKeyGenerator>();
 
         services.AddTransient<IIntakeReader, JsonFileIntakeReader>();

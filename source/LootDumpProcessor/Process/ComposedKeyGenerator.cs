@@ -1,15 +1,19 @@
-﻿using LootDumpProcessor.Model;
+﻿using System.Globalization;
+using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Processing;
-using LootDumpProcessor.Utils;
 
 namespace LootDumpProcessor.Process;
 
-public class ComposedKeyGenerator(ITarkovItemsProvider tarkovItemsProvider) : IComposedKeyGenerator
+public class ComposedKeyGenerator(ITarkovItemsProvider tarkovItemsProvider, IKeyGenerator keyGenerator)
+    : IComposedKeyGenerator
 {
     private readonly ITarkovItemsProvider _tarkovItemsProvider =
         tarkovItemsProvider ?? throw new ArgumentNullException(nameof(tarkovItemsProvider));
 
-    public ComposedKey Generate(IEnumerable<Item> items)
+    private readonly IKeyGenerator
+        _keyGenerator = keyGenerator ?? throw new ArgumentNullException(nameof(keyGenerator));
+
+    public ComposedKey Generate(IReadOnlyList<Item>? items)
     {
         var key = items?.Select(i => i.Tpl)
             .Where(i => !string.IsNullOrEmpty(i) &&
@@ -17,8 +21,9 @@ public class ComposedKeyGenerator(ITarkovItemsProvider tarkovItemsProvider) : IC
             .Cast<string>()
             .Select(i => (double)i.GetHashCode())
             .Sum()
-            .ToString() ?? KeyGenerator.GetNextKey();
-        var firstItem = items?.FirstOrDefault();
+            .ToString(CultureInfo.InvariantCulture) ?? _keyGenerator.Generate();
+        var firstItem = items?[0];
+
         return new ComposedKey(key, firstItem);
     }
 }

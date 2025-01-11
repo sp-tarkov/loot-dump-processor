@@ -1,6 +1,3 @@
-using System.Text.Json.Serialization;
-
-
 namespace LootDumpProcessor.Model.Config;
 
 public class ReaderConfig

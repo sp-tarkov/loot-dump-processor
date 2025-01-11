@@ -4,5 +4,5 @@ namespace LootDumpProcessor.Process;
 
 public interface IComposedKeyGenerator
 {
-    ComposedKey Generate(IEnumerable<Item> items);
+    ComposedKey Generate(IReadOnlyList<Item>? items);
 }

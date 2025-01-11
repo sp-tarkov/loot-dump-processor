@@ -11,7 +11,7 @@ namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor;
 
 public class LooseLootProcessor(
     ILogger<LooseLootProcessor> logger, IDataStorage dataStorage, ITarkovItemsProvider tarkovItemsProvider,
-    IComposedKeyGenerator composedKeyGenerator
+    IComposedKeyGenerator composedKeyGenerator, IKeyGenerator keyGenerator
 )
     : ILooseLootProcessor
 {
@@ -27,6 +27,9 @@ public class LooseLootProcessor(
     private readonly IComposedKeyGenerator _composedKeyGenerator =
         composedKeyGenerator ?? throw new ArgumentNullException(nameof(composedKeyGenerator));
 
+    private readonly IKeyGenerator
+        _keyGenerator = keyGenerator ?? throw new ArgumentNullException(nameof(keyGenerator));
+
     public PreProcessedLooseLoot PreProcessLooseLoot(List<Template> looseLoot)
     {
         var preProcessedLoot = new PreProcessedLooseLoot
@@ -34,7 +37,8 @@ public class LooseLootProcessor(
             Counts = new Dictionary<string, int>()
         };
 
-        var itemPropertiesDictionary = new SubdivisionedKeyableDictionary<string, List<Template>>();
+        var itemPropertiesDictionary =
+            new SubdivisionedKeyableDictionary<string, List<Template>>(_keyGenerator.Generate());
         preProcessedLoot.ItemProperties = (AbstractKey)itemPropertiesDictionary.GetKey();
         preProcessedLoot.MapSpawnpointCount = looseLoot.Count;
 
@@ -55,7 +59,7 @@ public class LooseLootProcessor(
 
             if (!itemPropertiesDictionary.TryGetValue(sanitizedId, out var templates))
             {
-                templates = new FlatKeyableList<Template>();
+                templates = new FlatKeyableList<Template>(_keyGenerator.Generate());
                 itemPropertiesDictionary.Add(sanitizedId, templates);
             }
 

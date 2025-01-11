@@ -1,10 +1,14 @@
-using LootDumpProcessor.Utils;
-
 namespace LootDumpProcessor.Storage.Collections;
 
 public class FlatKeyableList<T> : List<T>, IKeyable
 {
-    public string __ID { get; } = KeyGenerator.GetNextKey();
+    public string Id { get; }
 
-    public IKey GetKey() => new FlatUniqueKey([__ID]);
+    public FlatKeyableList(string id)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        Id = id;
+    }
+
+    public IKey GetKey() => new FlatUniqueKey([Id]);
 }

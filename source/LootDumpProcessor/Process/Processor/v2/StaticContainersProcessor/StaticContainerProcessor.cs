@@ -20,7 +20,7 @@ public class StaticContainersProcessor : IStaticContainersProcessor
         var locationLoot = rawMapDump.Data.LocationLoot;
         var mapId = locationLoot.Id.ToLower();
         var staticLootPositions = locationLoot.Loot
-            .Where(loot => loot.IsContainer.GetValueOrDefault())
+            .Where(loot => loot.IsContainer)
             .OrderBy(loot => loot.Id)
             .ToList();
 
@@ -44,7 +44,8 @@ public class StaticContainersProcessor : IStaticContainersProcessor
             _logger.LogDebug("Added static weapon with ID {WeaponId} to Map {MapId}.", copiedLoot.Id, mapId);
         }
 
-        var forcedStaticItems = LootDumpProcessorContext.GetForcedItems().TryGetValue(mapId, out var forcedItems)
+        var forcedStaticItems = LootDumpProcessorContext.GetForcedItems()
+            .TryGetValue(mapId, out List<StaticForced>? forcedItems)
             ? forcedItems
             : new List<StaticForced>();
 
@@ -61,13 +62,13 @@ public class StaticContainersProcessor : IStaticContainersProcessor
     public IReadOnlyList<Template> CreateDynamicStaticContainers(RootData rawMapDump)
     {
         var dynamicContainers = rawMapDump.Data.LocationLoot.Loot
-            .Where(loot => loot.IsContainer.GetValueOrDefault() &&
+            .Where(loot => loot.IsContainer &&
                            !LootDumpProcessorContext.GetStaticWeaponIds().Contains(loot.Items.FirstOrDefault()?.Tpl))
             .ToList();
 
         foreach (var container in dynamicContainers)
         {
-            if (container.Items == null || !container.Items.Any())
+            if (container.Items == null || container.Items.Count == 0)
             {
                 _logger.LogWarning("Dynamic container with ID {ContainerId} has no items.", container.Id);
                 continue;

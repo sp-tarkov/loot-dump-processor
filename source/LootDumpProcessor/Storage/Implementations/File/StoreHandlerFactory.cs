@@ -10,7 +10,7 @@ public class StoreHandlerFactory
     public static IStoreHandler GetInstance(KeyType type)
     {
         if (Handlers.TryGetValue(type, out var handler)) return handler;
-        
+
         handler = type switch
         {
             KeyType.Unique => new FlatStoreHandler(),

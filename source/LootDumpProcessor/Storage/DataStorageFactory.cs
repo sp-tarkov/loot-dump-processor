@@ -17,7 +17,7 @@ public static class DataStorageFactory
     private static IDataStorage GetInstance(DataStorageTypes type)
     {
         if (DataStorage.TryGetValue(type, out var dataStorage)) return dataStorage;
-        
+
         dataStorage = type switch
         {
             DataStorageTypes.File => new FileDataStorage(),

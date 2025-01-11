@@ -33,7 +33,7 @@ public class FileProcessor : IFileProcessor
         var staticLoot = new List<Template>();
 
         foreach (var item in parsedData.Data.Data.LocationLoot.Loot)
-            if (item.IsContainer ?? false) staticLoot.Add(item);
+            if (item.IsContainer) staticLoot.Add(item);
             else looseLoot.Add(item);
 
         parsedData.Data = null;
