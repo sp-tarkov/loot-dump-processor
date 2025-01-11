@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.LooseLoot;
 using LootDumpProcessor.Model.Output.StaticContainer;
@@ -44,7 +45,7 @@ public class FileWriter : IWriter
         switch (type)
         {
             case OutputFileType.LooseLoot:
-                var looseLootData = (Dictionary<string, LooseLootRoot>)data;
+                var looseLootData = (IReadOnlyDictionary<string, LooseLootRoot>)data;
                 foreach (var (key, value) in looseLootData)
                 {
                     if (!Directory.Exists($@"{_outputPath}\locations\{key}"))
@@ -55,7 +56,7 @@ public class FileWriter : IWriter
 
                 break;
             case OutputFileType.StaticContainer:
-                var staticContainer = (Dictionary<string, MapStaticLoot>)data;
+                var staticContainer = (IReadOnlyDictionary<string, MapStaticLoot>)data;
                 foreach (var (key, value) in staticContainer)
                 {
                         if (!Directory.Exists($@"{_outputPath}\locations\{key}"))
