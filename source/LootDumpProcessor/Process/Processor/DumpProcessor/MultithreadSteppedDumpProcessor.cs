@@ -3,6 +3,7 @@ using LootDumpProcessor.Logger;
 using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Output;
+using LootDumpProcessor.Model.Output.LooseLoot;
 using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Model.Processing;
 using LootDumpProcessor.Process.Processor.v2.AmmoProcessor;
@@ -222,17 +223,22 @@ public class MultithreadSteppedDumpProcessor(
 
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
             LoggerFactory.GetInstance().Log("Processing loose loot distribution", LogLevel.Info);
+        
         // Loose loot distribution
-        var looseLootDistribution = _looseLootProcessor.CreateLooseLootDistribution(
-            dumpProcessData.MapCounts,
-            dumpProcessData.LooseLootCounts
-        );
-
+        var looseLoot = new ConcurrentDictionary<string, LooseLootRoot>();
+        Parallel.ForEach(dumpProcessData.MapCounts.Keys, mapId =>
+        {
+            var mapCount = dumpProcessData.MapCounts[mapId];
+            var looseLootCount = dumpProcessData.LooseLootCounts[mapId];
+            var looseLootDistribution =
+                _looseLootProcessor.CreateLooseLootDistribution(mapId, mapCount, looseLootCount);
+            looseLoot[mapId] = looseLootDistribution;
+        });
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))
             LoggerFactory.GetInstance().Log("Collecting loose loot distribution information", LogLevel.Info);
         var loot = dumpProcessData.MapCounts
             .Select(mapCount => mapCount.Key)
-            .ToDictionary(mi => mi, mi => looseLootDistribution[mi]);
+            .ToDictionary(mi => mi, mi => looseLoot[mi]);
 
         output.Add(OutputFileType.LooseLoot, loot);
         if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Info))

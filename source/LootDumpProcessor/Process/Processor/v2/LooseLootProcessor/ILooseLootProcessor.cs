@@ -9,9 +9,10 @@ namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor
     {
         PreProcessedLooseLoot PreProcessLooseLoot(List<Template> looseLoot);
 
-        Dictionary<string, LooseLootRoot> CreateLooseLootDistribution(
-            Dictionary<string, int> mapCounts,
-            Dictionary<string, IKey> looseLootCounts
+        LooseLootRoot CreateLooseLootDistribution(
+            string mapId,
+            int mapCount,
+            IKey looseLootCountKey
         );
     }
 }
