@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using LootDumpProcessor.Model.Tarkov;
 using Newtonsoft.Json;
 
 namespace LootDumpProcessor.Model.Input

@@ -1,10 +1,7 @@
-using System.Collections.Concurrent;
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.LooseLoot;
 using LootDumpProcessor.Model.Output.StaticContainer;
-using LootDumpProcessor.Model.Processing;
 using LootDumpProcessor.Serializers.Json;
-using System.Collections.Generic;
 
 namespace LootDumpProcessor.Process.Writer;
 

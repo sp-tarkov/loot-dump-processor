@@ -1,6 +1,5 @@
 using LootDumpProcessor.Logger;
 using SevenZip;
-using SevenZip.Sdk.Compression.Lzma;
 
 namespace LootDumpProcessor.Process.Reader.PreProcess;
 
