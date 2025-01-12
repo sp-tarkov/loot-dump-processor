@@ -47,7 +47,7 @@ public class MultithreadSteppedDumpProcessor(
 
     private static readonly IDataStorage _dataStorage = DataStorageFactory.GetInstance();
 
-    public Dictionary<OutputFileType, object> ProcessDumps(List<PartialData> dumps)
+    public async Task<Dictionary<OutputFileType, object>> ProcessDumps(List<PartialData> dumps)
     {
         _logger.LogInformation("Starting final dump processing");
         var output = new Dictionary<OutputFileType, object>();
@@ -65,8 +65,8 @@ public class MultithreadSteppedDumpProcessor(
         {
             MaxDegreeOfParallelism = Environment.ProcessorCount
         };
-        Parallel.ForEachAsync(dumps, parallelOptions,
-            async (partialData, cancellationToken) =>
+        await Parallel.ForEachAsync(dumps, parallelOptions,
+            async (partialData, _) =>
                 await Process(partialData, staticContainers, mapStaticContainersAggregated, mapDumpCounter));
 
         _logger.LogInformation("All static data processing threads finished");
@@ -202,7 +202,7 @@ public class MultithreadSteppedDumpProcessor(
         fileDate.Value > LootDumpProcessorContext.GetConfig().DumpProcessorConfig
             .SpawnContainerChanceIncludeAfterDate;
 
-    private static void IncrementMapCounterDictionaryValue(IDictionary<string, int> mapDumpCounter, string mapName)
+    private static void IncrementMapCounterDictionaryValue(ConcurrentDictionary<string, int> mapDumpCounter, string mapName)
     {
         if (!mapDumpCounter.TryAdd(mapName, 1)) mapDumpCounter[mapName] += 1;
     }
@@ -305,13 +305,12 @@ public class MultithreadSteppedDumpProcessor(
                     );
             foreach (var (uniqueKey, containerTemplate) in loadedDictionary)
             {
-                var count = dumpData.LooseLoot.Counts[uniqueKey];
+                var isValueFound = dumpData.LooseLoot.Counts.TryGetValue(uniqueKey, out var count);
+                if (!isValueFound) _logger.LogError("Value for {UniqueKey} not found", uniqueKey);
                 lock (lockObjectDictionaryCounts)
                 {
-                    if (dictionaryCounts.ContainsKey(uniqueKey))
+                    if (!dictionaryCounts.TryAdd(uniqueKey, count))
                         dictionaryCounts[uniqueKey] += count;
-                    else
-                        dictionaryCounts[uniqueKey] = count;
                 }
 
                 lock (lockObjectDictionaryItemProperties)
@@ -319,8 +318,8 @@ public class MultithreadSteppedDumpProcessor(
                     if (!dictionaryItemProperties.TryGetValue(uniqueKey, out var values))
                     {
                         values = new FlatKeyableList<Template>(_keyGenerator.Generate());
-                        dictionaryItemProperties.Add(uniqueKey, values);
-                        actualDictionaryItemProperties.Add(uniqueKey, values.GetKey());
+                        dictionaryItemProperties.TryAdd(uniqueKey, values);
+                        actualDictionaryItemProperties.TryAdd(uniqueKey, values.GetKey());
                     }
 
                     values.AddRange(containerTemplate);
