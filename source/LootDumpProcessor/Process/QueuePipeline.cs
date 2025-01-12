@@ -38,7 +38,6 @@ public class QueuePipeline(
     private readonly BlockingCollection<string> _filesToProcess = new();
 
     private readonly List<string> _mapNames = LootDumpProcessorContext.GetConfig().MapsToProcess;
-    private Dictionary<OutputFileType, object> _processedDumps;
 
 
     public async Task Execute()
@@ -160,8 +159,8 @@ public class QueuePipeline(
         var writer = WriterFactory.GetInstance();
         // Single collector instance to collect results
         var partialData = collector.Retrieve();
-        _processedDumps = await _dumpProcessor.ProcessDumps(partialData);
-        writer.WriteAll(_processedDumps);
+        var processedDumps = await _dumpProcessor.ProcessDumps(partialData);
+        writer.WriteAll(processedDumps);
 
         // clear collector and datastorage as we process per map now
         collector.Clear();
