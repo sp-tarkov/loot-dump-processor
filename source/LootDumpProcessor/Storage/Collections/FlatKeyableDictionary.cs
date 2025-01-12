@@ -1,8 +1,9 @@
+using System.Collections.Concurrent;
 using System.Text.Json.Serialization;
 
 namespace LootDumpProcessor.Storage.Collections;
 
-public class FlatKeyableDictionary<K, V> : Dictionary<K, V>, IKeyable
+public class FlatKeyableDictionary<K, V> : ConcurrentDictionary<K, V>, IKeyable
 {
     [JsonPropertyName("__id__")] private string Id { get; set; }
 

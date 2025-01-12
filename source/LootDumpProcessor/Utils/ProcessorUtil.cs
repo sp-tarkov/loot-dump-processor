@@ -7,11 +7,12 @@ namespace LootDumpProcessor.Utils;
 public static class ProcessorUtil
 {
     public static string GetSaneId(this Template x) =>
-        $"({x.Position.X}, {x.Position.Y}, {x.Position.Z}, {Math.Round(x.Rotation.X, 3)}," +
-        $" {Math.Round(x.Rotation.Y, 3)}, {Math.Round(x.Rotation.Z, 3)}," +
+        $"({x.Position.GetValueOrDefault().X}, {x.Position.GetValueOrDefault().Y}, {x.Position.GetValueOrDefault().Z}, {Math.Round(x.Rotation.GetValueOrDefault().X, 3)}," +
+        $" {Math.Round(x.Rotation.GetValueOrDefault().Y, 3)}, {Math.Round(x.Rotation.GetValueOrDefault().Z, 3)}," +
         $" {x.UseGravity}, {x.IsGroupPosition})";
 
-    public static string GetLocationId(this Template x) => $"({x.Position.X}, {x.Position.Y}, {x.Position.Z})";
+    public static string GetLocationId(this Template x) =>
+        $"({x.Position.GetValueOrDefault().X}, {x.Position.GetValueOrDefault().Y}, {x.Position.GetValueOrDefault().Z})";
 
     public static T? Copy<T>(T? obj) where T : ICloneable
     {

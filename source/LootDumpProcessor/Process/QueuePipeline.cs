@@ -52,7 +52,7 @@ public class QueuePipeline(
         try
         {
             await FixFilesFromDumps();
-            foreach (var mapName in _mapNames) ProcessFilesFromDumpsPerMap(collector, mapName);
+            foreach (var mapName in _mapNames) await ProcessFilesFromDumpsPerMap(collector, mapName);
         }
         finally
         {
@@ -126,7 +126,7 @@ public class QueuePipeline(
         return queuedFilesToProcess;
     }
 
-    private void ProcessFilesFromDumpsPerMap(ICollector collector, string mapName)
+    private async Task ProcessFilesFromDumpsPerMap(ICollector collector, string mapName)
     {
         // Gather all files, sort them by date descending and then add them into the processing queue
         GatherFiles().FindAll(f => f.ToLower().Contains($"{mapName}--")).OrderByDescending(f =>
@@ -158,7 +158,9 @@ public class QueuePipeline(
         // Single writer instance to collect results
         var writer = WriterFactory.GetInstance();
         // Single collector instance to collect results
-        writer.WriteAll(_dumpProcessor.ProcessDumps(collector.Retrieve()));
+        var partialData = collector.Retrieve();
+        var processedDumps = await _dumpProcessor.ProcessDumps(partialData);
+        writer.WriteAll(processedDumps);
 
         // clear collector and datastorage as we process per map now
         collector.Clear();

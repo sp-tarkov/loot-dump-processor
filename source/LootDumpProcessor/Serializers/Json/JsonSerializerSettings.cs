@@ -15,7 +15,6 @@ public static class JsonSerializerSettings
             new NetJsonKeyConverter(),
             new JsonStringEnumConverter(),
             new NetDateTimeConverter()
-        },
-        WriteIndented = true
+        }
     };
 }
