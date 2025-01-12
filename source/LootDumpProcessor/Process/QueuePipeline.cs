@@ -17,7 +17,7 @@ namespace LootDumpProcessor.Process;
 
 public class QueuePipeline(
     IFileProcessor fileProcessor, IDumpProcessor dumpProcessor, ILogger<QueuePipeline> logger, IFileFilter fileFilter,
-    IIntakeReader intakeReader
+    IIntakeReader intakeReader, ICollector collector
 )
     : IPipeline
 {
@@ -34,6 +34,8 @@ public class QueuePipeline(
     private readonly IIntakeReader
         _intakeReader = intakeReader ?? throw new ArgumentNullException(nameof(intakeReader));
 
+    private readonly ICollector _collector = collector ?? throw new ArgumentNullException(nameof(collector));
+
     private readonly List<string> _filesToRename = new();
     private readonly BlockingCollection<string> _filesToProcess = new();
 
@@ -44,15 +46,14 @@ public class QueuePipeline(
     {
         var stopwatch = Stopwatch.StartNew();
         // Single collector instance to collect results
-        var collector = CollectorFactory.GetInstance();
-        collector.Setup();
+        _collector.Setup();
 
         _logger.LogInformation("Gathering files to begin processing");
 
         try
         {
             await FixFilesFromDumps();
-            foreach (var mapName in _mapNames) await ProcessFilesFromDumpsPerMap(collector, mapName);
+            foreach (var mapName in _mapNames) await ProcessFilesFromDumpsPerMap(_collector, mapName);
         }
         finally
         {
