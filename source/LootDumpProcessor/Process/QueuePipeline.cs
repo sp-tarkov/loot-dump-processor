@@ -17,7 +17,7 @@ namespace LootDumpProcessor.Process;
 
 public class QueuePipeline(
     IFileProcessor fileProcessor, IDumpProcessor dumpProcessor, ILogger<QueuePipeline> logger, IFileFilter fileFilter,
-    IIntakeReader intakeReader, ICollector collector
+    IIntakeReader intakeReader, ICollector collector, IDataStorage dataStorage
 )
     : IPipeline
 {
@@ -36,6 +36,8 @@ public class QueuePipeline(
 
     private readonly ICollector _collector = collector ?? throw new ArgumentNullException(nameof(collector));
 
+    private readonly IDataStorage _dataStorage = dataStorage ?? throw new ArgumentNullException(nameof(dataStorage));
+    
     private readonly List<string> _filesToRename = new();
     private readonly BlockingCollection<string> _filesToProcess = new();
 
@@ -165,7 +167,7 @@ public class QueuePipeline(
 
         // clear collector and datastorage as we process per map now
         collector.Clear();
-        DataStorageFactory.GetInstance().Clear();
+        _dataStorage.Clear();
     }
 
     /// <summary>

@@ -23,7 +23,7 @@ public class MultithreadSteppedDumpProcessor(
     IStaticContainersProcessor staticContainersProcessor,
     IAmmoProcessor ammoProcessor,
     ILooseLootProcessor looseLootProcessor,
-    ILogger<MultithreadSteppedDumpProcessor> logger, IKeyGenerator keyGenerator
+    ILogger<MultithreadSteppedDumpProcessor> logger, IKeyGenerator keyGenerator, IDataStorage dataStorage
 )
     : IDumpProcessor
 {
@@ -45,7 +45,8 @@ public class MultithreadSteppedDumpProcessor(
     private readonly IKeyGenerator
         _keyGenerator = keyGenerator ?? throw new ArgumentNullException(nameof(keyGenerator));
 
-    private static readonly IDataStorage _dataStorage = DataStorageFactory.GetInstance();
+    private readonly IDataStorage _dataStorage = dataStorage ?? throw new ArgumentNullException(nameof(dataStorage));
+
 
     public async Task<Dictionary<OutputFileType, object>> ProcessDumps(List<PartialData> dumps)
     {
@@ -202,7 +203,8 @@ public class MultithreadSteppedDumpProcessor(
         fileDate.Value > LootDumpProcessorContext.GetConfig().DumpProcessorConfig
             .SpawnContainerChanceIncludeAfterDate;
 
-    private static void IncrementMapCounterDictionaryValue(ConcurrentDictionary<string, int> mapDumpCounter, string mapName)
+    private static void IncrementMapCounterDictionaryValue(ConcurrentDictionary<string, int> mapDumpCounter,
+        string mapName)
     {
         if (!mapDumpCounter.TryAdd(mapName, 1)) mapDumpCounter[mapName] += 1;
     }

@@ -10,6 +10,8 @@ using LootDumpProcessor.Process.Processor.v2.StaticLootProcessor;
 using LootDumpProcessor.Process.Reader.Filters;
 using LootDumpProcessor.Process.Reader.Intake;
 using LootDumpProcessor.Storage;
+using LootDumpProcessor.Storage.Implementations.File;
+using LootDumpProcessor.Storage.Implementations.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -24,10 +26,10 @@ public static class ServiceCollectionExtensions
         services.AddLogging(configure => configure.AddConsole());
         AddConfiguration(services);
         AddCollector(services);
+        AddDataStorage(services);
         RegisterProcessors(services);
 
         services.AddSingleton<ITarkovItemsProvider, TarkovItemsProvider>();
-        services.AddSingleton<IDataStorage>(_ => DataStorageFactory.GetInstance());
         services.AddSingleton<IKeyGenerator, NumericKeyGenerator>();
         services.AddTransient<IComposedKeyGenerator, ComposedKeyGenerator>();
 
@@ -36,6 +38,26 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IFileProcessor, FileProcessor>();
         services.AddTransient<IDumpProcessor, MultithreadSteppedDumpProcessor>();
         services.AddTransient<IPipeline, QueuePipeline>();
+    }
+
+    private static void AddConfiguration(IServiceCollection services)
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile("Config/config.json")
+            .AddEnvironmentVariables()
+            .Build();
+
+        services.AddOptions<Config>()
+            .Bind(configuration)
+            .ValidateOnStart();
+    }
+
+    private static void RegisterProcessors(IServiceCollection services)
+    {
+        services.AddTransient<IStaticLootProcessor, StaticLootProcessor>();
+        services.AddTransient<IStaticContainersProcessor, StaticContainersProcessor>();
+        services.AddTransient<IAmmoProcessor, AmmoProcessor>();
+        services.AddTransient<ILooseLootProcessor, LooseLootProcessor>();
     }
 
     private static void AddCollector(IServiceCollection services)
@@ -53,23 +75,18 @@ public static class ServiceCollectionExtensions
         });
     }
 
-    private static void RegisterProcessors(IServiceCollection services)
+    private static void AddDataStorage(IServiceCollection services)
     {
-        services.AddTransient<IStaticLootProcessor, StaticLootProcessor>();
-        services.AddTransient<IStaticContainersProcessor, StaticContainersProcessor>();
-        services.AddTransient<IAmmoProcessor, AmmoProcessor>();
-        services.AddTransient<ILooseLootProcessor, LooseLootProcessor>();
-    }
-
-    private static void AddConfiguration(IServiceCollection services)
-    {
-        var configuration = new ConfigurationBuilder()
-            .AddJsonFile("Config/config.json")
-            .AddEnvironmentVariables()
-            .Build();
-
-        services.AddOptions<Config>()
-            .Bind(configuration)
-            .ValidateOnStart();
+        services.AddSingleton<IDataStorage>(provider =>
+        {
+            var config = provider.GetRequiredService<IOptions<Config>>().Value;
+            var dataStorageType = config.DataStorageConfig.DataStorageType;
+            return dataStorageType switch
+            {
+                DataStorageTypes.File => new FileDataStorage(),
+                DataStorageTypes.Memory => new MemoryDataStorage(),
+                _ => throw new ArgumentOutOfRangeException($"DataStorageType '{dataStorageType} is not supported'")
+            };
+        });
     }
 }
