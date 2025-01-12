@@ -7,24 +7,24 @@ namespace LootDumpProcessor.Model;
 
 public class Template : IKeyable, ICloneable
 {
-    [JsonIgnore] public string internalId { get; }
-    public string Id { get; set; }
-    public bool IsContainer { get; set; }
+    [JsonIgnore] public string InternalId { get; }
+    [JsonPropertyName("Id")] public string Id { get; set; }
+    [JsonPropertyName("IsContainer")] public bool IsContainer { get; set; }
     public bool UseGravity { get; set; }
     public bool RandomRotation { get; set; }
-    public Vector3 Position { get; set; }
-    public Vector3 Rotation { get; set; }
-    public bool IsGroupPosition { get; set; }
-    public List<GroupPosition> GroupPositions { get; set; }
-    public bool IsAlwaysSpawn { get; set; }
-    public string Root { get; set; }
-    public List<Item> Items { get; set; }
+    [JsonPropertyName("Position")] public Vector3 Position { get; set; }
+    [JsonPropertyName("Rotation")] public Vector3 Rotation { get; set; }
+    [JsonPropertyName("IsGroupPosition")] public bool IsGroupPosition { get; set; }
+    [JsonPropertyName("GroupPositions")] public List<GroupPosition> GroupPositions { get; set; }
+    [JsonPropertyName("IsAlwaysSpawn")] public bool IsAlwaysSpawn { get; set; }
+    [JsonPropertyName("Root")] public string Root { get; set; }
+    [JsonPropertyName("Items")] public List<Item> Items { get; set; }
 
     public Template(string internalId, string id, bool isContainer, bool useGravity, bool randomRotation,
         Vector3 position, Vector3 rotation, bool isGroupPosition, List<GroupPosition> groupPositions,
         bool isAlwaysSpawn, string root, List<Item> items)
     {
-        this.internalId = internalId;
+        this.InternalId = internalId;
         Id = id;
         IsContainer = isContainer;
         UseGravity = useGravity;
@@ -49,11 +49,11 @@ public class Template : IKeyable, ICloneable
 
     public override int GetHashCode() => Id != null ? Id.GetHashCode() : 0;
 
-    public IKey GetKey() => new FlatUniqueKey([internalId]);
+    public IKey GetKey() => new FlatUniqueKey([InternalId]);
 
     public object Clone() => new Template
     (
-        internalId,
+        InternalId,
         Id,
         IsContainer,
         UseGravity,
