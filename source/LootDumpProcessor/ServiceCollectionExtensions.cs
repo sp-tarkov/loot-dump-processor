@@ -9,6 +9,7 @@ using LootDumpProcessor.Process.Processor.v2.StaticContainersProcessor;
 using LootDumpProcessor.Process.Processor.v2.StaticLootProcessor;
 using LootDumpProcessor.Process.Reader.Filters;
 using LootDumpProcessor.Process.Reader.Intake;
+using LootDumpProcessor.Process.Writer;
 using LootDumpProcessor.Serializers.Yaml;
 using LootDumpProcessor.Storage;
 using LootDumpProcessor.Storage.Implementations.File;
@@ -31,10 +32,13 @@ public static class ServiceCollectionExtensions
         AddDataStorage(services);
         RegisterProcessors(services);
 
+        services.AddSingleton<StoreHandlerFactory>();
+
         services.AddSingleton<ITarkovItemsProvider, TarkovItemsProvider>();
         services.AddSingleton<IKeyGenerator, NumericKeyGenerator>();
         services.AddTransient<IComposedKeyGenerator, ComposedKeyGenerator>();
 
+        services.AddTransient<IWriter, FileWriter>();
         services.AddTransient<IIntakeReader, JsonFileIntakeReader>();
         services.AddTransient<IFileFilter, JsonDumpFileFilter>();
         services.AddTransient<IFileProcessor, FileProcessor>();
@@ -75,12 +79,12 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<ICollector>(provider =>
         {
-            var config = provider.GetRequiredService<IOptions<Config>>().Value;
-            var collectorType = config.CollectorConfig.CollectorType;
+            var config = provider.GetRequiredService<IOptions<Config>>();
+            var collectorType = config.Value.CollectorConfig.CollectorType;
             return collectorType switch
             {
                 CollectorType.Memory => new HashSetCollector(),
-                CollectorType.Dump => new DumpCollector(),
+                CollectorType.Dump => new DumpCollector(config),
                 _ => throw new ArgumentOutOfRangeException($"CollectorType '{collectorType} is not supported'")
             };
         });
@@ -94,7 +98,7 @@ public static class ServiceCollectionExtensions
             var dataStorageType = config.DataStorageConfig.DataStorageType;
             return dataStorageType switch
             {
-                DataStorageTypes.File => new FileDataStorage(),
+                DataStorageTypes.File => new FileDataStorage(provider.GetRequiredService<StoreHandlerFactory>()),
                 DataStorageTypes.Memory => new MemoryDataStorage(),
                 _ => throw new ArgumentOutOfRangeException($"DataStorageType '{dataStorageType} is not supported'")
             };

@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using LootDumpProcessor.Model;
+using LootDumpProcessor.Model.Config;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.LooseLoot;
@@ -15,6 +16,7 @@ using LootDumpProcessor.Storage;
 using LootDumpProcessor.Storage.Collections;
 using LootDumpProcessor.Utils;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace LootDumpProcessor.Process.Processor.DumpProcessor;
 
@@ -23,7 +25,8 @@ public class MultithreadSteppedDumpProcessor(
     IStaticContainersProcessor staticContainersProcessor,
     IAmmoProcessor ammoProcessor,
     ILooseLootProcessor looseLootProcessor,
-    ILogger<MultithreadSteppedDumpProcessor> logger, IKeyGenerator keyGenerator, IDataStorage dataStorage
+    ILogger<MultithreadSteppedDumpProcessor> logger, IKeyGenerator keyGenerator, IDataStorage dataStorage,
+    IOptions<Config> config
 )
     : IDumpProcessor
 {
@@ -46,6 +49,8 @@ public class MultithreadSteppedDumpProcessor(
         _keyGenerator = keyGenerator ?? throw new ArgumentNullException(nameof(keyGenerator));
 
     private readonly IDataStorage _dataStorage = dataStorage ?? throw new ArgumentNullException(nameof(dataStorage));
+
+    private readonly Config _config = (config ?? throw new ArgumentNullException(nameof(config))).Value;
 
 
     public async Task<Dictionary<OutputFileType, object>> ProcessDumps(List<PartialData> dumps)
@@ -173,7 +178,7 @@ public class MultithreadSteppedDumpProcessor(
         }
 
         if (!mapStaticContainersAggregated.TryGetValue(mapId,
-                out ConcurrentDictionary<Template, int> mapAggregatedDataDict))
+                out var mapAggregatedDataDict))
         {
             mapAggregatedDataDict = new ConcurrentDictionary<Template, int>();
             mapStaticContainersAggregated.TryAdd(mapId, mapAggregatedDataDict);
@@ -183,7 +188,7 @@ public class MultithreadSteppedDumpProcessor(
 
         IncrementMapCounterDictionaryValue(mapDumpCounter, mapId);
 
-        var containerIgnoreListExists = LootDumpProcessorContext.GetConfig().ContainerIgnoreList
+        var containerIgnoreListExists = _config.ContainerIgnoreList
             .TryGetValue(mapId, out var ignoreListForMap);
         foreach (var dynamicStaticContainer in _staticContainersProcessor.CreateDynamicStaticContainers(
                      dataDump))
@@ -194,13 +199,13 @@ public class MultithreadSteppedDumpProcessor(
                 mapAggregatedDataDict[dynamicStaticContainer] += 1;
         }
 
-        GCHandler.Collect();
+        if (_config.ManualGarbageCollectionCalls) GC.Collect();
     }
 
-    private static bool DumpWasMadeAfterConfigThresholdDate(PartialData dataDump) =>
+    private bool DumpWasMadeAfterConfigThresholdDate(PartialData dataDump) =>
         FileDateParser.TryParseFileDate(dataDump.BasicInfo.FileName, out var fileDate) &&
         fileDate.HasValue &&
-        fileDate.Value > LootDumpProcessorContext.GetConfig().DumpProcessorConfig
+        fileDate.Value > _config.DumpProcessorConfig
             .SpawnContainerChanceIncludeAfterDate;
 
     private static void IncrementMapCounterDictionaryValue(ConcurrentDictionary<string, int> mapDumpCounter,
@@ -249,7 +254,7 @@ public class MultithreadSteppedDumpProcessor(
 
                 partialFileMetaData = null;
                 tuple = null;
-                GCHandler.Collect();
+                if (_config.ManualGarbageCollectionCalls) GC.Collect();
 
                 var parallelOptions = new ParallelOptions
                 {
@@ -268,14 +273,14 @@ public class MultithreadSteppedDumpProcessor(
 
                 _dataStorage.Store(dictionaryCounts);
                 dictionaryCounts = null;
-                GCHandler.Collect();
+                if (_config.ManualGarbageCollectionCalls) GC.Collect();
 
                 _dataStorage.Store(actualDictionaryItemProperties);
                 actualDictionaryItemProperties = null;
-                GCHandler.Collect();
+                if (_config.ManualGarbageCollectionCalls) GC.Collect();
                 _dataStorage.Store(looseLootCounts);
                 looseLootCounts = null;
-                GCHandler.Collect();
+                if (_config.ManualGarbageCollectionCalls) GC.Collect();
             });
         return dumpProcessData;
     }

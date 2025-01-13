@@ -1,19 +1,23 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
+using LootDumpProcessor.Model.Config;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Processing;
 using LootDumpProcessor.Serializers.Json;
 using LootDumpProcessor.Utils;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace LootDumpProcessor.Process.Reader.Intake;
 
-public class JsonFileIntakeReader(ILogger<JsonFileIntakeReader> logger) : IIntakeReader
+public class JsonFileIntakeReader(ILogger<JsonFileIntakeReader> logger, IOptions<Config> config) : IIntakeReader
 {
     private readonly ILogger<JsonFileIntakeReader> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-    private readonly HashSet<string>? _ignoredLocations = LootDumpProcessorContext.GetConfig()
-        .ReaderConfig.IntakeReaderConfig?.IgnoredDumpLocations.ToHashSet();
+    private readonly Config _config = (config ?? throw new ArgumentNullException(nameof(config))).Value;
+
+    private HashSet<string> IgnoredLocations => _config
+        .ReaderConfig.IntakeReaderConfig.IgnoredDumpLocations.ToHashSet();
 
     private readonly ConcurrentDictionary<string, int> _totalMapDumpsCounter = new();
 
@@ -43,14 +47,14 @@ public class JsonFileIntakeReader(ILogger<JsonFileIntakeReader> logger) : IIntak
             _logger.LogError("Could not parse date from file: {File}", file);
 
         var fi = JsonSerializer.Deserialize<RootData>(fileData, JsonSerializerSettings.Default);
-        if (fi?.Data.LocationLoot.Name != null && (!_ignoredLocations?.Contains(fi.Data.LocationLoot.Name) ?? true))
+        if (fi?.Data.LocationLoot.Name != null && (!IgnoredLocations?.Contains(fi.Data.LocationLoot.Name) ?? true))
         {
             var mapName = fi.Data.LocationLoot.Name;
             var mapId = fi.Data.LocationLoot.Id.ToLower();
 
             var counter = _totalMapDumpsCounter.AddOrUpdate(mapName, 0, (_, current) => current);
 
-            var maxDumpsPerMap = LootDumpProcessorContext.GetConfig()
+            var maxDumpsPerMap = _config
                 .ReaderConfig.IntakeReaderConfig?.MaxDumpsPerMap ?? 1500;
 
             if (counter < maxDumpsPerMap)

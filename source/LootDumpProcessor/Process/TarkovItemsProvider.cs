@@ -1,7 +1,9 @@
 using System.Collections.Frozen;
 using System.Text.Json;
+using LootDumpProcessor.Model.Config;
 using LootDumpProcessor.Model.Tarkov;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace LootDumpProcessor.Process;
 
@@ -9,14 +11,16 @@ public class TarkovItemsProvider : ITarkovItemsProvider
 {
     private readonly ILogger<TarkovItemsProvider> _logger;
     private readonly FrozenDictionary<string, TemplateFileItem>? _items;
+    private readonly Config _config;
 
-    private static readonly string ItemsFilePath = Path.Combine(
-        LootDumpProcessorContext.GetConfig().ServerLocation,
+    private string ItemsFilePath => Path.Combine(
+        _config.ServerLocation,
         "project", "assets", "database", "templates", "items.json");
 
-    public TarkovItemsProvider(ILogger<TarkovItemsProvider> logger)
+    public TarkovItemsProvider(ILogger<TarkovItemsProvider> logger, IOptions<Config> config)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _config = (config ?? throw new ArgumentNullException(nameof(config))).Value;
 
         try
         {

@@ -1,4 +1,5 @@
 ﻿using LootDumpProcessor.Model;
+using LootDumpProcessor.Model.Config;
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.LooseLoot;
 using LootDumpProcessor.Model.Processing;
@@ -6,12 +7,13 @@ using LootDumpProcessor.Storage;
 using LootDumpProcessor.Storage.Collections;
 using LootDumpProcessor.Utils;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor;
 
 public class LooseLootProcessor(
     ILogger<LooseLootProcessor> logger, IDataStorage dataStorage, ITarkovItemsProvider tarkovItemsProvider,
-    IComposedKeyGenerator composedKeyGenerator, IKeyGenerator keyGenerator
+    IComposedKeyGenerator composedKeyGenerator, IKeyGenerator keyGenerator, IOptions<Config> config
 )
     : ILooseLootProcessor
 {
@@ -29,6 +31,8 @@ public class LooseLootProcessor(
 
     private readonly IKeyGenerator
         _keyGenerator = keyGenerator ?? throw new ArgumentNullException(nameof(keyGenerator));
+
+    private readonly Config _config = (config ?? throw new ArgumentNullException(nameof(config))).Value;
 
     public PreProcessedLooseLoot PreProcessLooseLoot(List<Template> looseLoot)
     {
@@ -76,8 +80,7 @@ public class LooseLootProcessor(
         IKey looseLootCountKey
     )
     {
-        var config = LootDumpProcessorContext.GetConfig();
-        var spawnPointTolerance = config.ProcessorConfig.SpawnPointToleranceForForced / 100.0;
+        var spawnPointTolerance = _config.ProcessorConfig.SpawnPointToleranceForForced / 100.0;
         var looseLootDistribution = new LooseLootRoot();
 
         var probabilities = new Dictionary<string, double>();
@@ -88,7 +91,7 @@ public class LooseLootProcessor(
 
         var spawnPointCount = looseLootCountsItem.MapSpawnpointCount.Select(Convert.ToDouble).ToList();
         var initialMean = CalculateMean(spawnPointCount);
-        var tolerancePercentage = config.ProcessorConfig.LooseLootCountTolerancePercentage / 100.0;
+        var tolerancePercentage = _config.ProcessorConfig.LooseLootCountTolerancePercentage / 100.0;
         var highThreshold = initialMean * (1 + tolerancePercentage);
 
         looseLootCountsItem.MapSpawnpointCount = looseLootCountsItem.MapSpawnpointCount
@@ -160,7 +163,7 @@ public class LooseLootProcessor(
                 _logger.LogWarning(
                     "Item: {ItemId} has > {Tolerance}% spawn chance in spawn point: {LocationId} but isn't in forced loot, adding to forced",
                     templateCopy.Id,
-                    config.ProcessorConfig.SpawnPointToleranceForForced,
+                    _config.ProcessorConfig.SpawnPointToleranceForForced,
                     forcedSpawnPoint.LocationId
                 );
             }
