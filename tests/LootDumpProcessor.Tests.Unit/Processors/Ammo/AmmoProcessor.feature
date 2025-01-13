@@ -2,9 +2,9 @@
 
     Scenario: Create ammo distribution with valid containers
         Given the following ammo:
-          | Id | Tpl   | Caliber |
-          | 1  | ammo1 | 5.56x45 |
-          | 2  | ammo2 | 5.56x45 |
+          | Tpl   | Caliber |
+          | ammo1 | 5.56x45 |
+          | ammo2 | 5.56x45 |
         And a container with items:
           | Tpl   |
           | ammo1 |
@@ -31,8 +31,8 @@
 
     Scenario: Create ammo distribution with no matching containers
         Given the following ammo:
-          | Id | Tpl   | Caliber |
-          | 1  | ammo3 | 7.62x39 |
+          | Tpl   | Caliber |
+          | ammo3 | 7.62x39 |
         And a container with items:
           | Tpl   |
           | ammo1 |
@@ -43,9 +43,9 @@
 
     Scenario: Create ammo distribution with multiple calibers
         Given the following ammo:
-          | Id | Tpl   | Caliber |
-          | 1  | ammo1 | 5.56x45 |
-          | 2  | ammo2 | 7.62x39 |
+          | Tpl   | Caliber |
+          | ammo1 | 5.56x45 |
+          | ammo2 | 7.62x39 |
         And a container with items:
           | Tpl   |
           | ammo1 |
@@ -66,8 +66,8 @@
 
     Scenario: Create ammo distribution with duplicate container ammo entries
         Given the following ammo:
-          | Id | Tpl   | Caliber |
-          | 1  | ammo1 | 5.56x45 |
+          | Tpl   | Caliber |
+          | ammo1 | 5.56x45 |
         And a container with items:
           | Tpl   |
           | ammo1 |

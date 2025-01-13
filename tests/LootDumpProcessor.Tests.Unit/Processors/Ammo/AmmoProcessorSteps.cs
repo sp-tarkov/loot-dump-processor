@@ -47,7 +47,6 @@ public class AmmoProcessorSteps(ScenarioContext scenarioContext)
             .Select(item => new Item
             {
                 Tpl = item.Tpl,
-                Id = item.Id
             })
             .ToList();
 

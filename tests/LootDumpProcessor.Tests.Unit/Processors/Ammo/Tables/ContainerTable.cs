@@ -1,6 +1,4 @@
-﻿using Reqnroll;
-
-namespace LootDumpProcessor.Tests.Unit.Processors.Ammo.Tables;
+﻿namespace LootDumpProcessor.Tests.Unit.Processors.Ammo.Tables;
 
 public static class ContainerTable
 {
