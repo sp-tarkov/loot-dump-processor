@@ -1,10 +1,11 @@
 ﻿using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Output.StaticContainer;
+using LootDumpProcessor.Process.Services.ForcedItemsProvider;
 using LootDumpProcessor.Utils;
 using Microsoft.Extensions.Logging;
 
-namespace LootDumpProcessor.Process.Processor.v2.StaticContainersProcessor;
+namespace LootDumpProcessor.Process.Processor.StaticContainersProcessor;
 
 public class StaticContainersProcessor(
     ILogger<StaticContainersProcessor> logger, IForcedItemsProvider forcedItemsProvider

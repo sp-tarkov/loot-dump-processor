@@ -2,7 +2,7 @@
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Processing;
 
-namespace LootDumpProcessor.Process.Processor.v2.StaticLootProcessor;
+namespace LootDumpProcessor.Process.Processor.StaticLootProcessor;
 
 public interface IStaticLootProcessor
 {

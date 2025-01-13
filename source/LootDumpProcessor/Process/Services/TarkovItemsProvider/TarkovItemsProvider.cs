@@ -5,7 +5,7 @@ using LootDumpProcessor.Model.Tarkov;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace LootDumpProcessor.Process;
+namespace LootDumpProcessor.Process.Services.TarkovItemsProvider;
 
 public class TarkovItemsProvider : ITarkovItemsProvider
 {

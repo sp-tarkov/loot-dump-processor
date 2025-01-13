@@ -4,7 +4,7 @@ using LootDumpProcessor.Model.Config;
 using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Serializers.Yaml;
 
-namespace LootDumpProcessor.Process;
+namespace LootDumpProcessor.Process.Services.ForcedItemsProvider;
 
 public class ForcedItemsProvider : IForcedItemsProvider
 {

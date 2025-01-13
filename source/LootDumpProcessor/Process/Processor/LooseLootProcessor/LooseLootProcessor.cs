@@ -3,13 +3,17 @@ using LootDumpProcessor.Model.Config;
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.LooseLoot;
 using LootDumpProcessor.Model.Processing;
+using LootDumpProcessor.Process.Services.ComposedKeyGenerator;
+using LootDumpProcessor.Process.Services.ForcedItemsProvider;
+using LootDumpProcessor.Process.Services.KeyGenerator;
+using LootDumpProcessor.Process.Services.TarkovItemsProvider;
 using LootDumpProcessor.Storage;
 using LootDumpProcessor.Storage.Collections;
 using LootDumpProcessor.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor;
+namespace LootDumpProcessor.Process.Processor.LooseLootProcessor;
 
 public class LooseLootProcessor(
     ILogger<LooseLootProcessor> logger, IDataStorage dataStorage, ITarkovItemsProvider tarkovItemsProvider,

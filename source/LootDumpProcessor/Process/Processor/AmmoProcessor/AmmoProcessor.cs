@@ -1,8 +1,9 @@
 ﻿using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Processing;
+using LootDumpProcessor.Process.Services.TarkovItemsProvider;
 using Microsoft.Extensions.Logging;
 
-namespace LootDumpProcessor.Process.Processor.v2.AmmoProcessor;
+namespace LootDumpProcessor.Process.Processor.AmmoProcessor;
 
 public class AmmoProcessor(ILogger<AmmoProcessor> logger, ITarkovItemsProvider tarkovItemsProvider) : IAmmoProcessor
 {

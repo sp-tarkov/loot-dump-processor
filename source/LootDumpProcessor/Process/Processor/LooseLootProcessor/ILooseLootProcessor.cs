@@ -3,7 +3,7 @@ using LootDumpProcessor.Model.Output.LooseLoot;
 using LootDumpProcessor.Model.Processing;
 using LootDumpProcessor.Storage;
 
-namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor;
+namespace LootDumpProcessor.Process.Processor.LooseLootProcessor;
 
 public interface ILooseLootProcessor
 {

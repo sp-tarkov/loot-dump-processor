@@ -2,7 +2,7 @@
 using System.Collections.Immutable;
 using LootDumpProcessor.Model.Config;
 
-namespace LootDumpProcessor.Process;
+namespace LootDumpProcessor.Process.Services.ForcedItemsProvider;
 
 public interface IForcedItemsProvider
 {

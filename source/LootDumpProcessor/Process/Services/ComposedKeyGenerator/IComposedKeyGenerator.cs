@@ -1,6 +1,6 @@
 ﻿using LootDumpProcessor.Model;
 
-namespace LootDumpProcessor.Process;
+namespace LootDumpProcessor.Process.Services.ComposedKeyGenerator;
 
 public interface IComposedKeyGenerator
 {
