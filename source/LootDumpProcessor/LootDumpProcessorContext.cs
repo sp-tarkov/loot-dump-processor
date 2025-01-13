@@ -34,38 +34,6 @@ public static class LootDumpProcessorContext
         return _config;
     }
 
-    public static ForcedStatic GetForcedStatic()
-    {
-        lock (_forcedStaticLock)
-        {
-            if (_forcedStatic == null)
-                _forcedStatic = Yaml.Deserializer
-                    .Deserialize<ForcedStatic>(File.ReadAllText("./Config/forced_static.yaml"));
-        }
-
-        return _forcedStatic;
-    }
-
-    public static HashSet<string> GetStaticWeaponIds()
-    {
-        lock (_staticWeaponIdsLock)
-        {
-            if (_staticWeaponIds == null) _staticWeaponIds = GetForcedStatic().StaticWeaponIds.ToHashSet();
-        }
-
-        return _staticWeaponIds;
-    }
-
-    public static Dictionary<string, List<StaticForced>> GetForcedItems()
-    {
-        lock (_forcedItemsLock)
-        {
-            if (_forcedItems == null) _forcedItems = GetForcedStatic().ForcedItems;
-        }
-
-        return _forcedItems;
-    }
-
     public static Dictionary<string, HashSet<string>> GetForcedLooseItems()
     {
         lock (_forcedLooseLock)

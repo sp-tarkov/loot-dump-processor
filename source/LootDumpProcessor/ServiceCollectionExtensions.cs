@@ -9,6 +9,7 @@ using LootDumpProcessor.Process.Processor.v2.StaticContainersProcessor;
 using LootDumpProcessor.Process.Processor.v2.StaticLootProcessor;
 using LootDumpProcessor.Process.Reader.Filters;
 using LootDumpProcessor.Process.Reader.Intake;
+using LootDumpProcessor.Serializers.Yaml;
 using LootDumpProcessor.Storage;
 using LootDumpProcessor.Storage.Implementations.File;
 using LootDumpProcessor.Storage.Implementations.Memory;
@@ -25,6 +26,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddLogging(configure => configure.AddConsole());
         AddConfiguration(services);
+        AddForcedStatic(services);
         AddCollector(services);
         AddDataStorage(services);
         RegisterProcessors(services);
@@ -42,8 +44,9 @@ public static class ServiceCollectionExtensions
 
     private static void AddConfiguration(IServiceCollection services)
     {
+        const string configPath = "Config/config.json";
         var configuration = new ConfigurationBuilder()
-            .AddJsonFile("Config/config.json")
+            .AddJsonFile(configPath)
             .AddEnvironmentVariables()
             .Build();
 
@@ -51,6 +54,13 @@ public static class ServiceCollectionExtensions
             .Bind(configuration)
             .ValidateDataAnnotations()
             .ValidateOnStart();
+    }
+
+    private static void AddForcedStatic(IServiceCollection services)
+    {
+        const string forcedStaticPath = "Config/forced_static.yaml";
+        var forcedStatic = Yaml.Deserializer.Deserialize<ForcedStatic>(forcedStaticPath);
+        services.AddSingleton(forcedStatic);
     }
 
     private static void RegisterProcessors(IServiceCollection services)
