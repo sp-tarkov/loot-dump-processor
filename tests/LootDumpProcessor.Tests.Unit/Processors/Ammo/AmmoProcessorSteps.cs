@@ -50,17 +50,13 @@ public class AmmoProcessorSteps(ScenarioContext scenarioContext)
             })
             .ToList();
 
-        var loot = new PreProcessedStaticLoot
-        {
-            Items = items
-        };
 
-        if (_scenarioContext.TryGetValue(out List<PreProcessedStaticLoot> lootList))
+        if (_scenarioContext.TryGetValue(out List<Item> lootList))
         {
-            lootList.Add(loot);
+            lootList.AddRange(items);
             _scenarioContext.Set(lootList);
         }
-        else _scenarioContext.Set(new List<PreProcessedStaticLoot> { loot });
+        else _scenarioContext.Set(new List<Item>(items));
     }
 
     [When("I create an ammo distribution")]
@@ -71,8 +67,9 @@ public class AmmoProcessorSteps(ScenarioContext scenarioContext)
 
         var ammoProcessor = new AmmoProcessor(logger, itemsProvider);
 
-        var containers = _scenarioContext.Get<List<PreProcessedStaticLoot>>();
-        var distribution = ammoProcessor.CreateAmmoDistribution(containers);
+        var items = _scenarioContext.Get<List<Item>>();
+        var loot = new PreProcessedStaticLoot { Items = items };
+        var distribution = ammoProcessor.CreateAmmoDistribution([loot]);
         _scenarioContext.Set(distribution);
     }
 
