@@ -1,5 +1,4 @@
 ﻿using LootDumpProcessor.Model;
-using LootDumpProcessor.Model.Config;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Utils;
@@ -7,15 +6,18 @@ using Microsoft.Extensions.Logging;
 
 namespace LootDumpProcessor.Process.Processor.v2.StaticContainersProcessor;
 
-public class StaticContainersProcessor(ILogger<StaticContainersProcessor> logger, ForcedStatic forcedStatic)
+public class StaticContainersProcessor(
+    ILogger<StaticContainersProcessor> logger, IForcedItemsProvider forcedItemsProvider
+)
     : IStaticContainersProcessor
 {
     private readonly ILogger<StaticContainersProcessor> _logger =
         logger ?? throw new ArgumentNullException(nameof(logger));
 
-    private readonly ForcedStatic _forcedStatic = forcedStatic ?? throw new ArgumentNullException(nameof(forcedStatic));
+    private readonly IForcedItemsProvider _forcedItemsProvider =
+        forcedItemsProvider ?? throw new ArgumentNullException(nameof(forcedItemsProvider));
 
-    public MapStaticLoot CreateStaticWeaponsAndForcedContainers(RootData rawMapDump)
+    public async Task<MapStaticLoot> CreateStaticWeaponsAndForcedContainers(RootData rawMapDump)
     {
         var locationLoot = rawMapDump.Data.LocationLoot;
         var mapId = locationLoot.Id.ToLower();
@@ -25,6 +27,7 @@ public class StaticContainersProcessor(ILogger<StaticContainersProcessor> logger
             .ToList();
 
         var staticWeapons = new List<Template>();
+        var forcedStatic = await _forcedItemsProvider.GetForcedStatic();
 
         foreach (var lootPosition in staticLootPositions)
         {
@@ -36,7 +39,7 @@ public class StaticContainersProcessor(ILogger<StaticContainersProcessor> logger
 
             var firstItemTpl = lootPosition.Items.First().Tpl;
 
-            if (!_forcedStatic.StaticWeaponIds.Contains(firstItemTpl))
+            if (!forcedStatic.StaticWeaponIds.Contains(firstItemTpl))
                 continue;
 
             var copiedLoot = ProcessorUtil.Copy(lootPosition);
@@ -44,7 +47,7 @@ public class StaticContainersProcessor(ILogger<StaticContainersProcessor> logger
             _logger.LogDebug("Added static weapon with ID {WeaponId} to Map {MapId}.", copiedLoot.Id, mapId);
         }
 
-        var forcedStaticItems = _forcedStatic.ForcedItems
+        var forcedStaticItems = forcedStatic.ForcedItems
             .TryGetValue(mapId, out var forcedItems)
             ? forcedItems
             : new List<StaticForced>();
@@ -59,11 +62,13 @@ public class StaticContainersProcessor(ILogger<StaticContainersProcessor> logger
         return mapStaticLoot;
     }
 
-    public IReadOnlyList<Template> CreateDynamicStaticContainers(RootData rawMapDump)
+    public async Task<IReadOnlyList<Template>> CreateDynamicStaticContainers(RootData rawMapDump)
     {
+        var forcedStatic = await _forcedItemsProvider.GetForcedStatic();
+
         var dynamicContainers = rawMapDump.Data.LocationLoot.Loot
             .Where(loot => loot.IsContainer &&
-                           !_forcedStatic.StaticWeaponIds.Contains(loot.Items.FirstOrDefault()?.Tpl))
+                           !forcedStatic.StaticWeaponIds.Contains(loot.Items.FirstOrDefault()?.Tpl))
             .ToList();
 
         foreach (var container in dynamicContainers)

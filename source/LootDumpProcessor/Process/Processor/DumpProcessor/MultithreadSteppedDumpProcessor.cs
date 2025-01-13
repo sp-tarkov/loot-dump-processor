@@ -165,8 +165,7 @@ public class MultithreadSteppedDumpProcessor(
         }
         else
         {
-            var mapStaticContainers =
-                _staticContainersProcessor.CreateStaticWeaponsAndForcedContainers(dataDump);
+            var mapStaticContainers = await _staticContainersProcessor.CreateStaticWeaponsAndForcedContainers(dataDump);
 
             var newStaticWeapons = mapStaticContainers.StaticWeapons.Where(x =>
                 !mapStaticLoot.StaticWeapons.Exists(y => y.Id == x.Id));
@@ -190,7 +189,7 @@ public class MultithreadSteppedDumpProcessor(
 
         var containerIgnoreListExists = _config.ContainerIgnoreList
             .TryGetValue(mapId, out var ignoreListForMap);
-        foreach (var dynamicStaticContainer in _staticContainersProcessor.CreateDynamicStaticContainers(
+        foreach (var dynamicStaticContainer in await _staticContainersProcessor.CreateDynamicStaticContainers(
                      dataDump))
         {
             if (containerIgnoreListExists && ignoreListForMap.Contains(dynamicStaticContainer.Id)) continue;

@@ -147,13 +147,13 @@ public class QueuePipeline(
 
         _logger.LogInformation("Files sorted and ready to begin pre-processing");
 
-        Parallel.ForEach(_filesToProcess, file =>
+        await Parallel.ForEachAsync(_filesToProcess, async (file, _) =>
         {
             try
             {
                 if (!_intakeReader.Read(file, out var basicInfo)) return;
 
-                var partialData = _fileProcessor.Process(basicInfo);
+                var partialData = await _fileProcessor.Process(basicInfo);
                 collector.Hold(partialData);
             }
             catch (Exception e)

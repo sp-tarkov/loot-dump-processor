@@ -27,7 +27,7 @@ public class FileProcessor(
 
     private readonly IDataStorage _dataStorage = dataStorage ?? throw new ArgumentNullException(nameof(dataStorage));
 
-    public PartialData Process(BasicInfo parsedData)
+    public async Task<PartialData> Process(BasicInfo parsedData)
     {
         _logger.LogDebug("Processing file {FileName}...", parsedData.FileName);
 
@@ -58,7 +58,7 @@ public class FileProcessor(
                 string.Join("/", dumpData.GetKey().GetLookupIndex())
             );
 
-            dumpData.Containers = _staticLootProcessor.PreProcessStaticLoot(staticLoot);
+            dumpData.Containers = await _staticLootProcessor.PreProcessStaticLoot(staticLoot);
             dumpData.LooseLoot = _looseLootProcessor.PreProcessLooseLoot(looseLoot);
             dataStorage.Store(dumpData);
         }

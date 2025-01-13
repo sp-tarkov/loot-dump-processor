@@ -29,13 +29,13 @@ public static class ServiceCollectionExtensions
     {
         services.AddLogging(configure => configure.AddConsole());
         AddConfiguration(services);
-        AddForcedStatic(services);
         AddCollector(services);
         AddDataStorage(services);
         RegisterProcessors(services);
 
         services.AddSingleton<StoreHandlerFactory>();
 
+        services.AddSingleton<IForcedItemsProvider, ForcedItemsProvider>();
         services.AddSingleton<ITarkovItemsProvider, TarkovItemsProvider>();
         services.AddSingleton<IKeyGenerator, NumericKeyGenerator>();
         services.AddTransient<IComposedKeyGenerator, ComposedKeyGenerator>();
@@ -60,23 +60,6 @@ public static class ServiceCollectionExtensions
             .Bind(configuration)
             .ValidateDataAnnotations()
             .ValidateOnStart();
-    }
-
-    private static void AddForcedStatic(IServiceCollection services)
-    {
-        const string forcedStaticPath = "Config/forced_static.yaml";
-        var forcedStaticContent = File.ReadAllText(forcedStaticPath);
-
-        // Workaround needed because YamlDotNet cannot deserialize properly
-        var forcedStaticDto = Yaml.Deserializer.Deserialize<ForcedStaticDto>(forcedStaticContent);
-        var forcedStatic = new ForcedStatic(
-            forcedStaticDto.StaticWeaponIds.AsReadOnly(),
-            forcedStaticDto.ForcedItems.ToFrozenDictionary(
-                kvp => kvp.Key,
-                IReadOnlyList<StaticForced> (kvp) => kvp.Value.AsReadOnly()
-            ));
-
-        services.AddSingleton(forcedStatic);
     }
 
     private static void RegisterProcessors(IServiceCollection services)
