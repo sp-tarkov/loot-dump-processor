@@ -52,8 +52,7 @@ public class MultithreadSteppedDumpProcessor(
     private readonly IDataStorage _dataStorage = dataStorage ?? throw new ArgumentNullException(nameof(dataStorage));
 
     private readonly Config _config = (config ?? throw new ArgumentNullException(nameof(config))).Value;
-
-
+    
     public async Task<Dictionary<OutputFileType, object>> ProcessDumps(List<PartialData> dumps)
     {
         _logger.LogInformation("Starting final dump processing");
