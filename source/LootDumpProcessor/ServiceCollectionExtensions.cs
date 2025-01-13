@@ -1,4 +1,6 @@
-﻿using LootDumpProcessor.Model.Config;
+﻿using System.Collections.Frozen;
+using LootDumpProcessor.Model.Config;
+using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Process;
 using LootDumpProcessor.Process.Collector;
 using LootDumpProcessor.Process.Processor.DumpProcessor;
@@ -63,7 +65,17 @@ public static class ServiceCollectionExtensions
     private static void AddForcedStatic(IServiceCollection services)
     {
         const string forcedStaticPath = "Config/forced_static.yaml";
-        var forcedStatic = Yaml.Deserializer.Deserialize<ForcedStatic>(forcedStaticPath);
+        var forcedStaticContent = File.ReadAllText(forcedStaticPath);
+
+        // Workaround needed because YamlDotNet cannot deserialize properly
+        var forcedStaticDto = Yaml.Deserializer.Deserialize<ForcedStaticDto>(forcedStaticContent);
+        var forcedStatic = new ForcedStatic(
+            forcedStaticDto.StaticWeaponIds.AsReadOnly(),
+            forcedStaticDto.ForcedItems.ToFrozenDictionary(
+                kvp => kvp.Key,
+                IReadOnlyList<StaticForced> (kvp) => kvp.Value.AsReadOnly()
+            ));
+
         services.AddSingleton(forcedStatic);
     }
 
