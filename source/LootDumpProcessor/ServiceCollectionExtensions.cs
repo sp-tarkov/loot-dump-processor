@@ -49,6 +49,7 @@ public static class ServiceCollectionExtensions
 
         services.AddOptions<Config>()
             .Bind(configuration)
+            .ValidateDataAnnotations()
             .ValidateOnStart();
     }
 

@@ -1,13 +1,6 @@
-using System.Text.Json.Serialization;
-
+using JetBrains.Annotations;
 
 namespace LootDumpProcessor.Model.Config;
 
-public class ProcessorConfig
-{
-    [JsonPropertyName("spawnPointToleranceForForced")] public double SpawnPointToleranceForForced { get; set; } = 99D;
-
-
-    [JsonPropertyName("looseLootCountTolerancePercentage")]
-    public double LooseLootCountTolerancePercentage { get; set; } = 75D;
-}
+[UsedImplicitly]
+public record ProcessorConfig(double SpawnPointToleranceForForced = 99, double LooseLootCountTolerancePercentage = 75);

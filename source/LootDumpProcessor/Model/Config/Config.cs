@@ -1,15 +1,19 @@
+using System.ComponentModel.DataAnnotations;
+using JetBrains.Annotations;
+
 namespace LootDumpProcessor.Model.Config;
 
-public class Config
+[UsedImplicitly]
+public record Config
 {
-    public string ServerLocation { get; set; } = string.Empty;
-    public bool ManualGarbageCollectionCalls { get; set; }
-    public DataStorageConfig DataStorageConfig { get; set; }
-    public ReaderConfig ReaderConfig { get; set; }
-    public ProcessorConfig ProcessorConfig { get; set; }
-    public DumpProcessorConfig DumpProcessorConfig { get; set; }
-    public WriterConfig WriterConfig { get; set; }
-    public CollectorConfig CollectorConfig { get; set; }
-    public Dictionary<string, string[]> ContainerIgnoreList { get; set; }
-    public List<string> MapsToProcess { get; set; }
+    [Required] public string ServerLocation { get; init; } = string.Empty;
+    [Required] public bool ManualGarbageCollectionCalls { get; init; }
+    [Required] public DataStorageConfig DataStorageConfig { get; init; } = null!;
+    [Required] public ReaderConfig ReaderConfig { get; init; } = null!;
+    [Required] public ProcessorConfig ProcessorConfig { get; init; } = null!;
+    [Required] public DumpProcessorConfig DumpProcessorConfig { get; init; } = null!;
+    [Required] public WriterConfig WriterConfig { get; init; } = null!;
+    [Required] public CollectorConfig CollectorConfig { get; init; } = null!;
+    [Required] public IReadOnlyDictionary<string, string[]> ContainerIgnoreList { get; init; } = null!;
+    [Required] public IReadOnlyList<string> MapsToProcess { get; init; } = null!;
 }

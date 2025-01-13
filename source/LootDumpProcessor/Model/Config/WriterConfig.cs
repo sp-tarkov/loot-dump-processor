@@ -1,9 +1,9 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using JetBrains.Annotations;
 
 
 namespace LootDumpProcessor.Model.Config;
 
-public class WriterConfig
-{
-    [JsonPropertyName("outputLocation")] public string? OutputLocation { get; set; }
-}
+[UsedImplicitly]
+public record WriterConfig([Required]string OutputLocation);

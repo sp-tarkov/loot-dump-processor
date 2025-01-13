@@ -1,10 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+using JetBrains.Annotations;
 using LootDumpProcessor.Storage;
 
 
 namespace LootDumpProcessor.Model.Config;
 
-public class DataStorageConfig
-{
-    public DataStorageTypes DataStorageType { get; set; } = DataStorageTypes.File;
-    public string? FileDataStorageTempLocation { get; set; }
-}
+[UsedImplicitly]
+public record DataStorageConfig(
+    [Required] string FileDataStorageTempLocation,
+    [Required] DataStorageTypes DataStorageType = DataStorageTypes.File
+);

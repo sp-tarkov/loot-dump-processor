@@ -1,7 +1,6 @@
+using JetBrains.Annotations;
+
 namespace LootDumpProcessor.Model.Config;
 
-public class IntakeReaderConfig
-{
-    public int MaxDumpsPerMap { get; set; } = 1500;
-    public List<string> IgnoredDumpLocations { get; set; } = new();
-}
+[UsedImplicitly]
+public record IntakeReaderConfig(IReadOnlyList<string> IgnoredDumpLocations, int MaxDumpsPerMap = 1500);

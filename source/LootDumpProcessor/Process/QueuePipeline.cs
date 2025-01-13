@@ -37,11 +37,11 @@ public class QueuePipeline(
     private readonly ICollector _collector = collector ?? throw new ArgumentNullException(nameof(collector));
 
     private readonly IDataStorage _dataStorage = dataStorage ?? throw new ArgumentNullException(nameof(dataStorage));
-    
+
     private readonly List<string> _filesToRename = new();
     private readonly BlockingCollection<string> _filesToProcess = new();
 
-    private readonly List<string> _mapNames = LootDumpProcessorContext.GetConfig().MapsToProcess;
+    private readonly IReadOnlyList<string> _mapNames = LootDumpProcessorContext.GetConfig().MapsToProcess;
 
 
     public async Task Execute()
@@ -104,12 +104,12 @@ public class QueuePipeline(
         return gatheredFiles;
     }
 
-    private Queue<string> GetFileQueue(List<string> inputPath)
+    private Queue<string> GetFileQueue(IReadOnlyList<string> inputPath)
     {
         var queuedPathsToProcess = new Queue<string>();
         var queuedFilesToProcess = new Queue<string>();
 
-        inputPath.ForEach(p => queuedPathsToProcess.Enqueue(p));
+        foreach (var path in inputPath) queuedPathsToProcess.Enqueue(path);
 
         while (queuedPathsToProcess.TryDequeue(out var path))
         {
