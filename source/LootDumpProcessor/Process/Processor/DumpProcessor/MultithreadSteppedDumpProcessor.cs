@@ -97,7 +97,7 @@ public class MultithreadSteppedDumpProcessor(
         Parallel.ForEach(dumpProcessData.ContainerCounts.Keys, parallelOptions, mapId =>
         {
             var preProcessedStaticLoots = dumpProcessData.ContainerCounts[mapId];
-            var ammoDistribution = _ammoProcessor.CreateAmmoDistribution(mapId, preProcessedStaticLoots);
+            var ammoDistribution = _ammoProcessor.CreateAmmoDistribution(preProcessedStaticLoots);
             staticAmmo[mapId] = ammoDistribution;
         });
         output.Add(OutputFileType.StaticAmmo, staticAmmo);
