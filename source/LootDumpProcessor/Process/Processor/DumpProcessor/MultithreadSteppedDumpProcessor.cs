@@ -117,12 +117,12 @@ public class MultithreadSteppedDumpProcessor(
         _logger.LogInformation("Processing loose loot distribution");
 
         var looseLoot = new ConcurrentDictionary<string, LooseLootRoot>();
-        Parallel.ForEach(dumpProcessData.MapCounts.Keys, parallelOptions, mapId =>
+        await Parallel.ForEachAsync(dumpProcessData.MapCounts.Keys, parallelOptions, async (mapId, _) =>
         {
             var mapCount = dumpProcessData.MapCounts[mapId];
             var looseLootCount = dumpProcessData.LooseLootCounts[mapId];
             var looseLootDistribution =
-                _looseLootProcessor.CreateLooseLootDistribution(mapId, mapCount, looseLootCount);
+                await _looseLootProcessor.CreateLooseLootDistribution(mapId, mapCount, looseLootCount);
             looseLoot[mapId] = looseLootDistribution;
         });
         _logger.LogInformation("Collecting loose loot distribution information");

@@ -9,9 +9,7 @@ public interface ILooseLootProcessor
 {
     PreProcessedLooseLoot PreProcessLooseLoot(List<Template> looseLoot);
 
-    LooseLootRoot CreateLooseLootDistribution(
-        string mapId,
+    Task<LooseLootRoot> CreateLooseLootDistribution(string mapId,
         int mapCount,
-        IKey looseLootCountKey
-    );
+        IKey looseLootCountKey);
 }
