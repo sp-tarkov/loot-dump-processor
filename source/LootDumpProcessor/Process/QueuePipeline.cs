@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json;
+using LootDumpProcessor.Model.Config;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Process.Collector;
 using LootDumpProcessor.Process.Processor.DumpProcessor;
@@ -12,12 +13,13 @@ using LootDumpProcessor.Serializers.Json;
 using LootDumpProcessor.Storage;
 using LootDumpProcessor.Utils;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace LootDumpProcessor.Process;
 
 public class QueuePipeline(
     IFileProcessor fileProcessor, IDumpProcessor dumpProcessor, ILogger<QueuePipeline> logger, IFileFilter fileFilter,
-    IIntakeReader intakeReader
+    IIntakeReader intakeReader, ICollector collector, IDataStorage dataStorage, IOptions<Config> config, IWriter writer
 )
     : IPipeline
 {
@@ -34,25 +36,32 @@ public class QueuePipeline(
     private readonly IIntakeReader
         _intakeReader = intakeReader ?? throw new ArgumentNullException(nameof(intakeReader));
 
+    private readonly ICollector _collector = collector ?? throw new ArgumentNullException(nameof(collector));
+
+    private readonly IDataStorage _dataStorage = dataStorage ?? throw new ArgumentNullException(nameof(dataStorage));
+
+    private readonly IWriter _writer = writer ?? throw new ArgumentNullException(nameof(writer));
+
+    private readonly Config _config = (config ?? throw new ArgumentNullException(nameof(config))).Value;
+
     private readonly List<string> _filesToRename = new();
     private readonly BlockingCollection<string> _filesToProcess = new();
 
-    private readonly List<string> _mapNames = LootDumpProcessorContext.GetConfig().MapsToProcess;
+    private IReadOnlyList<string> MapNames => _config.MapsToProcess;
 
 
     public async Task Execute()
     {
         var stopwatch = Stopwatch.StartNew();
         // Single collector instance to collect results
-        var collector = CollectorFactory.GetInstance();
-        collector.Setup();
+        _collector.Setup();
 
         _logger.LogInformation("Gathering files to begin processing");
 
         try
         {
             await FixFilesFromDumps();
-            foreach (var mapName in _mapNames) await ProcessFilesFromDumpsPerMap(collector, mapName);
+            foreach (var mapName in MapNames) await ProcessFilesFromDumpsPerMap(_collector, mapName);
         }
         finally
         {
@@ -64,7 +73,7 @@ public class QueuePipeline(
     private List<string> GatherFiles()
     {
         // Read locations
-        var inputPath = LootDumpProcessorContext.GetConfig().ReaderConfig.DumpFilesLocation;
+        var inputPath = _config.ReaderConfig.DumpFilesLocation;
 
         if (inputPath == null || inputPath.Count == 0)
             throw new Exception("Reader dumpFilesLocations must be set to a valid value");
@@ -101,12 +110,12 @@ public class QueuePipeline(
         return gatheredFiles;
     }
 
-    private Queue<string> GetFileQueue(List<string> inputPath)
+    private Queue<string> GetFileQueue(IReadOnlyList<string> inputPath)
     {
         var queuedPathsToProcess = new Queue<string>();
         var queuedFilesToProcess = new Queue<string>();
 
-        inputPath.ForEach(p => queuedPathsToProcess.Enqueue(p));
+        foreach (var path in inputPath) queuedPathsToProcess.Enqueue(path);
 
         while (queuedPathsToProcess.TryDequeue(out var path))
         {
@@ -114,7 +123,7 @@ public class QueuePipeline(
             if (!Directory.Exists(path)) throw new Exception($"Input directory \"{path}\" could not be found");
 
             // If we should process subfolder, queue them up as well
-            if (LootDumpProcessorContext.GetConfig().ReaderConfig.ProcessSubFolders)
+            if (_config.ReaderConfig.ProcessSubFolders)
                 foreach (var directory in Directory.GetDirectories(path))
                     queuedPathsToProcess.Enqueue(directory);
 
@@ -138,13 +147,13 @@ public class QueuePipeline(
 
         _logger.LogInformation("Files sorted and ready to begin pre-processing");
 
-        Parallel.ForEach(_filesToProcess, file =>
+        await Parallel.ForEachAsync(_filesToProcess, async (file, _) =>
         {
             try
             {
                 if (!_intakeReader.Read(file, out var basicInfo)) return;
 
-                var partialData = _fileProcessor.Process(basicInfo);
+                var partialData = await _fileProcessor.Process(basicInfo);
                 collector.Hold(partialData);
             }
             catch (Exception e)
@@ -156,15 +165,14 @@ public class QueuePipeline(
         _logger.LogInformation("Pre-processing finished");
 
         // Single writer instance to collect results
-        var writer = WriterFactory.GetInstance();
         // Single collector instance to collect results
         var partialData = collector.Retrieve();
         var processedDumps = await _dumpProcessor.ProcessDumps(partialData);
-        writer.WriteAll(processedDumps);
+        _writer.WriteAll(processedDumps);
 
         // clear collector and datastorage as we process per map now
         collector.Clear();
-        DataStorageFactory.GetInstance().Clear();
+        _dataStorage.Clear();
     }
 
     /// <summary>
@@ -172,7 +180,7 @@ public class QueuePipeline(
     /// </summary>
     private async Task FixFilesFromDumps()
     {
-        var inputPath = LootDumpProcessorContext.GetConfig().ReaderConfig.DumpFilesLocation;
+        var inputPath = _config.ReaderConfig.DumpFilesLocation;
 
         if (inputPath == null || inputPath.Count == 0)
             throw new Exception("Reader dumpFilesLocations must be set to a valid value");
@@ -181,7 +189,7 @@ public class QueuePipeline(
 
         await Parallel.ForEachAsync(_filesToRename, async (file, cancellationToken) =>
         {
-            if (_mapNames.Any(file.Contains)) return;
+            if (MapNames.Any(file.Contains)) return;
 
             try
             {

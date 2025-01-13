@@ -1,16 +1,21 @@
 ﻿using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Processing;
+using LootDumpProcessor.Process.Services.ForcedItemsProvider;
 using Microsoft.Extensions.Logging;
 
-namespace LootDumpProcessor.Process.Processor.v2.StaticLootProcessor;
+namespace LootDumpProcessor.Process.Processor.StaticLootProcessor;
 
-public class StaticLootProcessor(ILogger<StaticLootProcessor> logger) : IStaticLootProcessor
+public class StaticLootProcessor(ILogger<StaticLootProcessor> logger, IForcedItemsProvider forcedItemsProvider)
+    : IStaticLootProcessor
 {
     private readonly ILogger<StaticLootProcessor> _logger =
         logger ?? throw new ArgumentNullException(nameof(logger));
 
-    public IReadOnlyList<PreProcessedStaticLoot> PreProcessStaticLoot(IReadOnlyList<Template> staticLoot)
+    private readonly IForcedItemsProvider _forcedItemsProvider =
+        forcedItemsProvider ?? throw new ArgumentNullException(nameof(forcedItemsProvider));
+
+    public async Task<IReadOnlyList<PreProcessedStaticLoot>> PreProcessStaticLoot(IReadOnlyList<Template> staticLoot)
     {
         var nonWeaponContainers = new List<PreProcessedStaticLoot>();
 
@@ -24,7 +29,8 @@ public class StaticLootProcessor(ILogger<StaticLootProcessor> logger) : IStaticL
 
             var firstItemTpl = lootSpawn.Items[0].Tpl;
 
-            if (!LootDumpProcessorContext.GetStaticWeaponIds().Contains(firstItemTpl))
+            var forcedStatic = await _forcedItemsProvider.GetForcedStatic();
+            if (!forcedStatic.StaticWeaponIds.Contains(firstItemTpl))
             {
                 nonWeaponContainers.Add(new PreProcessedStaticLoot
                 {

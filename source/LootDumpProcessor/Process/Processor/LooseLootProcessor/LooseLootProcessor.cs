@@ -1,17 +1,24 @@
 ﻿using LootDumpProcessor.Model;
+using LootDumpProcessor.Model.Config;
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.LooseLoot;
 using LootDumpProcessor.Model.Processing;
+using LootDumpProcessor.Process.Services.ComposedKeyGenerator;
+using LootDumpProcessor.Process.Services.ForcedItemsProvider;
+using LootDumpProcessor.Process.Services.KeyGenerator;
+using LootDumpProcessor.Process.Services.TarkovItemsProvider;
 using LootDumpProcessor.Storage;
 using LootDumpProcessor.Storage.Collections;
 using LootDumpProcessor.Utils;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
-namespace LootDumpProcessor.Process.Processor.v2.LooseLootProcessor;
+namespace LootDumpProcessor.Process.Processor.LooseLootProcessor;
 
 public class LooseLootProcessor(
     ILogger<LooseLootProcessor> logger, IDataStorage dataStorage, ITarkovItemsProvider tarkovItemsProvider,
-    IComposedKeyGenerator composedKeyGenerator, IKeyGenerator keyGenerator
+    IComposedKeyGenerator composedKeyGenerator, IKeyGenerator keyGenerator, IOptions<Config> config,
+    IForcedItemsProvider forcedItemsProvider
 )
     : ILooseLootProcessor
 {
@@ -29,6 +36,11 @@ public class LooseLootProcessor(
 
     private readonly IKeyGenerator
         _keyGenerator = keyGenerator ?? throw new ArgumentNullException(nameof(keyGenerator));
+
+    private readonly Config _config = (config ?? throw new ArgumentNullException(nameof(config))).Value;
+
+    private readonly IForcedItemsProvider _forcedItemsProvider =
+        forcedItemsProvider ?? throw new ArgumentNullException(nameof(forcedItemsProvider));
 
     public PreProcessedLooseLoot PreProcessLooseLoot(List<Template> looseLoot)
     {
@@ -70,25 +82,23 @@ public class LooseLootProcessor(
         return preProcessedLoot;
     }
 
-    public LooseLootRoot CreateLooseLootDistribution(
-        string mapId,
+    public async Task<LooseLootRoot> CreateLooseLootDistribution(string mapId,
         int mapCount,
-        IKey looseLootCountKey
-    )
+        IKey looseLootCountKey)
     {
-        var config = LootDumpProcessorContext.GetConfig();
-        var spawnPointTolerance = config.ProcessorConfig.SpawnPointToleranceForForced / 100.0;
+        var spawnPointTolerance = _config.ProcessorConfig.SpawnPointToleranceForForced / 100.0;
         var looseLootDistribution = new LooseLootRoot();
 
         var probabilities = new Dictionary<string, double>();
         var looseLootCountsItem = _dataStorage.GetItem<LooseLootCounts>(looseLootCountKey);
+        var forcedLooseItems = await _forcedItemsProvider.GetForcedLooseItems();
 
         var counts = _dataStorage.GetItem<FlatKeyableDictionary<string, int>>(looseLootCountsItem.Counts);
         foreach (var (itemId, count) in counts) probabilities[itemId] = (double)count / mapCount;
 
         var spawnPointCount = looseLootCountsItem.MapSpawnpointCount.Select(Convert.ToDouble).ToList();
         var initialMean = CalculateMean(spawnPointCount);
-        var tolerancePercentage = config.ProcessorConfig.LooseLootCountTolerancePercentage / 100.0;
+        var tolerancePercentage = _config.ProcessorConfig.LooseLootCountTolerancePercentage / 100.0;
         var highThreshold = initialMean * (1 + tolerancePercentage);
 
         looseLootCountsItem.MapSpawnpointCount = looseLootCountsItem.MapSpawnpointCount
@@ -137,7 +147,7 @@ public class LooseLootProcessor(
 
             if (itemDistributions.Count == 1 &&
                 (_tarkovItemsProvider.IsQuestItem(itemDistributions[0].ComposedKey?.FirstItem?.Tpl) ||
-                 LootDumpProcessorContext.GetForcedLooseItems()[mapId]
+                 forcedLooseItems[mapId]
                      .Contains(itemDistributions[0].ComposedKey?.FirstItem?.Tpl)))
             {
                 var forcedSpawnPoint = new SpawnPointsForced
@@ -160,7 +170,7 @@ public class LooseLootProcessor(
                 _logger.LogWarning(
                     "Item: {ItemId} has > {Tolerance}% spawn chance in spawn point: {LocationId} but isn't in forced loot, adding to forced",
                     templateCopy.Id,
-                    config.ProcessorConfig.SpawnPointToleranceForForced,
+                    _config.ProcessorConfig.SpawnPointToleranceForForced,
                     forcedSpawnPoint.LocationId
                 );
             }
@@ -210,7 +220,7 @@ public class LooseLootProcessor(
             .ToList();
 
         var configuredForcedTemplates =
-            new HashSet<string>(LootDumpProcessorContext.GetForcedLooseItems()[mapId].Select(item => item));
+            new HashSet<string>(forcedLooseItems[mapId].Select(item => item));
         var foundForcedTemplates =
             new HashSet<string>(looseLootDistribution.SpawnPointsForced.Select(fp => fp.Template.Items[0].Tpl));
 

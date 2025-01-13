@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Process;
+﻿namespace LootDumpProcessor.Process.Services.KeyGenerator;
 
 public class NumericKeyGenerator : IKeyGenerator
 {

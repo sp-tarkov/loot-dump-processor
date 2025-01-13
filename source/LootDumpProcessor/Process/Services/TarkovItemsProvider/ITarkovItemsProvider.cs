@@ -1,4 +1,4 @@
-﻿namespace LootDumpProcessor.Process;
+﻿namespace LootDumpProcessor.Process.Services.TarkovItemsProvider;
 
 public interface ITarkovItemsProvider
 {

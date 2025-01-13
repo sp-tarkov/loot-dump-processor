@@ -1,32 +1,33 @@
 using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Processing;
-using LootDumpProcessor.Process.Processor.v2.LooseLootProcessor;
-using LootDumpProcessor.Process.Processor.v2.StaticLootProcessor;
+using LootDumpProcessor.Process.Processor.LooseLootProcessor;
+using LootDumpProcessor.Process.Processor.StaticLootProcessor;
 using LootDumpProcessor.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace LootDumpProcessor.Process.Processor.FileProcessor;
 
-public class FileProcessor : IFileProcessor
+public class FileProcessor(
+    IStaticLootProcessor staticLootProcessor,
+    ILooseLootProcessor looseLootProcessor,
+    ILogger<FileProcessor> logger, IDataStorage dataStorage
+)
+    : IFileProcessor
 {
-    private readonly IStaticLootProcessor _staticLootProcessor;
-    private readonly ILooseLootProcessor _looseLootProcessor;
-    private readonly ILogger<FileProcessor> _logger;
+    private readonly IStaticLootProcessor _staticLootProcessor = staticLootProcessor
+                                                                 ?? throw new ArgumentNullException(
+                                                                     nameof(staticLootProcessor));
 
-    public FileProcessor(
-        IStaticLootProcessor staticLootProcessor,
-        ILooseLootProcessor looseLootProcessor,
-        ILogger<FileProcessor> logger)
-    {
-        _staticLootProcessor = staticLootProcessor
-                               ?? throw new ArgumentNullException(nameof(staticLootProcessor));
-        _looseLootProcessor = looseLootProcessor
-                              ?? throw new ArgumentNullException(nameof(looseLootProcessor));
-        _logger = logger
-                  ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private readonly ILooseLootProcessor _looseLootProcessor = looseLootProcessor
+                                                               ?? throw new ArgumentNullException(
+                                                                   nameof(looseLootProcessor));
 
-    public PartialData Process(BasicInfo parsedData)
+    private readonly ILogger<FileProcessor> _logger = logger
+                                                      ?? throw new ArgumentNullException(nameof(logger));
+
+    private readonly IDataStorage _dataStorage = dataStorage ?? throw new ArgumentNullException(nameof(dataStorage));
+
+    public async Task<PartialData> Process(BasicInfo parsedData)
     {
         _logger.LogDebug("Processing file {FileName}...", parsedData.FileName);
 
@@ -50,16 +51,16 @@ public class FileProcessor : IFileProcessor
             ParsedDumpKey = (AbstractKey)dumpData.GetKey()
         };
 
-        if (!DataStorageFactory.GetInstance().Exists(dumpData.GetKey()))
+        if (!_dataStorage.Exists(dumpData.GetKey()))
         {
             _logger.LogDebug(
                 "Cache not found for {LookupIndex} processing.",
                 string.Join("/", dumpData.GetKey().GetLookupIndex())
             );
 
-            dumpData.Containers = _staticLootProcessor.PreProcessStaticLoot(staticLoot);
+            dumpData.Containers = await _staticLootProcessor.PreProcessStaticLoot(staticLoot);
             dumpData.LooseLoot = _looseLootProcessor.PreProcessLooseLoot(looseLoot);
-            DataStorageFactory.GetInstance().Store(dumpData);
+            dataStorage.Store(dumpData);
         }
 
         _logger.LogDebug("File {FileName} finished processing!", parsedData.FileName);

@@ -1,18 +1,21 @@
 using System.Text.Json;
+using LootDumpProcessor.Model.Config;
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.LooseLoot;
 using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Serializers.Json;
+using Microsoft.Extensions.Options;
 
 namespace LootDumpProcessor.Process.Writer;
 
 public class FileWriter : IWriter
 {
-    private static readonly string _outputPath;
+    private readonly string _outputPath;
 
-    static FileWriter()
+    public FileWriter(IOptions<Config> config)
     {
-        var path = LootDumpProcessorContext.GetConfig().WriterConfig.OutputLocation;
+        var config1 = (config ?? throw new ArgumentNullException(nameof(config))).Value;
+        var path = config1.WriterConfig.OutputLocation;
         if (string.IsNullOrEmpty(path))
             throw new Exception("Output directory must be set in WriterConfigs");
 

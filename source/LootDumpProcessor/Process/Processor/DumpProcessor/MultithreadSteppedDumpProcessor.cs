@@ -1,20 +1,23 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using LootDumpProcessor.Model;
+using LootDumpProcessor.Model.Config;
 using LootDumpProcessor.Model.Input;
 using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Output.LooseLoot;
 using LootDumpProcessor.Model.Output.StaticContainer;
 using LootDumpProcessor.Model.Processing;
-using LootDumpProcessor.Process.Processor.v2.AmmoProcessor;
-using LootDumpProcessor.Process.Processor.v2.LooseLootProcessor;
-using LootDumpProcessor.Process.Processor.v2.StaticContainersProcessor;
-using LootDumpProcessor.Process.Processor.v2.StaticLootProcessor;
+using LootDumpProcessor.Process.Processor.AmmoProcessor;
+using LootDumpProcessor.Process.Processor.LooseLootProcessor;
+using LootDumpProcessor.Process.Processor.StaticContainersProcessor;
+using LootDumpProcessor.Process.Processor.StaticLootProcessor;
+using LootDumpProcessor.Process.Services.KeyGenerator;
 using LootDumpProcessor.Serializers.Json;
 using LootDumpProcessor.Storage;
 using LootDumpProcessor.Storage.Collections;
 using LootDumpProcessor.Utils;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace LootDumpProcessor.Process.Processor.DumpProcessor;
 
@@ -23,7 +26,8 @@ public class MultithreadSteppedDumpProcessor(
     IStaticContainersProcessor staticContainersProcessor,
     IAmmoProcessor ammoProcessor,
     ILooseLootProcessor looseLootProcessor,
-    ILogger<MultithreadSteppedDumpProcessor> logger, IKeyGenerator keyGenerator
+    ILogger<MultithreadSteppedDumpProcessor> logger, IKeyGenerator keyGenerator, IDataStorage dataStorage,
+    IOptions<Config> config
 )
     : IDumpProcessor
 {
@@ -45,8 +49,10 @@ public class MultithreadSteppedDumpProcessor(
     private readonly IKeyGenerator
         _keyGenerator = keyGenerator ?? throw new ArgumentNullException(nameof(keyGenerator));
 
-    private static readonly IDataStorage _dataStorage = DataStorageFactory.GetInstance();
+    private readonly IDataStorage _dataStorage = dataStorage ?? throw new ArgumentNullException(nameof(dataStorage));
 
+    private readonly Config _config = (config ?? throw new ArgumentNullException(nameof(config))).Value;
+    
     public async Task<Dictionary<OutputFileType, object>> ProcessDumps(List<PartialData> dumps)
     {
         _logger.LogInformation("Starting final dump processing");
@@ -111,12 +117,12 @@ public class MultithreadSteppedDumpProcessor(
         _logger.LogInformation("Processing loose loot distribution");
 
         var looseLoot = new ConcurrentDictionary<string, LooseLootRoot>();
-        Parallel.ForEach(dumpProcessData.MapCounts.Keys, parallelOptions, mapId =>
+        await Parallel.ForEachAsync(dumpProcessData.MapCounts.Keys, parallelOptions, async (mapId, _) =>
         {
             var mapCount = dumpProcessData.MapCounts[mapId];
             var looseLootCount = dumpProcessData.LooseLootCounts[mapId];
             var looseLootDistribution =
-                _looseLootProcessor.CreateLooseLootDistribution(mapId, mapCount, looseLootCount);
+                await _looseLootProcessor.CreateLooseLootDistribution(mapId, mapCount, looseLootCount);
             looseLoot[mapId] = looseLootDistribution;
         });
         _logger.LogInformation("Collecting loose loot distribution information");
@@ -159,8 +165,7 @@ public class MultithreadSteppedDumpProcessor(
         }
         else
         {
-            var mapStaticContainers =
-                _staticContainersProcessor.CreateStaticWeaponsAndForcedContainers(dataDump);
+            var mapStaticContainers = await _staticContainersProcessor.CreateStaticWeaponsAndForcedContainers(dataDump);
 
             var newStaticWeapons = mapStaticContainers.StaticWeapons.Where(x =>
                 !mapStaticLoot.StaticWeapons.Exists(y => y.Id == x.Id));
@@ -172,7 +177,7 @@ public class MultithreadSteppedDumpProcessor(
         }
 
         if (!mapStaticContainersAggregated.TryGetValue(mapId,
-                out ConcurrentDictionary<Template, int> mapAggregatedDataDict))
+                out var mapAggregatedDataDict))
         {
             mapAggregatedDataDict = new ConcurrentDictionary<Template, int>();
             mapStaticContainersAggregated.TryAdd(mapId, mapAggregatedDataDict);
@@ -182,9 +187,9 @@ public class MultithreadSteppedDumpProcessor(
 
         IncrementMapCounterDictionaryValue(mapDumpCounter, mapId);
 
-        var containerIgnoreListExists = LootDumpProcessorContext.GetConfig().ContainerIgnoreList
+        var containerIgnoreListExists = _config.ContainerIgnoreList
             .TryGetValue(mapId, out var ignoreListForMap);
-        foreach (var dynamicStaticContainer in _staticContainersProcessor.CreateDynamicStaticContainers(
+        foreach (var dynamicStaticContainer in await _staticContainersProcessor.CreateDynamicStaticContainers(
                      dataDump))
         {
             if (containerIgnoreListExists && ignoreListForMap.Contains(dynamicStaticContainer.Id)) continue;
@@ -193,16 +198,17 @@ public class MultithreadSteppedDumpProcessor(
                 mapAggregatedDataDict[dynamicStaticContainer] += 1;
         }
 
-        GCHandler.Collect();
+        if (_config.ManualGarbageCollectionCalls) GC.Collect();
     }
 
-    private static bool DumpWasMadeAfterConfigThresholdDate(PartialData dataDump) =>
+    private bool DumpWasMadeAfterConfigThresholdDate(PartialData dataDump) =>
         FileDateParser.TryParseFileDate(dataDump.BasicInfo.FileName, out var fileDate) &&
         fileDate.HasValue &&
-        fileDate.Value > LootDumpProcessorContext.GetConfig().DumpProcessorConfig
+        fileDate.Value > _config.DumpProcessorConfig
             .SpawnContainerChanceIncludeAfterDate;
 
-    private static void IncrementMapCounterDictionaryValue(ConcurrentDictionary<string, int> mapDumpCounter, string mapName)
+    private static void IncrementMapCounterDictionaryValue(ConcurrentDictionary<string, int> mapDumpCounter,
+        string mapName)
     {
         if (!mapDumpCounter.TryAdd(mapName, 1)) mapDumpCounter[mapName] += 1;
     }
@@ -247,7 +253,7 @@ public class MultithreadSteppedDumpProcessor(
 
                 partialFileMetaData = null;
                 tuple = null;
-                GCHandler.Collect();
+                if (_config.ManualGarbageCollectionCalls) GC.Collect();
 
                 var parallelOptions = new ParallelOptions
                 {
@@ -266,14 +272,14 @@ public class MultithreadSteppedDumpProcessor(
 
                 _dataStorage.Store(dictionaryCounts);
                 dictionaryCounts = null;
-                GCHandler.Collect();
+                if (_config.ManualGarbageCollectionCalls) GC.Collect();
 
                 _dataStorage.Store(actualDictionaryItemProperties);
                 actualDictionaryItemProperties = null;
-                GCHandler.Collect();
+                if (_config.ManualGarbageCollectionCalls) GC.Collect();
                 _dataStorage.Store(looseLootCounts);
                 looseLootCounts = null;
-                GCHandler.Collect();
+                if (_config.ManualGarbageCollectionCalls) GC.Collect();
             });
         return dumpProcessData;
     }

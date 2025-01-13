@@ -4,5 +4,5 @@ namespace LootDumpProcessor.Process.Processor.FileProcessor;
 
 public interface IFileProcessor
 {
-    PartialData Process(BasicInfo parsedData);
+    Task<PartialData> Process(BasicInfo parsedData);
 }

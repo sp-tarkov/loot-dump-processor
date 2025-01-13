@@ -1,10 +1,14 @@
 using System.Text.Json;
+using LootDumpProcessor.Model.Config;
 using LootDumpProcessor.Serializers.Json;
+using Microsoft.Extensions.Options;
 
 namespace LootDumpProcessor.Storage.Implementations.File.Handlers;
 
-public abstract class AbstractStoreHandler : IStoreHandler
+public abstract class AbstractStoreHandler(IOptions<Config> config) : IStoreHandler
 {
+    private readonly Config _config = (config ?? throw new ArgumentNullException(nameof(config))).Value;
+
     public void Store<TEntity>(TEntity entity, bool failIfDuplicate = true) where TEntity : IKeyable
     {
         var locationWithFile = GetLocation(entity.GetKey());
@@ -34,8 +38,8 @@ public abstract class AbstractStoreHandler : IStoreHandler
     protected virtual string GetBaseLocation()
     {
         var location =
-            string.IsNullOrEmpty(LootDumpProcessorContext.GetConfig().DataStorageConfig.FileDataStorageTempLocation)
-                ? LootDumpProcessorContext.GetConfig().DataStorageConfig.FileDataStorageTempLocation
+            string.IsNullOrEmpty(_config.DataStorageConfig.FileDataStorageTempLocation)
+                ? _config.DataStorageConfig.FileDataStorageTempLocation
                 : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
         return $"{location}/SPT/tmp/LootGen";

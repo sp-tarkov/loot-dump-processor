@@ -1,16 +1,18 @@
 using System.Text.Json;
+using LootDumpProcessor.Model.Config;
 using LootDumpProcessor.Model.Processing;
 using LootDumpProcessor.Serializers.Json;
+using Microsoft.Extensions.Options;
 
 namespace LootDumpProcessor.Process.Collector;
 
-public class DumpCollector : ICollector
+public class DumpCollector(IOptions<Config> config) : ICollector
 {
-    private static readonly string DumpLocation =
-        $"{LootDumpProcessorContext.GetConfig().CollectorConfig.DumpLocation}/collector/";
+    private readonly Config _config = (config ?? throw new ArgumentNullException(nameof(config))).Value;
 
-    private readonly List<PartialData> processedDumps =
-        new(LootDumpProcessorContext.GetConfig().CollectorConfig.MaxEntitiesBeforeDumping + 50);
+    private string DumpLocation => Path.Combine(_config.CollectorConfig.DumpLocation, "collector");
+
+    private List<PartialData> ProcessedDumps => new(_config.CollectorConfig.MaxEntitiesBeforeDumping + 50);
 
     private readonly object lockObject = new();
 
@@ -25,13 +27,13 @@ public class DumpCollector : ICollector
     {
         lock (lockObject)
         {
-            processedDumps.Add(parsedDump);
-            if (processedDumps.Count > LootDumpProcessorContext.GetConfig().CollectorConfig.MaxEntitiesBeforeDumping)
+            ProcessedDumps.Add(parsedDump);
+            if (ProcessedDumps.Count > _config.CollectorConfig.MaxEntitiesBeforeDumping)
             {
                 var fileName = $"collector-{DateTime.Now.ToString("yyyyMMddHHmmssfffff")}.json";
                 File.WriteAllText($"{DumpLocation}{fileName}",
-                    JsonSerializer.Serialize(processedDumps, JsonSerializerSettings.Default));
-                processedDumps.Clear();
+                    JsonSerializer.Serialize(ProcessedDumps, JsonSerializerSettings.Default));
+                ProcessedDumps.Clear();
             }
         }
     }
@@ -39,10 +41,10 @@ public class DumpCollector : ICollector
     public List<PartialData> Retrieve()
     {
         foreach (var file in Directory.GetFiles(DumpLocation))
-            processedDumps.AddRange(JsonSerializer
+            ProcessedDumps.AddRange(JsonSerializer
                 .Deserialize<List<PartialData>>(File.ReadAllText(file), JsonSerializerSettings.Default));
 
-        return processedDumps;
+        return ProcessedDumps;
     }
 
     public void Clear()
@@ -51,7 +53,7 @@ public class DumpCollector : ICollector
         {
             foreach (var file in Directory.GetFiles(DumpLocation)) File.Delete(file);
 
-            processedDumps.Clear();
+            ProcessedDumps.Clear();
         }
     }
 }

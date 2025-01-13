@@ -1,8 +1,10 @@
 ﻿using System.Globalization;
 using LootDumpProcessor.Model;
 using LootDumpProcessor.Model.Processing;
+using LootDumpProcessor.Process.Services.KeyGenerator;
+using LootDumpProcessor.Process.Services.TarkovItemsProvider;
 
-namespace LootDumpProcessor.Process;
+namespace LootDumpProcessor.Process.Services.ComposedKeyGenerator;
 
 public class ComposedKeyGenerator(ITarkovItemsProvider tarkovItemsProvider, IKeyGenerator keyGenerator)
     : IComposedKeyGenerator

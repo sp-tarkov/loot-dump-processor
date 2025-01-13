@@ -1,7 +1,7 @@
 ﻿using LootDumpProcessor.Model.Output;
 using LootDumpProcessor.Model.Processing;
 
-namespace LootDumpProcessor.Process.Processor.v2.AmmoProcessor;
+namespace LootDumpProcessor.Process.Processor.AmmoProcessor;
 
 public interface IAmmoProcessor
 {

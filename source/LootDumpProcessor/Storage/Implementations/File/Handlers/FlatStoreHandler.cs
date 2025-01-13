@@ -1,6 +1,9 @@
+using LootDumpProcessor.Model.Config;
+using Microsoft.Extensions.Options;
+
 namespace LootDumpProcessor.Storage.Implementations.File.Handlers;
 
-public class FlatStoreHandler : AbstractStoreHandler
+public class FlatStoreHandler(IOptions<Config> config) : AbstractStoreHandler(config)
 {
     protected override string GetLocation(IKey key)
     {
