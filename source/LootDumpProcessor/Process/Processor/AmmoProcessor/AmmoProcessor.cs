@@ -12,9 +12,7 @@ public class AmmoProcessor(ILogger<AmmoProcessor> logger, ITarkovItemsProvider t
     private readonly ITarkovItemsProvider _tarkovItemsProvider =
         tarkovItemsProvider ?? throw new ArgumentNullException(nameof(tarkovItemsProvider));
 
-    public IReadOnlyDictionary<string, List<AmmoDistribution>> CreateAmmoDistribution(
-        string mapId,
-        List<PreProcessedStaticLoot> containers)
+    public IReadOnlyDictionary<string, List<AmmoDistribution>> CreateAmmoDistribution(List<PreProcessedStaticLoot> containers)
     {
         var ammoTemplates = containers
             .SelectMany(container => container.Items)
@@ -43,8 +41,6 @@ public class AmmoProcessor(ILogger<AmmoProcessor> logger, ITarkovItemsProvider t
                     RelativeProbability = ctc.Count
                 }).ToList()
             );
-
-        _logger.LogInformation("Created ammo distribution for Map {MapId}.", mapId);
 
         return ammoDistribution;
     }

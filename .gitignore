@@ -401,3 +401,6 @@ FodyWeavers.xsd
 
 # Qodo
 .qodo
+
+# Reqnroll
+*.feature.cs

@@ -12,16 +12,31 @@
         <PackageReference Include="FluentAssertions" Version="7.0.0"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
         <PackageReference Include="Moq" Version="4.20.72"/>
+        <PackageReference Include="Reqnroll.xUnit" Version="2.2.1" />
         <PackageReference Include="xunit" Version="2.9.2"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2"/>
     </ItemGroup>
 
     <ItemGroup>
         <Using Include="Xunit"/>
+        <Using Include="Reqnroll"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\source\LootDumpProcessor\LootDumpProcessor.csproj"/>
     </ItemGroup>
+
+    <Target Name="CleanSpecFlowFeatureCodeBehindFiles" AfterTargets="Clean">
+        <ItemGroup>
+            <FilesToDelete Include="**\*.feature.cs"/>
+        </ItemGroup>
+        <Message Text="Delete Reqnroll feature code behind files on cleanup:"/>
+        <Message Text="%(FilesToDelete.Identity)"/>
+        <Delete Files="@(FilesToDelete)">
+            <Output TaskParameter="DeletedFiles" ItemName="FilesDeleted"/>
+        </Delete>
+        <Message Text="Files deleted:"/>
+        <Message Text="%(FilesDeleted.Identity)"/>
+    </Target>
 
 </Project>

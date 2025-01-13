@@ -31,7 +31,7 @@ public class AmmoProcessorTests
         var processor = new AmmoProcessor(logger, tarkovItemsProvider.Object);
 
         // Act
-        var result = processor.CreateAmmoDistribution("woods", containers);
+        var result = processor.CreateAmmoDistribution(containers);
 
         // Assert
         result.Should().ContainKey("5.56x45");
@@ -50,7 +50,7 @@ public class AmmoProcessorTests
         var emptyContainers = new List<PreProcessedStaticLoot>();
 
         // Act
-        var result = processor.CreateAmmoDistribution("woods", emptyContainers);
+        var result = processor.CreateAmmoDistribution(emptyContainers);
 
         // Assert
         result.Should().BeEmpty();
@@ -76,7 +76,7 @@ public class AmmoProcessorTests
         var processor = new AmmoProcessor(logger, tarkovItemsProvider.Object);
 
         // Act
-        var result = processor.CreateAmmoDistribution("woods", containers);
+        var result = processor.CreateAmmoDistribution(containers);
 
         // Assert
         result.Should().BeEmpty();
@@ -108,7 +108,7 @@ public class AmmoProcessorTests
         var processor = new AmmoProcessor(logger, tarkovItemsProvider.Object);
 
         // Act
-        var result = processor.CreateAmmoDistribution("customs", containers);
+        var result = processor.CreateAmmoDistribution(containers);
 
         // Assert
         result.Should().ContainKey("5.56x45");
@@ -145,7 +145,7 @@ public class AmmoProcessorTests
         var processor = new AmmoProcessor(logger, tarkovItemsProvider.Object);
 
         // Act
-        var result = processor.CreateAmmoDistribution("customs", containers);
+        var result = processor.CreateAmmoDistribution(containers);
 
         // Assert
         result.Should().ContainKey("5.56x45");
