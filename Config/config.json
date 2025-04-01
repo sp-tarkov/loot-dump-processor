@@ -1,5 +1,5 @@
 {
-  "serverLocation": "E:\\spt\\Server",
+  "serverItemsJsonLocation": "C:\\Code\\server-csharp\\Libraries\\SPTarkov.Server.Assets\\Assets\\database\\templates\\items.json",
   "threads": 10,
   "threadPoolingTimeoutMs": 1000,
   "jsonSerializer": "DotNet",
@@ -9,7 +9,7 @@
   },
   "dataStorageConfig": {
     "dataStorageType": "Memory",
-    "fileDataStorageTempLocation": "E:\\spt\\dumps\\cache"
+    "fileDataStorageTempLocation": "C:\\Code\\LootDumpProcessorWorkingDir\\dumps\\cache"
   },
   "loggerConfig": {
     "logLevel": "Info",
@@ -20,7 +20,7 @@
       "preProcessors": [
         "SevenZip"
       ],
-      "preProcessorTempFolder": "E:\\spt\\dumps\\temp",
+      "preProcessorTempFolder": "C:\\Code\\LootDumpProcessorWorkingDir\\dumps\\temp",
       "cleanupTempFolderAfterProcess": true
     },
     "intakeReaderConfig": {
@@ -31,7 +31,7 @@
       ]
     },
     "dumpFilesLocation": [
-      "E:\\spt\\dumps\\input"
+      "C:\\Code\\LootDumpProcessorWorkingDir\\dumps\\input"
     ],
     "thresholdDate": "2023-01-08",
     "acceptedFileExtensions": [
@@ -50,10 +50,10 @@
   "collectorConfig": {
     "collectorType": "Dump",
     "maxEntitiesBeforeDumping": 1000,
-      "dumpLocation": "C:\\Users\\USER\\SPT\\tmp"
+    "dumpLocation": "C:\\Code\\LootDumpProcessorWorkingDir\\temp"
   },
   "writerConfig": {
-    "outputLocation": "E:\\spt\\dumps\\output"
+    "outputLocation": "C:\\Code\\LootDumpProcessorWorkingDir\\dumps\\output"
   },
   "containerIgnoreList": {
     "tarkovstreets": [
@@ -74,6 +74,6 @@
     "shoreline",
     "tarkovstreets",
     "woods",
-	"labyrinth"
+    "labyrinth"
   ]
 }

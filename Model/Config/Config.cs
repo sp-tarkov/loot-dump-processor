@@ -6,9 +6,9 @@ namespace LootDumpProcessor.Model.Config;
 
 public class Config
 {
-    [JsonProperty("serverLocation")]
-    [JsonPropertyName("serverLocation")]
-    public string? ServerLocation { get; set; }
+    [JsonProperty("serverItemsJsonLocation")]
+    [JsonPropertyName("serverItemsJsonLocation")]
+    public string? ServerItemsJsonLocation { get; set; }
 
     [JsonProperty("threads")]
     [JsonPropertyName("threads")]
