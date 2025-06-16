@@ -166,11 +166,13 @@ sandbox:
 - 6582bd252b50c61c565828e2  # Bottle of Le Jean wine
 - 6575a6ca8778e96ded05a802  # TerraGroup scientist's hard drive
 - 679b9a1a4e4ed4b3b40ae5c2  # Knossos senior manager's diary
+- 679b98e429acd1f2f60985a3  # Container with suspicious substance
 
 sandbox_high:
 - 6582bd252b50c61c565828e2  # Bottle of Le Jean wine
 - 6575a6ca8778e96ded05a802  # TerraGroup scientist's hard drive
 - 679b9a1a4e4ed4b3b40ae5c2  # Knossos senior manager's diary
+- 679b98e429acd1f2f60985a3  # Container with suspicious substance
 
 labyrinth:
 - 679b9aa490622daf9708da73 # ? quest_peacekeeper_vpx
