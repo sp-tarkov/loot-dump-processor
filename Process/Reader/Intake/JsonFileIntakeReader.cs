@@ -37,12 +37,12 @@ public class JsonFileIntakeReader : IIntakeReader
         }
 
         var fi = _jsonSerializer.Deserialize<RootData>(fileData);
-        if (fi?.Data?.LocationLoot?.Name != null && (!_ignoredLocations?.Contains(fi.Data.LocationLoot.Name) ?? true))
+        if (fi?.Data?.LocationLoot?.Id != null && (!_ignoredLocations?.Contains(fi.Data.LocationLoot.Id) ?? true))
         {
-            if (!_totalMapDumpsCounter.TryGetValue(fi.Data.LocationLoot.Name, out var counter))
+            if (!_totalMapDumpsCounter.TryGetValue(fi.Data.LocationLoot.Id, out var counter))
             {
                 counter = 0;
-                _totalMapDumpsCounter[fi.Data.LocationLoot.Name] = counter;
+                _totalMapDumpsCounter[fi.Data.LocationLoot.Id] = counter;
             }
 
             if (counter < (LootDumpProcessorContext.GetConfig().ReaderConfig.IntakeReaderConfig?.MaxDumpsPerMap ?? 1500))
@@ -56,7 +56,7 @@ public class JsonFileIntakeReader : IIntakeReader
                     FileName = file
                 };
 
-                _totalMapDumpsCounter[fi.Data.LocationLoot.Name] += 1;
+                _totalMapDumpsCounter[fi.Data.LocationLoot.Id] += 1;
 
                 if (LoggerFactory.GetInstance().CanBeLogged(LogLevel.Debug))
                     LoggerFactory.GetInstance().Log($"File {file} fully read, returning data", LogLevel.Debug);
