@@ -368,7 +368,19 @@ public class QueuePipeline : IPipeline
             throw new Exception("Reader dumpFilesLocations must be set to a valid value");
         }
 
-        GetFileQueue(inputPath).ToList().ForEach(f => _filesToRename.Add(f));
+        GetFileQueue(inputPath).ToList().ForEach(f =>
+        {
+            // if the file name already has a map name in it, dont add it to be "fixed"
+            // we only use -- to split the map and the rest in the file names, so we can safely assume if it can split,
+            // the map name it there.
+            var test = f.Split("--");
+            if (test.Length >= 2)
+            {
+                return;
+            }
+            
+            _filesToRename.Add(f);
+        });
 
         var jsonUtil = JsonSerializerFactory.GetInstance(JsonSerializerTypes.DotNet);
 
