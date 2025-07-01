@@ -1,3 +1,4 @@
+using LootDumpProcessor.Logger;
 using LootDumpProcessor.Storage.Implementations.File.Serializers;
 
 namespace LootDumpProcessor.Storage.Implementations.File.Handlers;
@@ -11,7 +12,8 @@ public abstract class AbstractStoreHandler : IStoreHandler
         var locationWithFile = GetLocation(obj.GetKey());
         if (System.IO.File.Exists(locationWithFile) && failIfDuplicate)
         {
-            throw new Exception($"Attempted to save duplicated object into data storage: {locationWithFile}");
+            //throw new Exception($"Attempted to save duplicated object into data storage: {locationWithFile}");
+            LoggerFactory.GetInstance().Log($"Attempted to save duplicated object into data storage: {locationWithFile}", LogLevel.Warning);
         }
 
         System.IO.File.WriteAllText(locationWithFile, _serializer.GetSerializer().Serialize(obj));

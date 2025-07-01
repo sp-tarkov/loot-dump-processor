@@ -1,11 +1,15 @@
-using System.Text.Json.Serialization;
 using LootDumpProcessor.Utils;
 using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace LootDumpProcessor.Model
 {
     public class Item : ICloneable
     {
+        [JsonProperty("composedKey", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("composedKey")]
+        public string? ComposedKey { get; set; }
+
         [JsonProperty("_id", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("_id")]
         public string? Id { get; set; }

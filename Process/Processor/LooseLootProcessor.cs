@@ -82,7 +82,7 @@ public static class LooseLootProcessor
             // No longer used, dispose
             counts = null;
 
-            // we want to cleanup the data, so we calculate the mean for the values we get raw
+            // we want to clean up the data, so we calculate the mean for the values we get raw
             // For whatever reason, we sometimes get dumps that have A LOT more loose loot point than 
             // the average
             var values = looseLootCounts.MapSpawnpointCount.Select(Convert.ToDouble);
@@ -189,19 +189,11 @@ public static class LooseLootProcessor
                     {
                         if (group.TryGetValue(distribution.ComposedKey, out var items))
                         {
-                            // We need to reparent the IDs to match the composed key ID
+
                             var itemDistributionItemList = items.First().Items;
                             // Find the item with no parent id, this is essentially the "Root" of the actual item
-                            var firstItemInTemplate =
-                                itemDistributionItemList.Find(i => string.IsNullOrEmpty(i.ParentId));
-                            // Save the original ID reference, we need to replace it on child items
-                            var originalId = firstItemInTemplate.Id;
-                            // Put the composed key instead
-                            firstItemInTemplate.Id = distribution.ComposedKey.Key;
-                            // Reparent any items with the original id on it
-                            itemDistributionItemList.Where(i => i.ParentId == originalId)
-                                .ToList()
-                                .ForEach(i => i.ParentId = firstItemInTemplate.Id);
+                            var firstItemInTemplate = itemDistributionItemList.Find(i => string.IsNullOrEmpty(i.ParentId));
+                            firstItemInTemplate.ComposedKey = distribution.ComposedKey.Key;
                             
                             template.Items.AddRange(itemDistributionItemList);
                         }
