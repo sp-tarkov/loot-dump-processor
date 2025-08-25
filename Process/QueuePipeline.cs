@@ -405,7 +405,7 @@ public class QueuePipeline : IPipeline
                         var data = File.ReadAllText(file);
                         var fileData = jsonUtil.Deserialize<RootData>(data);
                         var newpath = file.Replace("resp", $"{fileData.Data.LocationLoot.Id.ToLower()}--resp");
-                        File.Move(file, newpath);
+                        File.Move(file, newpath, overwrite: true);
                     }
                     catch (Exception e)
                     {
